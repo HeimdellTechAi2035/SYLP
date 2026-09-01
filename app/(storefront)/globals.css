@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand palette — warm, handmade, giftable. Sampled from the HandMade by Mia logo. */
+  --color-cream: #fbf4ec;
+  --color-cream-dark: #f3e7d8;
+  --color-blush: #f3ddd4;
+  --color-rose: #c97c6b;
+  --color-rose-dark: #a65c4e;
+  --color-sage: #8a9a80;
+  --color-ink: #3b2e2a;
+  --color-ink-soft: #6b5b54;
+  --color-gold: #c9a66b;
+  --color-cloud: #ffffff;
+
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+}
+
+@theme inline {
+  --color-cream: var(--color-cream);
+  --color-cream-dark: var(--color-cream-dark);
+  --color-blush: var(--color-blush);
+  --color-rose: var(--color-rose);
+  --color-rose-dark: var(--color-rose-dark);
+  --color-sage: var(--color-sage);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-gold: var(--color-gold);
+  --color-cloud: var(--color-cloud);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-display: var(--font-playfair);
+  --font-sans: var(--font-poppins);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1, h2, h3, h4,
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+}
+
+/* Visible keyboard focus state everywhere, per accessibility requirement */
+:focus-visible {
+  outline: 2px solid var(--color-rose-dark);
+  outline-offset: 2px;
+}
+
+.container-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .container-page {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}

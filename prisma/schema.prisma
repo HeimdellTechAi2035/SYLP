@@ -1,0 +1,501 @@
+// HandMade by Mia — data model
+//
+// Dev database is SQLite (zero-config, file-based, no external service to install).
+// To move to production Postgres later: change `provider` below to "postgresql",
+// set DATABASE_URL to a Postgres connection string, and re-run `npx prisma migrate dev`.
+// SQLite has no native enum support, so status/type fields below are plain String
+// columns with the allowed values documented in a comment and enforced in code (lib/validation).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------------------------------------------------------------------------
+// ADMIN / AUTH
+// ---------------------------------------------------------------------------
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("OWNER") // OWNER | STAFF
+  createdAt    DateTime @default(now())
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  adminUserId String?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  action      String    // e.g. "product.update", "order.status_change"
+  entityType  String
+  entityId    String?
+  detail      String?
+  createdAt   DateTime  @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// CATALOGUE STRUCTURE
+// ---------------------------------------------------------------------------
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  image       String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Fragrance {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  name           String
+  description    String?
+  scentFamily    String?   // Fresh | Floral | Fruity | Sweet | Woody | Clean | Seasonal | ...
+  topNotes       String?   // comma-separated
+  heartNotes     String?   // comma-separated
+  baseNotes      String?   // comma-separated
+  isActive       Boolean   @default(true)
+  isSeasonal     Boolean   @default(false)
+  image          String?
+  internalNotes  String?   // owner-only notes, never rendered on storefront
+  safetyRef      String?   // reference to safety/compliance documentation for this fragrance oil
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  products       Product[]
+  variants       ProductVariant[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  sku         String   @unique
+  name        String
+  status      String   @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
+  productType String   @default("WAX_MELT") // WAX_MELT | CANDLE | GIFT_SET | OTHER
+
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  fragranceId String?
+  fragrance   Fragrance? @relation(fields: [fragranceId], references: [id], onDelete: SetNull)
+
+  shortDescription String?
+  description      String?
+
+  // Pricing — stored in pence (GBP) to avoid float rounding errors
+  price       Int
+  salePrice   Int?
+  costPrice   Int?     // internal only — never serialized to any public API response
+  saleActive  Boolean  @default(false)
+
+  // Stock
+  stockQuantity        Int     @default(0)
+  lowStockThreshold    Int     @default(5)
+  continueSellingOOS   Boolean @default(false)
+  madeToOrder          Boolean @default(false)
+  productionTimeDays   Int?
+
+  // Media
+  mainImage   String?
+  videoUrl    String?
+  images      ProductImage[]
+
+  // Material / general product info
+  waxType         String?
+  wickType        String?
+  vesselInfo      String?
+  netWeightGrams  Int?
+  dimensions      String?
+
+  // Wax melt specific
+  meltFormat          String? // e.g. "Clamshell", "Snap Bar", "Wax Bar"
+  piecesCount         Int?
+  recommendedUsage    String?
+  storageGuidance     String?
+
+  // Candle specific
+  candleWeightGrams     Int?
+  vesselSize            String?
+  burnInstructions      String?
+  candleCare            String?
+  burnTimeHours         Int?
+  firstBurnInstructions String?
+  wickTrimmingGuidance  String?
+  maxBurnSessionHours   Int?
+
+  // Compliance / safety (configurable per product — never assumed identical across products)
+  safetyWarnings              String?
+  allergenInfo                String?
+  clpInfo                     String?
+  supplierManufacturerDetails String?
+  batchReference              String?
+  ingredientsInfo             String?
+  safetyDocumentUrl           String?
+
+  // Merchandising
+  featured    Boolean @default(false)
+  bestSeller  Boolean @default(false)
+  isNew       Boolean @default(false)
+  seasonal    Boolean @default(false)
+  giftable    Boolean @default(false)
+
+  // Gift sets
+  giftPackagingAvailable Boolean @default(false)
+  giftMessageEnabled     Boolean @default(false)
+  giftSetItems           GiftSetItem[] @relation("GiftSetParent")
+
+  // SEO
+  seoTitle         String?
+  metaDescription  String?
+  socialImage      String?
+  canonicalUrl     String?
+
+  // Payments
+  stripeProductId String?
+  stripePriceId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  variants        ProductVariant[]
+  batches         ProductionBatch[]
+  reviews         Review[]
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
+  relatedFrom     ProductRelation[] @relation("RelationFrom")
+  relatedTo       ProductRelation[] @relation("RelationTo")
+  usedInGiftSets  GiftSetItem[]     @relation("GiftSetComponent")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+}
+
+model ProductVariant {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String   // display label, e.g. "Vanilla Dream — Large"
+  fragranceId   String?
+  fragrance     Fragrance? @relation(fields: [fragranceId], references: [id], onDelete: SetNull)
+  size          String?
+  colour        String?
+  vesselStyle   String?
+  packSize      String?
+  isGiftOption  Boolean  @default(false)
+  sku           String   @unique
+  priceOverride Int?
+  stockQuantity Int      @default(0)
+  isDefault     Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+}
+
+model ProductRelation {
+  id               String  @id @default(cuid())
+  productId        String
+  product          Product @relation("RelationFrom", fields: [productId], references: [id], onDelete: Cascade)
+  relatedProductId String
+  relatedProduct   Product @relation("RelationTo", fields: [relatedProductId], references: [id], onDelete: Cascade)
+  type             String  @default("RELATED") // RELATED | FREQUENTLY_BOUGHT | CROSS_SELL
+}
+
+model GiftSetItem {
+  id              String  @id @default(cuid())
+  giftSetId       String
+  giftSet         Product @relation("GiftSetParent", fields: [giftSetId], references: [id], onDelete: Cascade)
+  componentId     String
+  component       Product @relation("GiftSetComponent", fields: [componentId], references: [id], onDelete: Cascade)
+  quantity        Int     @default(1)
+}
+
+model ProductionBatch {
+  id                String   @id @default(cuid())
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dateMade          DateTime @default(now())
+  quantityProduced  Int
+  materialReference String?
+  notes             String?
+  status            String   @default("PLANNED") // PLANNED | IN_PROGRESS | COMPLETE
+  createdAt         DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// CUSTOMERS
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  firstName    String?
+  lastName     String?
+  phone        String?
+  passwordHash String?   // null for guest-checkout-only customers
+  createdAt    DateTime  @default(now())
+  addresses    Address[]
+  orders       Order[]
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label      String?
+  line1      String
+  line2      String?
+  city       String
+  county     String?
+  postcode   String
+  country    String   @default("United Kingdom")
+  isDefault  Boolean  @default(false)
+}
+
+// ---------------------------------------------------------------------------
+// CART / ORDERS
+// ---------------------------------------------------------------------------
+
+model Cart {
+  id        String     @id @default(cuid())
+  token     String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  quantity  Int      @default(1)
+  giftMessage String?
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id                    String   @id @default(cuid())
+  orderNumber           String   @unique
+  customerId            String?
+  customer              Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  email       String
+  firstName   String
+  lastName    String
+  phone       String?
+
+  shippingLine1    String
+  shippingLine2    String?
+  shippingCity     String
+  shippingCounty   String?
+  shippingPostcode String
+  shippingCountry  String @default("United Kingdom")
+
+  subtotal        Int
+  discountCode    String?
+  discountAmount  Int      @default(0)
+  deliveryAmount  Int      @default(0)
+  total           Int
+
+  paymentStatus     String  @default("PENDING")   // PENDING | PAID | FAILED | REFUNDED | PART_REFUNDED
+  fulfilmentStatus  String  @default("NEW")        // NEW | PAID | MAKING | READY_TO_PACK | PACKED | DISPATCHED | DELIVERED | CANCELLED
+
+  stripeCheckoutSessionId String?
+  stripePaymentIntentId   String?
+
+  trackingCarrier String?
+  trackingNumber  String?
+  trackingUrl     String?
+
+  giftMessage    String?
+  internalNotes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items   OrderItem[]
+  reviews Review[]
+}
+
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String?
+  product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  // Snapshots at time of purchase — must not change if the product changes later
+  productName   String
+  variantLabel  String?
+  fragranceName String?
+  sku           String?
+  unitPrice     Int
+  quantity      Int
+  lineTotal     Int
+  giftMessage   String?
+}
+
+// ---------------------------------------------------------------------------
+// DISCOUNTS
+// ---------------------------------------------------------------------------
+
+model Discount {
+  id                String    @id @default(cuid())
+  code              String    @unique
+  type              String    // FIXED | PERCENTAGE
+  value             Int       // pence if FIXED, whole percent (1-100) if PERCENTAGE
+  minimumSpend      Int?
+  maxUses           Int?
+  perCustomerLimit  Int?
+  timesUsed         Int       @default(0)
+  startDate         DateTime?
+  endDate           DateTime?
+  isActive          Boolean   @default(true)
+  categoryId        String?
+  productId         String?
+  createdAt         DateTime  @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// REVIEWS
+// ---------------------------------------------------------------------------
+
+model Review {
+  id                String   @id @default(cuid())
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderId           String?
+  order             Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  customerName      String
+  customerEmail     String
+  rating            Int
+  title             String?
+  body              String
+  status            String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  verifiedPurchase  Boolean  @default(false)
+  merchantResponse  String?
+  createdAt         DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// SUPPORT / CONTENT
+// ---------------------------------------------------------------------------
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  orderNumber String?
+  category    String   // Product question | Fragrance question | Order question | Delivery | Return | Refund | Damaged item | Complaint | Wholesale enquiry | Other
+  message     String
+  status      String   @default("NEW") // NEW | READ | RESPONDED
+  createdAt   DateTime @default(now())
+}
+
+model FaqItem {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   // Products | Wax Melts | Candles | Fragrances | How to Use | Candle Care | Safety | Orders | Delivery | Returns | Payments | Gift Sets | Contact
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+}
+
+model Policy {
+  id          String   @id @default(cuid())
+  slug        String   @unique // terms | privacy | cookies | delivery | returns-refunds | cancellation | complaints | candle-safety | wax-melt-safety | accessibility
+  title       String
+  body        String
+  isDraft     Boolean  @default(true)
+  lastUpdated DateTime @updatedAt
+}
+
+model HomepageFeature {
+  id        String @id @default(cuid())
+  section   String @default("WHY_SHOP") // WHY_SHOP | STORY_GALLERY
+  icon      String?
+  title     String
+  body      String?
+  image     String?
+  sortOrder Int    @default(0)
+}
+
+model HomepageContent {
+  id                    Int     @id @default(1)
+  announcementBarText   String?
+  heroTitle             String?
+  heroSubtitle          String?
+  heroImage             String?
+  heroCtaPrimaryLabel   String?
+  heroCtaPrimaryHref    String?
+  heroCtaSecondaryLabel String?
+  heroCtaSecondaryHref  String?
+  storyTitle            String?
+  storyBody             String?
+  storyImage            String?
+  giftSectionTitle      String?
+  giftSectionBody       String?
+  giftSectionImage      String?
+  updatedAt             DateTime @updatedAt
+}
+
+model DeliveryZone {
+  id             String   @id @default(cuid())
+  name           String
+  countries      String   // e.g. "United Kingdom" or "International"
+  price          Int
+  freeThreshold  Int?
+  estimatedDays  String?
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+}
+
+model SiteSettings {
+  id                      Int      @id @default(1)
+  businessName            String   @default("HandMade by Mia")
+  supportEmail            String?
+  supportPhone            String?
+  freeDeliveryThreshold   Int?     // pence; null = disabled
+  standardDeliveryPrice   Int      @default(295)
+  estimatedDispatchDays   String?  @default("1-3 working days")
+  estimatedDeliveryDays   String?  @default("2-4 working days")
+  instagramUrl            String?
+  facebookUrl             String?
+  tiktokUrl                String?
+  gaMeasurementId         String?
+  metaPixelId             String?
+  maintenanceMode         Boolean  @default(false)
+  updatedAt               DateTime @updatedAt
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  source       String?
+}
