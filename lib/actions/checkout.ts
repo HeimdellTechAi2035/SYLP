@@ -6,7 +6,7 @@ import { getCartToken, getCartWithItems, cartSubtotal, priceForCartItem } from "
 import { checkoutSchema } from "@/lib/validation";
 import { validateDiscountCode } from "@/lib/discounts";
 import { calculateDeliveryAmount } from "@/lib/delivery";
-import { generateOrderNumber } from "@/lib/order-number";
+import { createOrderWithUniqueNumber } from "@/lib/order-number";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { getCustomerSession } from "@/lib/customer-auth";
 
@@ -67,47 +67,48 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
   const deliveryAmount = await calculateDeliveryAmount(chargeableSubtotal, data.shippingCountry);
   const total = chargeableSubtotal + deliveryAmount;
 
-  const orderNumber = generateOrderNumber(await prisma.order.count());
   const customerSession = await getCustomerSession();
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber,
-      customerId: customerSession?.sub ?? null,
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phone: data.phone || null,
-      shippingLine1: data.shippingLine1,
-      shippingLine2: data.shippingLine2 || null,
-      shippingCity: data.shippingCity,
-      shippingCounty: data.shippingCounty || null,
-      shippingPostcode: data.shippingPostcode,
-      shippingCountry: data.shippingCountry,
-      subtotal,
-      discountCode,
-      discountAmount,
-      deliveryAmount,
-      total,
-      giftMessage: data.giftMessage || null,
-      paymentStatus: "PENDING",
-      fulfilmentStatus: "NEW",
-      items: {
-        create: cart.items.map((item) => ({
-          productId: item.productId,
-          variantId: item.variantId,
-          productName: item.product.name,
-          variantLabel: item.variant?.name ?? null,
-          fragranceName: null,
-          sku: item.variant?.sku ?? null,
-          unitPrice: priceForCartItem(item) / item.quantity,
-          quantity: item.quantity,
-          lineTotal: priceForCartItem(item),
-          giftMessage: item.giftMessage,
-        })),
+  const order = await createOrderWithUniqueNumber((orderNumber) =>
+    prisma.order.create({
+      data: {
+        orderNumber,
+        customerId: customerSession?.sub ?? null,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone || null,
+        shippingLine1: data.shippingLine1,
+        shippingLine2: data.shippingLine2 || null,
+        shippingCity: data.shippingCity,
+        shippingCounty: data.shippingCounty || null,
+        shippingPostcode: data.shippingPostcode,
+        shippingCountry: data.shippingCountry,
+        subtotal,
+        discountCode,
+        discountAmount,
+        deliveryAmount,
+        total,
+        giftMessage: data.giftMessage || null,
+        paymentStatus: "PENDING",
+        fulfilmentStatus: "NEW",
+        items: {
+          create: cart.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            productName: item.product.name,
+            variantLabel: item.variant?.name ?? null,
+            fragranceName: null,
+            sku: item.variant?.sku ?? null,
+            unitPrice: priceForCartItem(item) / item.quantity,
+            quantity: item.quantity,
+            lineTotal: priceForCartItem(item),
+            giftMessage: item.giftMessage,
+          })),
+        },
       },
-    },
-  });
+    })
+  );
 
   const lineItems = cart.items.map((item) => ({
     price_data: {

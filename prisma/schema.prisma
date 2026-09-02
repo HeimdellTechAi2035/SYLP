@@ -295,6 +295,15 @@ model CartItem {
   createdAt DateTime @default(now())
 }
 
+// Single-row atomic counter backing human-readable HM-xxxx order numbers.
+// Not row-count-derived (see lib/order-number.ts) — deleting an Order can
+// never cause a number to be reused, and concurrent checkouts can never be
+// allocated the same number.
+model OrderSequence {
+  id    Int @id @default(1)
+  value Int @default(1000)
+}
+
 model Order {
   id                    String   @id @default(cuid())
   orderNumber           String   @unique
