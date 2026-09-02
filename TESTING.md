@@ -17,7 +17,8 @@ Completely isolated from `dev.db`:
 
 - `.env.test` (committed — every value in it is a disposable fixture, not a real secret) points `DATABASE_URL` at `prisma/test.db`.
 - `npm run db:test:reset` deletes `prisma/test.db` (+ sidecars) if present, re-applies migrations, then loads deterministic fixtures from `prisma/seed-test.ts` (distinct from `prisma/seed.ts`, the dev sample catalog).
-- Both `npm run test:unit` and `npm run test:e2e` run this reset automatically first (`pretest:*` npm hooks) — every run starts from the same known state.
+- `npm run test:unit` runs this reset automatically first (`pretest:unit` npm hook).
+- `npm run test:e2e` / a bare `npx playwright test` both get the reset for free too, but not via an npm hook: Playwright's own `webServer.command` in `playwright.config.ts` runs the reset as the first step of the same command chain that builds and starts the app, so it fires no matter how Playwright is invoked (npm script, raw CLI, CI, an IDE's test runner). `webServer.reuseExistingServer` is hard-set to `false` for the same reason — reusing a leftover server from an earlier run would skip this command (reset included) and silently serve stale data.
 - `scripts/reset-test-db.mjs` and `prisma/seed-test.ts` both refuse to run unless `DATABASE_URL` contains `test.db`, as a guard against ever pointing this at `dev.db` by accident.
 - Vitest loads `.env.test` directly in `vitest.config.mts` and forwards it into test workers via `test.env` — this is what guarantees `lib/prisma.ts` (which reads `DATABASE_URL` at import time) never touches `dev.db` during a test run.
 - Playwright's `webServer` command wraps `next build`/`next start` with `dotenv -e .env.test --`, and serves on **port 3100** (not 3000) so it never collides with a developer's own `npm run dev`.
