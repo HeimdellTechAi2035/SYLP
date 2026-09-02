@@ -105,6 +105,66 @@ describe("startCheckout", () => {
     expect(redirectedTo).toBe("https://stripe.test/mto");
   });
 
+  it("rejects checkout for a made-to-order product regardless of an absurdly high requested quantity being 'in stock' — no finite limit is enforced either way", async () => {
+    // Made-to-order bypasses the stock check entirely; this just documents
+    // that a stored stockQuantity of 0 never blocks it, at any quantity.
+    vi.mocked(stripeConfigured).mockReturnValue(true);
+    vi.mocked(stripe.checkout.sessions.create).mockResolvedValue({ id: "sess_mto_bulk", url: "https://stripe.test/mto-bulk" } as never);
+    await seedCartWithProduct("test-melt-mto", 50);
+
+    await expect(
+      startCheckout({ status: "idle" }, checkoutFormData({ email: "mto-bulk@example.com" }))
+    ).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectedTo).toBe("https://stripe.test/mto-bulk");
+  });
+
+  /**
+   * Uses a dedicated, throwaway product rather than a shared seed fixture —
+   * this test archives it mid-test, which would otherwise permanently
+   * corrupt a fixture other tests in this file rely on staying ACTIVE.
+   */
+  async function seedCartWithDisposableProduct(overrides: { madeToOrder?: boolean; stockQuantity?: number }) {
+    const id = randomUUID().slice(0, 8);
+    const product = await prisma.product.create({
+      data: {
+        slug: `disposable-${id}`,
+        sku: `DISP-${id}`,
+        name: "Disposable Test Product",
+        price: 500,
+        status: "ACTIVE",
+        stockQuantity: overrides.stockQuantity ?? 10,
+        madeToOrder: overrides.madeToOrder ?? false,
+      },
+    });
+    const token = randomUUID();
+    const cart = await prisma.cart.create({ data: { token } });
+    await prisma.cartItem.create({ data: { cartId: cart.id, productId: product.id, quantity: 1 } });
+    cookieStore.set("hbm_cart", token);
+    return product;
+  }
+
+  it("rejects checkout for a TRACK_STOCK product that was archived after being added to the cart", async () => {
+    vi.mocked(stripeConfigured).mockReturnValue(true);
+    const product = await seedCartWithDisposableProduct({ madeToOrder: false });
+    await prisma.product.update({ where: { id: product.id }, data: { status: "ARCHIVED" } });
+
+    const result = await startCheckout({ status: "idle" }, checkoutFormData({ email: "archived-track@example.com" }));
+
+    expect(result.status).toBe("error");
+    expect(result.message).toMatch(/no longer available/i);
+  });
+
+  it("rejects checkout for a MADE_TO_ORDER product that was archived after being added to the cart — unlimited availability never overrides publication status", async () => {
+    vi.mocked(stripeConfigured).mockReturnValue(true);
+    const product = await seedCartWithDisposableProduct({ madeToOrder: true, stockQuantity: 0 });
+    await prisma.product.update({ where: { id: product.id }, data: { status: "ARCHIVED" } });
+
+    const result = await startCheckout({ status: "idle" }, checkoutFormData({ email: "archived-mto@example.com" }));
+
+    expect(result.status).toBe("error");
+    expect(result.message).toMatch(/no longer available/i);
+  });
+
   it("rejects an invalid discount code without creating an order", async () => {
     vi.mocked(stripeConfigured).mockReturnValue(true);
     await seedCartWithProduct("test-melt-standard", 1);

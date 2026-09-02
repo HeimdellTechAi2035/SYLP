@@ -7,6 +7,12 @@ import { requireAdminSession } from "@/lib/auth";
 import { productFormSchema } from "@/lib/validation";
 
 function readProductForm(formData: FormData) {
+  // "Track stock quantity" is the admin-facing control; madeToOrder (its
+  // inverse) is what checkout/payment-finalisation actually key off. When
+  // stock isn't tracked, the stock fields aren't even rendered — default
+  // them rather than requiring the admin to type an artificial number.
+  const trackStock = formData.get("trackStock") === "on";
+
   return productFormSchema.parse({
     name: formData.get("name"),
     slug: formData.get("slug"),
@@ -21,10 +27,10 @@ function readProductForm(formData: FormData) {
     salePrice: formData.get("salePrice") || undefined,
     saleActive: formData.get("saleActive") === "on",
     costPrice: formData.get("costPrice") || undefined,
-    stockQuantity: formData.get("stockQuantity"),
-    lowStockThreshold: formData.get("lowStockThreshold"),
-    continueSellingOOS: formData.get("continueSellingOOS") === "on",
-    madeToOrder: formData.get("madeToOrder") === "on",
+    stockQuantity: trackStock ? formData.get("stockQuantity") : 0,
+    lowStockThreshold: trackStock ? formData.get("lowStockThreshold") : 5,
+    continueSellingOOS: trackStock && formData.get("continueSellingOOS") === "on",
+    madeToOrder: !trackStock,
     productionTimeDays: formData.get("productionTimeDays") || undefined,
     mainImage: formData.get("mainImage") || "",
     featured: formData.get("featured") === "on",

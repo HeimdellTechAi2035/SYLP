@@ -1,4 +1,5 @@
 import { FormField, FormTextarea, FormSelect, FormCheckbox, SubmitButton } from "@/components/admin/FormField";
+import InventoryFields from "@/components/admin/InventoryFields";
 
 type ProductWithRelations = {
   id: string;
@@ -120,16 +121,14 @@ export default function ProductForm({
         <FormCheckbox label="Sale is currently active" name="saleActive" defaultChecked={p?.saleActive} />
       </Section>
 
-      <Section title="Stock">
-        <div className="grid sm:grid-cols-3 gap-4">
-          <FormField label="Stock quantity" name="stockQuantity" type="number" min="0" defaultValue={p?.stockQuantity ?? 0} required />
-          <FormField label="Low stock threshold" name="lowStockThreshold" type="number" min="0" defaultValue={p?.lowStockThreshold ?? 5} required />
-          <FormField label="Production time (days)" name="productionTimeDays" type="number" min="0" defaultValue={p?.productionTimeDays ?? undefined} />
-        </div>
-        <div className="flex gap-6">
-          <FormCheckbox label="Continue selling when out of stock" name="continueSellingOOS" defaultChecked={p?.continueSellingOOS} />
-          <FormCheckbox label="Made to order" name="madeToOrder" defaultChecked={p?.madeToOrder} />
-        </div>
+      <Section title="Inventory">
+        <InventoryFields
+          trackStock={p ? !p.madeToOrder : false}
+          stockQuantity={p?.stockQuantity ?? 0}
+          lowStockThreshold={p?.lowStockThreshold ?? 5}
+          continueSellingOOS={p?.continueSellingOOS ?? false}
+        />
+        <FormField label="Production time (days)" name="productionTimeDays" type="number" min="0" defaultValue={p?.productionTimeDays ?? undefined} />
       </Section>
 
       <Section title="Media">

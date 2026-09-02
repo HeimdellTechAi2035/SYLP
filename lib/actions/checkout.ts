@@ -42,10 +42,18 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
     return { status: "error", message: "Your basket is empty." };
   }
 
-  // Server-side stock check — never trust what the client last saw.
+  // Server-side availability check — never trust what the client last saw,
+  // and never trust that a cart added before a product was archived is still
+  // valid. Made-to-order bypasses the stock-quantity check (Mia makes more as
+  // orders arrive, so there's no finite number to enforce) but never bypasses
+  // whether the product is still published at all.
   for (const item of cart.items) {
+    if (item.product.status !== "ACTIVE") {
+      return { status: "error", message: `${item.product.name} is no longer available.` };
+    }
+    if (item.product.madeToOrder) continue;
     const available = item.variant ? item.variant.stockQuantity : item.product.stockQuantity;
-    const canSell = available >= item.quantity || item.product.continueSellingOOS || item.product.madeToOrder;
+    const canSell = available >= item.quantity || item.product.continueSellingOOS;
     if (!canSell) {
       return { status: "error", message: `${item.product.name} no longer has enough stock available.` };
     }

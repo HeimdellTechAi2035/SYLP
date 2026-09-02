@@ -7,7 +7,10 @@ import { prisma } from "@/lib/prisma";
  * (or after) the webhook has been processed.
  */
 export async function markOrderPaid(orderId: string) {
-  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { items: { include: { product: true } } },
+  });
   if (!order || order.paymentStatus === "PAID") return;
 
   await prisma.$transaction(async (tx) => {
@@ -17,6 +20,10 @@ export async function markOrderPaid(orderId: string) {
     });
 
     for (const item of order.items) {
+      // Made-to-order products have no finite stock to track — Mia makes
+      // more as orders arrive, so a paid order never touches stockQuantity.
+      if (item.product?.madeToOrder) continue;
+
       if (item.variantId) {
         await tx.productVariant
           .update({ where: { id: item.variantId }, data: { stockQuantity: { decrement: item.quantity } } })

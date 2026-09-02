@@ -48,9 +48,13 @@ export default async function AdminProductsPage() {
                 </td>
                 <td className="p-4">{formatPence(product.price)}</td>
                 <td className="p-4">
-                  <span className={product.stockQuantity <= product.lowStockThreshold ? "text-rose-dark font-semibold" : ""}>
-                    {product.stockQuantity}
-                  </span>
+                  {product.madeToOrder ? (
+                    <span className="text-sage">Made to order</span>
+                  ) : (
+                    <span className={product.stockQuantity <= product.lowStockThreshold ? "text-rose-dark font-semibold" : ""}>
+                      {product.stockQuantity}
+                    </span>
+                  )}
                 </td>
                 <td className="p-4 text-right">
                   {product.status !== "ARCHIVED" && (

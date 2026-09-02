@@ -82,7 +82,7 @@ export default async function EditProductPage({
         <ul className="space-y-2 mb-4">
           {product.variants.map((v) => (
             <li key={v.id} className="flex items-center justify-between bg-white rounded-lg px-4 py-2 text-sm">
-              <span>{v.name} &middot; SKU {v.sku} &middot; Stock {v.stockQuantity}</span>
+              <span>{v.name} &middot; SKU {v.sku} &middot; {product.madeToOrder ? "Made to order" : `Stock ${v.stockQuantity}`}</span>
               <form action={removeVariant}>
                 <input type="hidden" name="variantId" value={v.id} />
                 <input type="hidden" name="productId" value={product.id} />
@@ -98,7 +98,9 @@ export default async function EditProductPage({
           <FormField label="Size" name="variantSize" />
           <FormField label="Colour" name="variantColour" />
           <FormField label="Price override (£, optional)" name="variantPriceOverride" type="number" step="0.01" min="0" />
-          <FormField label="Stock quantity" name="variantStock" type="number" min="0" defaultValue={0} />
+          {!product.madeToOrder && (
+            <FormField label="Stock quantity" name="variantStock" type="number" min="0" defaultValue={0} />
+          )}
           <div className="sm:col-span-2">
             <SubmitButton>Add Variant</SubmitButton>
           </div>
