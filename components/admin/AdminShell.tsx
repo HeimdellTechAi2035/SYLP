@@ -18,6 +18,7 @@ import {
   Truck,
   Settings,
   BarChart3,
+  MessageCircle,
 } from "lucide-react";
 import LogoutButton from "@/components/admin/LogoutButton";
 import type { AdminSessionPayload } from "@/lib/auth";
@@ -37,6 +38,7 @@ const nav = [
   { href: "/admin/returns", label: "Returns", icon: RotateCcw },
   { href: "/admin/messages", label: "Contact Messages", icon: Mail },
   { href: "/admin/policies", label: "Policies", icon: FileText },
+  { href: "/admin/faqs", label: "FAQs & Chatbot", icon: MessageCircle },
   { href: "/admin/homepage", label: "Homepage", icon: Home },
   { href: "/admin/delivery", label: "Delivery", icon: Truck },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },

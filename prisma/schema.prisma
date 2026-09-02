@@ -424,6 +424,22 @@ model FaqItem {
   category  String   // Products | Wax Melts | Candles | Fragrances | How to Use | Candle Care | Safety | Orders | Delivery | Returns | Payments | Gift Sets | Contact
   sortOrder Int      @default(0)
   isActive  Boolean  @default(true)
+
+  unansweredQuestions UnansweredQuestion[]
+}
+
+// A normalized chatbot question the knowledge base couldn't confidently
+// answer. Deliberately stores only the question text, never a full
+// conversation transcript or any customer-identifying data — see
+// lib/knowledge/chat.ts for how this is populated.
+model UnansweredQuestion {
+  id            String    @id @default(cuid())
+  question      String    @unique
+  askCount      Int       @default(1)
+  lastAskedAt   DateTime  @default(now())
+  resolvedFaqId String?
+  resolvedFaq   FaqItem?  @relation(fields: [resolvedFaqId], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
 }
 
 model Policy {
