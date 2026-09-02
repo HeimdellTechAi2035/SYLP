@@ -5,9 +5,11 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createCustomerSession, destroyCustomerSession } from "@/lib/customer-auth";
-import { getClientIp, isRateLimited } from "@/lib/rate-limit";
+import { getClientIp, isRateLimited, recordFailedAttempt } from "@/lib/rate-limit";
 
 export type AuthFormState = { status: "idle" | "error"; message?: string };
+
+const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
 
 const registerSchema = z.object({
   firstName: z.string().min(1).max(80),
@@ -59,12 +61,14 @@ export async function loginCustomer(_prev: AuthFormState, formData: FormData): P
   if (!parsed.success) return { status: "error", message: "Please enter a valid email and password." };
 
   const ip = await getClientIp();
-  if (isRateLimited(`customer-login:${ip}:${parsed.data.email}`, 5, 5 * 60 * 1000)) {
+  const rateLimitKey = `customer-login:${ip}:${parsed.data.email}`;
+  if (isRateLimited(rateLimitKey, 5, RATE_LIMIT_WINDOW_MS)) {
     return { status: "error", message: "Too many attempts. Please wait a few minutes and try again." };
   }
 
   const customer = await prisma.customer.findUnique({ where: { email: parsed.data.email } });
   if (!customer?.passwordHash || !(await bcrypt.compare(parsed.data.password, customer.passwordHash))) {
+    recordFailedAttempt(rateLimitKey, RATE_LIMIT_WINDOW_MS);
     return { status: "error", message: "Incorrect email or password." };
   }
 

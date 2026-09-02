@@ -10,7 +10,15 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "db:test:reset": "dotenv -e .env.test -- node scripts/reset-test-db.mjs",
+    "pretest:unit": "npm run db:test:reset",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "pretest:e2e": "npm run db:test:reset",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit",
+    "test:all": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.0",
@@ -26,15 +34,18 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "prisma": "^7.10.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   }
 }

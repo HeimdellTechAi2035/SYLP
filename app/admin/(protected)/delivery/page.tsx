@@ -25,11 +25,11 @@ export default async function AdminDeliveryPage() {
               </summary>
               <form action={bound} className="grid sm:grid-cols-2 gap-4 mt-4">
                 <input type="hidden" name="zoneId" value={zone.id} />
-                <FormField label="Zone name" name="name" defaultValue={zone.name} required />
-                <FormField label="Countries (comma-separated)" name="countries" defaultValue={zone.countries} required />
-                <FormField label="Price (£)" name="price" type="number" step="0.01" min="0" defaultValue={(zone.price / 100).toFixed(2)} required />
-                <FormField label="Free delivery threshold (£, optional)" name="freeThreshold" type="number" step="0.01" min="0" defaultValue={zone.freeThreshold ? (zone.freeThreshold / 100).toFixed(2) : undefined} />
-                <FormField label="Estimated delivery time" name="estimatedDays" defaultValue={zone.estimatedDays ?? ""} />
+                <FormField label="Zone name" name="name" id={`zone-${zone.id}-name`} defaultValue={zone.name} required />
+                <FormField label="Countries (comma-separated)" name="countries" id={`zone-${zone.id}-countries`} defaultValue={zone.countries} required />
+                <FormField label="Price (£)" name="price" id={`zone-${zone.id}-price`} type="number" step="0.01" min="0" defaultValue={(zone.price / 100).toFixed(2)} required />
+                <FormField label="Free delivery threshold (£, optional)" name="freeThreshold" id={`zone-${zone.id}-freeThreshold`} type="number" step="0.01" min="0" defaultValue={zone.freeThreshold ? (zone.freeThreshold / 100).toFixed(2) : undefined} />
+                <FormField label="Estimated delivery time" name="estimatedDays" id={`zone-${zone.id}-estimatedDays`} defaultValue={zone.estimatedDays ?? ""} />
                 <FormCheckbox label="Active" name="isActive" defaultChecked={zone.isActive} />
                 <div className="sm:col-span-2 flex justify-between items-center">
                   <SubmitButton>Save</SubmitButton>

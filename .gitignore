@@ -38,10 +38,15 @@ yarn-error.log*
 # tests
 /test-results/
 /playwright-report/
+/blob-report/
+.last-run.json
 
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+# .env.test holds only disposable test fixtures (no real secrets) — committed
+# deliberately so CI can run the suite without manual setup. See TESTING.md.
+!.env.test
 
 # vercel
 .vercel

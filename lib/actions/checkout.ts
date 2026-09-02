@@ -125,28 +125,37 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
     });
   }
 
-  let discounts: { coupon: string }[] | undefined;
-  if (discountAmount > 0) {
-    const coupon = await stripe.coupons.create({
-      amount_off: discountAmount,
-      currency: "gbp",
-      duration: "once",
-      name: discountCode ?? "Discount",
-    });
-    discounts = [{ coupon: coupon.id }];
-  }
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    customer_email: data.email,
-    line_items: lineItems,
-    discounts,
-    metadata: { orderId: order.id, orderNumber: order.orderNumber },
-    success_url: `${siteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${siteUrl}/checkout`,
-  });
+  // A real Stripe API failure (as opposed to "not configured", already handled
+  // above) must never surface as a raw unhandled exception, and must never
+  // leave an orphaned pending order behind — clean up and fail gracefully.
+  let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>;
+  try {
+    let discounts: { coupon: string }[] | undefined;
+    if (discountAmount > 0) {
+      const coupon = await stripe.coupons.create({
+        amount_off: discountAmount,
+        currency: "gbp",
+        duration: "once",
+        name: discountCode ?? "Discount",
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
+
+    session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: data.email,
+      line_items: lineItems,
+      discounts,
+      metadata: { orderId: order.id, orderNumber: order.orderNumber },
+      success_url: `${siteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/checkout`,
+    });
+  } catch {
+    await prisma.order.delete({ where: { id: order.id } }).catch(() => {});
+    return { status: "error", message: "We couldn't start checkout just now. Please try again in a moment." };
+  }
 
   await prisma.order.update({ where: { id: order.id }, data: { stripeCheckoutSessionId: session.id } });
 

@@ -22,8 +22,8 @@ export default async function AdminPoliciesPage() {
                 <span className="text-xs text-ink-soft">{policy.isDraft ? "Draft" : "Published"}</span>
               </summary>
               <form action={bound} className="space-y-4 mt-4">
-                <FormField label="Title" name="title" defaultValue={policy.title} required />
-                <FormTextarea label="Body" name="body" defaultValue={policy.body} rows={10} />
+                <FormField label="Title" name="title" id={`policy-${policy.id}-title`} defaultValue={policy.title} required />
+                <FormTextarea label="Body" name="body" id={`policy-${policy.id}-body`} defaultValue={policy.body} rows={10} />
                 <FormCheckbox label="Draft (shows a warning banner to visitors)" name="isDraft" defaultChecked={policy.isDraft} />
                 <SubmitButton>Save</SubmitButton>
               </form>

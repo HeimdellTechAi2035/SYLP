@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches: [main, "handmade-by-mia/**"]
+  pull_request:
+    branches: [main, "handmade-by-mia/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.9"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run lint
+
+      - run: npx tsc --noEmit
+
+      # test:unit and test:e2e each reset the isolated prisma/test.db
+      # themselves (pretest:* hooks) — dev.db / .env is never touched here.
+      - run: npm run test:unit
+
+      - run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - run: npm run build

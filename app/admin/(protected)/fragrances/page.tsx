@@ -21,18 +21,18 @@ export default async function AdminFragrancesPage() {
               </summary>
               <form action={bound} className="grid sm:grid-cols-2 gap-4 mt-4">
                 <input type="hidden" name="fragranceId" value={frag.id} />
-                <FormField label="Name" name="name" defaultValue={frag.name} required />
-                <FormField label="Slug" name="slug" defaultValue={frag.slug} required />
-                <FormField label="Scent family" name="scentFamily" defaultValue={frag.scentFamily ?? ""} placeholder="Fresh, Floral, Fruity, Sweet, Woody, Clean..." />
-                <FormField label="Image URL" name="image" defaultValue={frag.image ?? ""} />
+                <FormField label="Name" name="name" id={`frag-${frag.id}-name`} defaultValue={frag.name} required />
+                <FormField label="Slug" name="slug" id={`frag-${frag.id}-slug`} defaultValue={frag.slug} required />
+                <FormField label="Scent family" name="scentFamily" id={`frag-${frag.id}-scentFamily`} defaultValue={frag.scentFamily ?? ""} placeholder="Fresh, Floral, Fruity, Sweet, Woody, Clean..." />
+                <FormField label="Image URL" name="image" id={`frag-${frag.id}-image`} defaultValue={frag.image ?? ""} />
                 <div className="sm:col-span-2">
-                  <FormTextarea label="Description" name="description" defaultValue={frag.description ?? ""} />
+                  <FormTextarea label="Description" name="description" id={`frag-${frag.id}-description`} defaultValue={frag.description ?? ""} />
                 </div>
-                <FormField label="Top notes" name="topNotes" defaultValue={frag.topNotes ?? ""} />
-                <FormField label="Heart notes" name="heartNotes" defaultValue={frag.heartNotes ?? ""} />
-                <FormField label="Base notes" name="baseNotes" defaultValue={frag.baseNotes ?? ""} />
+                <FormField label="Top notes" name="topNotes" id={`frag-${frag.id}-topNotes`} defaultValue={frag.topNotes ?? ""} />
+                <FormField label="Heart notes" name="heartNotes" id={`frag-${frag.id}-heartNotes`} defaultValue={frag.heartNotes ?? ""} />
+                <FormField label="Base notes" name="baseNotes" id={`frag-${frag.id}-baseNotes`} defaultValue={frag.baseNotes ?? ""} />
                 <div className="sm:col-span-2">
-                  <FormTextarea label="Internal notes (not shown publicly)" name="internalNotes" defaultValue={frag.internalNotes ?? ""} />
+                  <FormTextarea label="Internal notes (not shown publicly)" name="internalNotes" id={`frag-${frag.id}-internalNotes`} defaultValue={frag.internalNotes ?? ""} />
                 </div>
                 <div className="flex gap-6">
                   <FormCheckbox label="Active" name="isActive" defaultChecked={frag.isActive} />

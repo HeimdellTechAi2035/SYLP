@@ -21,12 +21,12 @@ export default async function AdminCategoriesPage() {
               </summary>
               <form action={bound} className="grid sm:grid-cols-2 gap-4 mt-4">
                 <input type="hidden" name="categoryId" value={cat.id} />
-                <FormField label="Name" name="name" defaultValue={cat.name} required />
-                <FormField label="Slug" name="slug" defaultValue={cat.slug} required />
+                <FormField label="Name" name="name" id={`cat-${cat.id}-name`} defaultValue={cat.name} required />
+                <FormField label="Slug" name="slug" id={`cat-${cat.id}-slug`} defaultValue={cat.slug} required />
                 <div className="sm:col-span-2">
-                  <FormTextarea label="Description" name="description" defaultValue={cat.description ?? ""} />
+                  <FormTextarea label="Description" name="description" id={`cat-${cat.id}-description`} defaultValue={cat.description ?? ""} />
                 </div>
-                <FormField label="Image URL" name="image" defaultValue={cat.image ?? ""} />
+                <FormField label="Image URL" name="image" id={`cat-${cat.id}-image`} defaultValue={cat.image ?? ""} />
                 <FormCheckbox label="Active (visible on storefront)" name="isActive" defaultChecked={cat.isActive} />
                 <div className="sm:col-span-2 flex justify-between items-center">
                   <SubmitButton>Save</SubmitButton>

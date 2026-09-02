@@ -29,17 +29,19 @@ export default async function AdminDiscountsPage() {
               </summary>
               <form action={bound} className="space-y-4 mt-4">
                 <input type="hidden" name="discountId" value={d.id} />
-                <FormField label="Code" name="code" defaultValue={d.code} required />
+                <FormField label="Code" name="code" id={`disc-${d.id}-code`} defaultValue={d.code} required />
                 <div className="grid sm:grid-cols-2 gap-4">
                   <FormSelect
                     label="Type"
                     name="type"
+                    id={`disc-${d.id}-type`}
                     defaultValue={d.type}
                     options={[{ value: "PERCENTAGE", label: "Percentage off" }, { value: "FIXED", label: "Fixed amount off (£)" }]}
                   />
                   <FormField
                     label="Value"
                     name="value"
+                    id={`disc-${d.id}-value`}
                     type="number"
                     step="0.01"
                     min="0"
@@ -48,16 +50,16 @@ export default async function AdminDiscountsPage() {
                   />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <FormField label="Minimum spend (£, optional)" name="minimumSpend" type="number" step="0.01" min="0" defaultValue={d.minimumSpend ? (d.minimumSpend / 100).toFixed(2) : undefined} />
-                  <FormField label="Max total uses (optional)" name="maxUses" type="number" min="1" defaultValue={d.maxUses ?? undefined} />
+                  <FormField label="Minimum spend (£, optional)" name="minimumSpend" id={`disc-${d.id}-minimumSpend`} type="number" step="0.01" min="0" defaultValue={d.minimumSpend ? (d.minimumSpend / 100).toFixed(2) : undefined} />
+                  <FormField label="Max total uses (optional)" name="maxUses" id={`disc-${d.id}-maxUses`} type="number" min="1" defaultValue={d.maxUses ?? undefined} />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <FormField label="Per-customer limit (optional)" name="perCustomerLimit" type="number" min="1" defaultValue={d.perCustomerLimit ?? undefined} />
+                  <FormField label="Per-customer limit (optional)" name="perCustomerLimit" id={`disc-${d.id}-perCustomerLimit`} type="number" min="1" defaultValue={d.perCustomerLimit ?? undefined} />
                   <div />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <FormField label="Start date (optional)" name="startDate" type="date" defaultValue={toDateInput(d.startDate)} />
-                  <FormField label="End date (optional)" name="endDate" type="date" defaultValue={toDateInput(d.endDate)} />
+                  <FormField label="Start date (optional)" name="startDate" id={`disc-${d.id}-startDate`} type="date" defaultValue={toDateInput(d.startDate)} />
+                  <FormField label="End date (optional)" name="endDate" id={`disc-${d.id}-endDate`} type="date" defaultValue={toDateInput(d.endDate)} />
                 </div>
                 <FormCheckbox label="Active" name="isActive" defaultChecked={d.isActive} />
                 <div className="flex justify-between items-center">
