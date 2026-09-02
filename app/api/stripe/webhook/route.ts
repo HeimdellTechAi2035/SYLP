@@ -19,7 +19,10 @@ export async function POST(request: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
-    return NextResponse.json({ error: `Invalid signature: ${(err as Error).message}` }, { status: 400 });
+    // Log the real reason server-side for operators; never echo SDK error
+    // detail back to whoever called the endpoint — it's a public URL.
+    console.error("Stripe webhook signature verification failed:", (err as Error).message);
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
