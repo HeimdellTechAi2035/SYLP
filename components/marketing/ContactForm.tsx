@@ -7,7 +7,7 @@ const initialState: ContactFormState = { status: "idle" };
 
 const categories = [
   "Product question",
-  "Fragrance question",
+  "Sizing question",
   "Order question",
   "Delivery",
   "Return",
@@ -51,7 +51,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={pending}
-        className="px-6 py-3 rounded-full bg-rose-dark text-cream font-semibold hover:bg-ink transition-colors disabled:opacity-60"
+        className="px-6 py-3 rounded-full bg-rose text-ink font-semibold hover:bg-rose-dark transition-colors disabled:opacity-60"
       >
         {pending ? "Sending..." : "Send Message"}
       </button>

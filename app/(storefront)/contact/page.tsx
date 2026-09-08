@@ -12,7 +12,7 @@ export default async function ContactPage() {
       <div className="max-w-lg mb-10">
         <h1 className="font-display text-4xl mb-3">Contact Us</h1>
         <p className="text-ink-soft">
-          Got a question about an order, a fragrance, or anything else? Send us a message and we&apos;ll get back to you.
+          Got a question about an order, sizing, or anything else? Send us a message and we&apos;ll get back to you.
           {settings.supportEmail && <> You can also email us directly at <a href={`mailto:${settings.supportEmail}`} className="text-rose-dark underline">{settings.supportEmail}</a>.</>}
         </p>
       </div>

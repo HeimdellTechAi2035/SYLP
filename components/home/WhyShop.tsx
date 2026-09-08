@@ -16,7 +16,7 @@ const defaultFeatures: Feature[] = [
   { icon: "package", title: "Small-batch", body: "We make in limited runs rather than mass production." },
   { icon: "gift", title: "Giftable", body: "Thoughtful packaging that's ready to give." },
   { icon: "shield", title: "Secure checkout", body: "Payments are processed securely via Stripe." },
-  { icon: "truck", title: "UK delivery", body: "Dispatched from the UK with tracked options available." },
+  { icon: "truck", title: "UK delivery", body: "Dispatched from the UK — get in touch if you'd like tracking added." },
 ];
 
 export default function WhyShop({ features }: { features?: Feature[] }) {
@@ -24,7 +24,7 @@ export default function WhyShop({ features }: { features?: Feature[] }) {
 
   return (
     <section className="container-page py-16">
-      <SectionHeading eyebrow="Why HandMade by Mia" title="Made with care, start to finish" align="center" />
+      <SectionHeading eyebrow="Why Support Your Local Patriot" title="Made with care, start to finish" align="center" />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
         {items.map((feature, i) => {
           const Icon = (feature.icon && iconMap[feature.icon]) || Sparkles;

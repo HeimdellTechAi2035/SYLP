@@ -1,4 +1,4 @@
-# HandMade by Mia
+# Support Your Local Patriot
 
 A full-stack ecommerce site for a UK handmade wax melt, candle and gift business — built with Next.js 16, Prisma, SQLite (dev) and Stripe. Every piece of day-to-day store data (products, fragrances, orders, discounts, homepage content, delivery settings, policies, reviews, etc.) is managed from the protected **Admin Dashboard** at `/admin` — the database is infrastructure only, never something the store owner touches directly.
 

@@ -20,7 +20,7 @@ export default async function AdminDiscountsPage() {
           const bound = updateDiscount.bind(null, d.id);
           const toDateInput = (date: Date | null) => (date ? date.toISOString().slice(0, 10) : undefined);
           return (
-            <details key={d.id} className="bg-white rounded-xl p-4">
+            <details key={d.id} className="bg-blush rounded-xl p-4">
               <summary className="cursor-pointer font-medium flex justify-between items-center">
                 <span>{d.code} &middot; {formatValue(d.type, d.value)}</span>
                 <span className="text-xs text-ink-soft">
@@ -75,7 +75,7 @@ export default async function AdminDiscountsPage() {
         {discounts.length === 0 && <p className="text-ink-soft text-sm">No discount codes yet.</p>}
       </div>
 
-      <div className="bg-white rounded-xl p-6 max-w-xl">
+      <div className="bg-blush rounded-xl p-6 max-w-xl">
         <h2 className="font-semibold mb-4">Add Discount Code</h2>
         <form action={createDiscount} className="space-y-4">
           <FormField label="Code" name="code" required placeholder="WELCOME10" />

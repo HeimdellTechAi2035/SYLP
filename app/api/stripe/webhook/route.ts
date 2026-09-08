@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { markOrderPaid } from "@/lib/orders";
+import { notifyAdminOfPaidOrder } from "@/lib/notifications/order-paid";
 
 export async function POST(request: NextRequest) {
   const signature = request.headers.get("stripe-signature");
@@ -30,6 +31,12 @@ export async function POST(request: NextRequest) {
     const orderId = session.metadata?.orderId;
     if (orderId) {
       await markOrderPaid(orderId);
+      // Runs on every delivery of this event, not just the first — its own
+      // idempotency (OrderNotification's unique constraint) skips anything
+      // already SENT, but will still catch up a notification that never
+      // went out (e.g. a transient email-provider failure) on a Stripe
+      // webhook retry, rather than requiring a manual admin retry for that.
+      await notifyAdminOfPaidOrder(orderId);
     }
   }
 

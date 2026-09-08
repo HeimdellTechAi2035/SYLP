@@ -23,6 +23,9 @@ export default function CategoryGrid({ categories }: { categories: CategoryTile[
             ) : (
               <PlaceholderImage />
             )}
+            {/* White text is legible here only because of this dark scrim over
+                an arbitrary admin-uploaded photo — swapping to black text would
+                fail contrast against the gradient far worse than this does. */}
             <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent" />
             <span className="absolute bottom-3 left-3 text-white font-display text-lg">{cat.name}</span>
           </Link>

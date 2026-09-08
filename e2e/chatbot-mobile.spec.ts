@@ -43,7 +43,7 @@ test.describe("Chatbot on a mobile viewport (375x812)", () => {
     await page.goto("/shop");
     await page.getByRole("button", { name: /open chat assistant/i }).click();
 
-    const panel = page.getByRole("dialog", { name: /handmade by mia chat assistant/i });
+    const panel = page.getByRole("dialog", { name: /patriot platform online store chat assistant/i });
     await expect(panel).toBeVisible();
     const panelBox = await panel.boundingBox();
     expect(panelBox!.x).toBeGreaterThanOrEqual(0);

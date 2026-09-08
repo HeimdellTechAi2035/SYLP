@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Core storefront + cart journey", () => {
   test("homepage -> shop -> product -> add to cart -> update -> remove -> empty state", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: /HandMade by Mia/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Support Your Local Patriot/i }).first()).toBeVisible();
 
     await page.getByRole("link", { name: "Shop", exact: true }).first().click();
     await page.waitForURL("**/shop");

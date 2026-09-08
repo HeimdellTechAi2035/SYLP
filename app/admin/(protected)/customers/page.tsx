@@ -11,7 +11,7 @@ export default async function AdminCustomersPage() {
   return (
     <div>
       <AdminPageHeader title="Customers" />
-      <div className="bg-white rounded-xl overflow-x-auto">
+      <div className="bg-blush rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-ink-soft border-b border-ink/10">

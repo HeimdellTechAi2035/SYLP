@@ -61,7 +61,7 @@ export default function AddToCartForm({
       {variants.length > 0 && (
         <div>
           <label htmlFor="variant" className="block text-sm font-medium mb-1">
-            Fragrance / Option
+            Size / Option
           </label>
           <select
             id="variant"
@@ -118,7 +118,7 @@ export default function AddToCartForm({
         <button
           type="submit"
           disabled={pending}
-          className="w-full py-3 rounded-full bg-rose-dark text-cream font-semibold hover:bg-ink transition-colors disabled:opacity-60"
+          className="w-full py-3 rounded-full bg-rose text-ink font-semibold hover:bg-rose-dark transition-colors disabled:opacity-60"
         >
           {pending ? "Adding..." : "Add to Basket"}
         </button>

@@ -23,23 +23,23 @@ describe("category delete", () => {
   });
 });
 
-describe("fragrance delete", () => {
-  it("leaves the product AND its variants intact and valid, just without a fragrance link", async () => {
+describe("packaging profile delete", () => {
+  it("leaves the product AND its variants intact and valid, just without a packaging profile link", async () => {
     const id = randomUUID().slice(0, 8);
-    const fragrance = await prisma.fragrance.create({ data: { slug: `disposable-frag-${id}`, name: "Disposable Fragrance" } });
+    const profile = await prisma.packagingProfile.create({ data: { name: `Disposable Profile ${id}`, cost: 100 } });
     const product = await prisma.product.create({
-      data: { slug: `disposable-prod2-${id}`, sku: `DISP2-${id}`, name: "Disposable Product 2", price: 500, fragranceId: fragrance.id, status: "ACTIVE" },
+      data: { slug: `disposable-prod2-${id}`, sku: `DISP2-${id}`, name: "Disposable Product 2", price: 500, packagingProfileId: profile.id, status: "ACTIVE" },
     });
     const variant = await prisma.productVariant.create({
-      data: { productId: product.id, name: "Variant", sku: `DISPVAR-${id}`, fragranceId: fragrance.id },
+      data: { productId: product.id, name: "Variant", sku: `DISPVAR-${id}`, packagingProfileId: profile.id },
     });
 
-    await prisma.fragrance.delete({ where: { id: fragrance.id } });
+    await prisma.packagingProfile.delete({ where: { id: profile.id } });
 
     const reloadedProduct = await prisma.product.findUniqueOrThrow({ where: { id: product.id } });
     const reloadedVariant = await prisma.productVariant.findUniqueOrThrow({ where: { id: variant.id } });
-    expect(reloadedProduct.fragranceId).toBeNull();
-    expect(reloadedVariant.fragranceId).toBeNull();
+    expect(reloadedProduct.packagingProfileId).toBeNull();
+    expect(reloadedVariant.packagingProfileId).toBeNull();
   });
 });
 

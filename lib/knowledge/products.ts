@@ -13,7 +13,6 @@ export type PublicProductKnowledge = {
   name: string;
   productType: string;
   category: string | null;
-  fragrance: string | null;
   shortDescription: string | null;
   description: string | null;
   price: number;
@@ -23,17 +22,14 @@ export type PublicProductKnowledge = {
   madeToOrder: boolean;
   productionTimeDays: number | null;
   available: boolean;
-  materials: string | null;
-  ingredientsInfo: string | null;
-  allergenInfo: string | null;
+  material: string | null;
   safetyWarnings: string | null;
-  recommendedUsage: string | null;
+  careInstructions: string | null;
   variants: {
     id: string;
     name: string;
     size: string | null;
     colour: string | null;
-    fragrance: string | null;
     price: number;
     available: boolean;
   }[];
@@ -49,7 +45,6 @@ function toPublicKnowledge(
     name: product.name,
     productType: product.productType,
     category: product.category?.name ?? null,
-    fragrance: product.fragrance?.name ?? null,
     shortDescription: product.shortDescription,
     description: product.description,
     price: product.price,
@@ -59,17 +54,14 @@ function toPublicKnowledge(
     madeToOrder: product.madeToOrder,
     productionTimeDays: product.productionTimeDays,
     available,
-    materials: product.waxType || product.vesselInfo || null,
-    ingredientsInfo: product.ingredientsInfo,
-    allergenInfo: product.allergenInfo,
+    material: product.material,
     safetyWarnings: product.safetyWarnings,
-    recommendedUsage: product.recommendedUsage,
+    careInstructions: product.careInstructions,
     variants: product.variants.map((v) => ({
       id: v.id,
       name: v.name,
       size: v.size,
       colour: v.colour,
-      fragrance: v.fragrance?.name ?? null,
       price: unitPriceFor(product, v),
       available: v.stockQuantity > 0 || product.continueSellingOOS || product.madeToOrder,
     })),
@@ -81,7 +73,7 @@ function fetchPublishedProducts() {
   // products never reach this query at all, let alone the knowledge layer.
   return prisma.product.findMany({
     where: { status: "ACTIVE" },
-    include: { category: true, fragrance: true, variants: { include: { fragrance: true } } },
+    include: { category: true, variants: true },
   });
 }
 
@@ -94,7 +86,7 @@ export async function getProductKnowledge(): Promise<PublicProductKnowledge[]> {
 export async function getProductKnowledgeBySlug(slug: string): Promise<PublicProductKnowledge | null> {
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { category: true, fragrance: true, variants: { include: { fragrance: true } } },
+    include: { category: true, variants: true },
   });
   if (!product || product.status !== "ACTIVE") return null;
   return toPublicKnowledge(product);

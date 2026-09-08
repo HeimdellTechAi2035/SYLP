@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { markOrderPaid } from "@/lib/orders";
+import { notifyAdminOfPaidOrder } from "@/lib/notifications/order-paid";
 import { formatPence } from "@/lib/money";
 import { CART_COOKIE } from "@/lib/cart";
 import { CheckCircle2 } from "lucide-react";
@@ -50,10 +51,18 @@ export default async function OrderConfirmationPage({
   const paid = session?.payment_status === "paid" || order.paymentStatus === "PAID";
 
   if (paid) {
+    // The customer's own browser landing here is never trusted on its own —
+    // `paid` above only became true because Stripe's own session object
+    // (fetched fresh, not a client-supplied flag) reported payment_status
+    // "paid". Safe to fire here too: idempotent, same as the webhook path.
+    await notifyAdminOfPaidOrder(order.id);
+
     const cookieStore = await cookies();
     const cartToken = cookieStore.get(CART_COOKIE)?.value;
     if (cartToken) {
-      await prisma.cart.delete({ where: { token: cartToken } }).catch(() => {});
+      // deleteMany (not delete) so a cart already removed by an earlier visit
+      // to this page doesn't log a spurious "record not found" error.
+      await prisma.cart.deleteMany({ where: { token: cartToken } });
     }
   }
 
@@ -67,14 +76,14 @@ export default async function OrderConfirmationPage({
           </div>
           <p className="text-ink-soft mb-8">
             Order <strong>{order.orderNumber}</strong> is confirmed. We&apos;ve started making and packing it with care —
-            you&apos;ll receive an email with tracking once it&apos;s dispatched.
+            you&apos;ll receive an email once it&apos;s dispatched.
           </p>
         </>
       ) : (
         <h1 className="font-display text-3xl mb-4">Payment processing</h1>
       )}
 
-      <div className="bg-white/70 rounded-2xl p-6 space-y-4">
+      <div className="bg-blush/70 rounded-2xl p-6 space-y-4">
         <div>
           <h2 className="font-semibold text-sm mb-2">Items</h2>
           <ul className="space-y-2 text-sm">
@@ -104,7 +113,7 @@ export default async function OrderConfirmationPage({
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/shop" className="px-6 py-3 rounded-full bg-rose-dark text-cream font-semibold">Continue Shopping</Link>
+        <Link href="/shop" className="px-6 py-3 rounded-full bg-rose-dark text-ink font-semibold">Continue Shopping</Link>
         <Link href={`/track-order?order=${order.orderNumber}`} className="px-6 py-3 rounded-full border border-ink/15 font-semibold">Track Order</Link>
       </div>
     </div>

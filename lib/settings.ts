@@ -6,7 +6,7 @@ export async function getSiteSettings() {
   return (
     settings ?? {
       id: 1,
-      businessName: "HandMade by Mia",
+      businessName: "Support Your Local Patriot",
       supportEmail: null,
       supportPhone: null,
       freeDeliveryThreshold: null,
@@ -19,6 +19,8 @@ export async function getSiteSettings() {
       gaMeasurementId: null,
       metaPixelId: null,
       maintenanceMode: false,
+      orderNotificationEmail: null,
+      orderNotificationEmailEnabled: false,
       updatedAt: new Date(),
     }
   );
@@ -29,22 +31,22 @@ export async function getHomepageContent() {
   return (
     content ?? {
       id: 1,
-      announcementBarText: "Handmade with care · UK delivery available",
-      heroTitle: "Beautiful home fragrance, handmade by Mia",
+      announcementBarText: "New drop just landed · UK delivery available",
+      heroTitle: "Support Your Local Patriot — wear your colours",
       heroSubtitle:
-        "Small-batch wax melts and candles, poured and packed by hand in the UK. [Placeholder copy — replace with confirmed brand messaging.]",
+        "Hoodies, tees and everyday gear, printed and packed to order in the UK.",
       heroImage: null,
-      heroCtaPrimaryLabel: "Shop Wax Melts",
-      heroCtaPrimaryHref: "/collections/wax-melts",
-      heroCtaSecondaryLabel: "Shop Candles",
-      heroCtaSecondaryHref: "/collections/candles",
-      storyTitle: "Handmade by Mia",
+      heroCtaPrimaryLabel: "Shop Hoodies",
+      heroCtaPrimaryHref: "/collections/hoodies",
+      heroCtaSecondaryLabel: "Shop All",
+      heroCtaSecondaryHref: "/shop",
+      storyTitle: "Support Your Local Patriot",
       storyBody:
-        "[Placeholder] Every wax melt and candle is hand-poured in small batches, checked, and packed with care before it comes to you.",
+        "Every item is printed, packed and checked with care before it comes to you.",
       storyImage: null,
       giftSectionTitle: "The perfect gift, ready to give",
       giftSectionBody:
-        "[Placeholder] Giftable sets for birthdays, thank-yous and every occasion in between.",
+        "Giftable sets for birthdays, thank-yous and every occasion in between.",
       giftSectionImage: null,
       updatedAt: new Date(),
     }

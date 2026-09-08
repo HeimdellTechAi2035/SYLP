@@ -52,7 +52,7 @@ export default async function AdminHomepagePage() {
         <h2 className="font-semibold text-lg mb-4">&ldquo;Why Shop&rdquo; Features</h2>
         <ul className="space-y-2 mb-4">
           {features.map((f) => (
-            <li key={f.id} className="flex items-center justify-between bg-white rounded-lg px-4 py-2 text-sm">
+            <li key={f.id} className="flex items-center justify-between bg-blush rounded-lg px-4 py-2 text-sm">
               <span>{f.title} — {f.body}</span>
               <form action={removeHomepageFeature}>
                 <input type="hidden" name="id" value={f.id} />

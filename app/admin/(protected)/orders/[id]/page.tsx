@@ -4,6 +4,8 @@ import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { FormField, FormSelect, FormTextarea, SubmitButton } from "@/components/admin/FormField";
 import { updateOrderFulfilment, refundOrder } from "@/lib/actions/admin/orders";
+import { retryOrderNotifications } from "@/lib/actions/admin/notifications";
+import { estimateOrderMargin } from "@/lib/margin";
 
 const statuses = ["NEW", "PAID", "MAKING", "READY_TO_PACK", "PACKED", "DISPATCHED", "DELIVERED", "CANCELLED"];
 
@@ -13,11 +15,24 @@ export default async function AdminOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { items: { include: { product: { select: { costPrice: true } } } }, notifications: true },
+  });
   if (!order) notFound();
 
   const boundUpdate = updateOrderFulfilment.bind(null, order.id);
   const boundRefund = refundOrder.bind(null, order.id);
+  const boundRetryNotifications = retryOrderNotifications.bind(null, order.id);
+
+  const { complete: costDataComplete, marginPence: estimatedMargin } = estimateOrderMargin(order, order.items);
+
+  const latestByChannel = (channel: "EMAIL" | "PUSH") =>
+    order.notifications
+      .filter((n) => n.channel === channel && n.event === "ORDER_PAID")
+      .sort((a, b) => b.attemptedAt.getTime() - a.attemptedAt.getTime())[0];
+  const emailNotification = latestByChannel("EMAIL");
+  const pushNotifications = order.notifications.filter((n) => n.channel === "PUSH" && n.event === "ORDER_PAID");
 
   return (
     <div>
@@ -25,7 +40,7 @@ export default async function AdminOrderDetailPage({
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-8">
         <div className="space-y-6">
-          <div className="bg-white rounded-xl p-6">
+          <div className="bg-blush rounded-xl p-6">
             <h2 className="font-semibold mb-3">Items</h2>
             <ul className="space-y-2 text-sm">
               {order.items.map((item) => (
@@ -43,7 +58,7 @@ export default async function AdminOrderDetailPage({
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6">
+          <div className="bg-blush rounded-xl p-6">
             <h2 className="font-semibold mb-3">Update Status & Tracking</h2>
             <form action={boundUpdate} className="space-y-4">
               <FormSelect
@@ -62,7 +77,7 @@ export default async function AdminOrderDetailPage({
             </form>
           </div>
 
-          <div className="bg-white rounded-xl p-6">
+          <div className="bg-blush rounded-xl p-6">
             <h2 className="font-semibold mb-3">Refund</h2>
             <p className="text-xs text-ink-soft mb-3">Payment status: {order.paymentStatus}</p>
             <form action={boundRefund} className="flex flex-wrap items-end gap-3">
@@ -76,9 +91,53 @@ export default async function AdminOrderDetailPage({
               <SubmitButton>Issue Refund</SubmitButton>
             </form>
           </div>
+
+          <div className="bg-blush rounded-xl p-6">
+            <h2 className="font-semibold mb-3">Fulfilment Cost</h2>
+            <p className="text-xs text-ink-soft mb-3">Internal only — never shown to the customer.</p>
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between"><span>Customer delivery paid</span><span>{formatPence(order.deliveryAmount)}</span></div>
+              <div className="flex justify-between"><span>Estimated postage</span><span>{formatPence(order.estimatedPostageCost)}</span></div>
+              <div className="flex justify-between"><span>Packaging</span><span>{formatPence(order.packagingCost)}</span></div>
+              <div className="flex justify-between font-semibold border-t border-ink/10 pt-1">
+                <span>Estimated postage + packaging</span>
+                <span>{formatPence(order.estimatedPostageCost + order.packagingCost)}</span>
+              </div>
+            </div>
+            <div className="border-t border-ink/10 mt-3 pt-3 text-sm">
+              <div className="flex justify-between">
+                <span>Estimated order margin</span>
+                <span className="font-semibold">{costDataComplete ? formatPence(estimatedMargin!) : "Cost data incomplete"}</span>
+              </div>
+              {!costDataComplete && (
+                <p className="text-xs text-ink-soft mt-1">Add a cost price to every product in this order to see an estimate.</p>
+              )}
+            </div>
+          </div>
+
+          {order.paymentStatus === "PAID" && (
+            <div className="bg-blush rounded-xl p-6">
+              <h2 className="font-semibold mb-3">Notifications</h2>
+              <div className="space-y-3 text-sm">
+                <NotificationRow label="Order email" notification={emailNotification} />
+                {pushNotifications.length === 0 ? (
+                  <NotificationRow label="Phone push" notification={undefined} />
+                ) : (
+                  pushNotifications.map((n) => <NotificationRow key={n.id} label="Phone push" notification={n} />)
+                )}
+              </div>
+              {(emailNotification?.status === "FAILED" || pushNotifications.some((n) => n.status === "FAILED")) && (
+                <form action={boundRetryNotifications} className="mt-3">
+                  <button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-rose-dark text-ink font-medium">
+                    Retry notification
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="bg-white rounded-xl p-6 h-fit space-y-4 text-sm">
+        <div className="bg-blush rounded-xl p-6 h-fit space-y-4 text-sm">
           <div>
             <h2 className="font-semibold mb-1">Customer</h2>
             <p>{order.firstName} {order.lastName}</p>
@@ -103,6 +162,41 @@ export default async function AdminOrderDetailPage({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function NotificationRow({
+  label,
+  notification,
+}: {
+  label: string;
+  notification: { status: string; sentAt: Date | null; errorMessage: string | null } | undefined;
+}) {
+  if (!notification) {
+    return (
+      <div className="flex items-center justify-between">
+        <span>{label}</span>
+        <span className="text-ink-soft">Not sent yet</span>
+      </div>
+    );
+  }
+
+  if (notification.status === "SENT") {
+    return (
+      <div className="flex items-center justify-between">
+        <span>{label}</span>
+        <span className="text-sage">
+          ✓ Sent{notification.sentAt && ` — ${notification.sentAt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between">
+      <span>{label}</span>
+      <span className="text-rose-dark">{notification.status === "FAILED" ? "Failed" : "Pending"}</span>
     </div>
   );
 }

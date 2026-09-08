@@ -13,20 +13,16 @@ function buildHref(base: Record<string, string | undefined>, overrides: Record<s
 
 export default function ShopFilters({
   categories,
-  scentFamilies,
   activeCategory,
-  activeScent,
   q,
   sort,
 }: {
   categories: { name: string; slug: string }[];
-  scentFamilies: string[];
   activeCategory?: string;
-  activeScent?: string;
   q?: string;
   sort?: string;
 }) {
-  const base = { category: activeCategory, scent: activeScent, q, sort };
+  const base = { category: activeCategory, q, sort };
 
   return (
     <aside className="space-y-8">
@@ -57,32 +53,6 @@ export default function ShopFilters({
           ))}
         </ul>
       </div>
-
-      {scentFamilies.length > 0 && (
-        <div>
-          <h2 className="font-semibold text-sm mb-3">Scent family</h2>
-          <ul className="space-y-1.5 text-sm">
-            <li>
-              <Link
-                href={buildHref(base, { scent: undefined })}
-                className={!activeScent ? "text-rose-dark font-semibold" : "text-ink-soft hover:text-ink"}
-              >
-                All
-              </Link>
-            </li>
-            {scentFamilies.map((family) => (
-              <li key={family}>
-                <Link
-                  href={buildHref(base, { scent: family })}
-                  className={activeScent === family ? "text-rose-dark font-semibold" : "text-ink-soft hover:text-ink"}
-                >
-                  {family}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </aside>
   );
 }

@@ -52,7 +52,7 @@ export default async function TrackOrderPage({
           placeholder="Email address"
           className="flex-1 rounded-lg border border-ink/15 px-3 py-2.5"
         />
-        <button type="submit" className="px-6 py-2.5 rounded-full bg-rose-dark text-cream font-semibold">
+        <button type="submit" className="px-6 py-2.5 rounded-full bg-rose-dark text-ink font-semibold">
           Track
         </button>
       </form>
@@ -64,7 +64,7 @@ export default async function TrackOrderPage({
       )}
 
       {order && (
-        <div className="bg-white/70 rounded-2xl p-6">
+        <div className="bg-blush/70 rounded-2xl p-6">
           <p className="text-sm text-ink-soft mb-1">Order {order.orderNumber}</p>
           <p className="font-display text-2xl mb-4">{statusLabels[order.fulfilmentStatus] ?? order.fulfilmentStatus}</p>
 

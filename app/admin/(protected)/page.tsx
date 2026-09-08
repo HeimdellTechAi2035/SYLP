@@ -29,7 +29,7 @@ export default async function AdminDashboardPage() {
       <div className="grid lg:grid-cols-2 gap-8">
         <div>
           <h2 className="font-semibold mb-3">Recent orders</h2>
-          <div className="bg-white rounded-xl divide-y divide-ink/10">
+          <div className="bg-blush rounded-xl divide-y divide-ink/10">
             {recentOrders.length === 0 && <p className="p-4 text-sm text-ink-soft">No orders yet.</p>}
             {recentOrders.map((order) => (
               <Link key={order.id} href={`/admin/orders/${order.id}`} className="flex justify-between p-4 text-sm hover:bg-cream">
@@ -42,7 +42,7 @@ export default async function AdminDashboardPage() {
 
         <div>
           <h2 className="font-semibold mb-3">Low stock</h2>
-          <div className="bg-white rounded-xl divide-y divide-ink/10">
+          <div className="bg-blush rounded-xl divide-y divide-ink/10">
             {lowStockProducts.length === 0 && <p className="p-4 text-sm text-ink-soft">Nothing low on stock.</p>}
             {lowStockProducts.map((product) => (
               <Link key={product.id} href={`/admin/products/${product.id}/edit`} className="flex justify-between p-4 text-sm hover:bg-cream">
@@ -59,7 +59,7 @@ export default async function AdminDashboardPage() {
 
 function StatCard({ label, value, href }: { label: string; value: string; href?: string }) {
   const content = (
-    <div className="bg-white rounded-xl p-5">
+    <div className="bg-blush rounded-xl p-5">
       <p className="text-xs text-ink-soft uppercase tracking-wide mb-1">{label}</p>
       <p className="font-display text-2xl">{value}</p>
     </div>

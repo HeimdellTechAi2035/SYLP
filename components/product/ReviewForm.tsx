@@ -62,7 +62,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="px-6 py-2.5 rounded-full bg-rose-dark text-cream font-semibold hover:bg-ink transition-colors disabled:opacity-60"
+        className="px-6 py-2.5 rounded-full bg-rose text-ink font-semibold hover:bg-rose-dark transition-colors disabled:opacity-60"
       >
         {pending ? "Submitting..." : "Submit Review"}
       </button>

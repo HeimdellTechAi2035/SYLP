@@ -13,7 +13,6 @@ const cardSelect = {
   stockQuantity: true,
   continueSellingOOS: true,
   madeToOrder: true,
-  fragrance: { select: { name: true } },
 } as const;
 
 const activeFilter = { status: "ACTIVE" } as const;
@@ -63,28 +62,9 @@ export async function getGiftSets(limit = 8): Promise<ProductCardData[]> {
   });
 }
 
-export async function getProductsByScentFamily(family: string, limit = 8): Promise<ProductCardData[]> {
-  return prisma.product.findMany({
-    where: { ...activeFilter, fragrance: { scentFamily: family } },
-    select: cardSelect,
-    take: limit,
-    orderBy: { updatedAt: "desc" },
-  });
-}
-
-export async function getScentFamilies(): Promise<string[]> {
-  const fragrances = await prisma.fragrance.findMany({
-    where: { isActive: true, scentFamily: { not: null } },
-    select: { scentFamily: true },
-    distinct: ["scentFamily"],
-  });
-  return fragrances.map((f) => f.scentFamily!).filter(Boolean);
-}
-
 export async function getShopProducts(params: {
   categorySlug?: string;
   smartCollection?: "new" | "best-sellers" | "seasonal";
-  scentFamily?: string;
   q?: string;
   sort?: "price-asc" | "price-desc" | "newest";
 }): Promise<ProductCardData[]> {
@@ -96,12 +76,10 @@ export async function getShopProducts(params: {
   if (params.smartCollection === "new") where.isNew = true;
   if (params.smartCollection === "best-sellers") where.bestSeller = true;
   if (params.smartCollection === "seasonal") where.seasonal = true;
-  if (params.scentFamily) where.fragrance = { scentFamily: params.scentFamily };
   if (params.q) {
     where.OR = [
       { name: { contains: params.q } },
       { shortDescription: { contains: params.q } },
-      { fragrance: { name: { contains: params.q } } },
     ];
   }
 
@@ -120,7 +98,6 @@ export async function getProductBySlug(slug: string) {
     where: { slug },
     include: {
       category: true,
-      fragrance: true,
       images: { orderBy: { sortOrder: "asc" } },
       variants: { orderBy: { sortOrder: "asc" } },
       giftSetItems: { include: { component: { select: cardSelect } } },

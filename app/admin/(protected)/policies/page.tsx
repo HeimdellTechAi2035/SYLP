@@ -16,7 +16,7 @@ export default async function AdminPoliciesPage() {
         {policies.map((policy) => {
           const bound = updatePolicy.bind(null, policy.id);
           return (
-            <details key={policy.id} className="bg-white rounded-xl p-4">
+            <details key={policy.id} className="bg-blush rounded-xl p-4">
               <summary className="cursor-pointer font-medium flex justify-between items-center">
                 {policy.title}
                 <span className="text-xs text-ink-soft">{policy.isDraft ? "Draft" : "Published"}</span>

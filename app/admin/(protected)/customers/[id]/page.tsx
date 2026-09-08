@@ -22,7 +22,7 @@ export default async function AdminCustomerDetailPage({
       <p className="text-ink-soft mb-8">{customer.email}{customer.phone && ` · ${customer.phone}`}</p>
 
       <h2 className="font-semibold mb-3">Orders</h2>
-      <div className="bg-white rounded-xl overflow-x-auto mb-8">
+      <div className="bg-blush rounded-xl overflow-x-auto mb-8">
         <table className="w-full text-sm">
           <tbody>
             {customer.orders.map((order) => (
@@ -43,7 +43,7 @@ export default async function AdminCustomerDetailPage({
       <h2 className="font-semibold mb-3">Addresses</h2>
       <div className="space-y-2">
         {customer.addresses.map((a) => (
-          <div key={a.id} className="bg-white rounded-lg p-4 text-sm text-ink-soft">
+          <div key={a.id} className="bg-blush rounded-lg p-4 text-sm text-ink-soft">
             {a.line1}{a.line2 && `, ${a.line2}`}, {a.city} {a.postcode}, {a.country}
           </div>
         ))}

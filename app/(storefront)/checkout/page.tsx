@@ -23,7 +23,7 @@ export default async function CheckoutPage() {
       <div className="grid lg:grid-cols-[1fr_360px] gap-10">
         <CheckoutForm giftMessageEnabled={giftMessageEnabled} />
 
-        <div className="bg-white/70 rounded-2xl p-6 h-fit order-first lg:order-last">
+        <div className="bg-blush/70 rounded-2xl p-6 h-fit order-first lg:order-last">
           <h2 className="font-semibold mb-4">Order Summary</h2>
           <ul className="space-y-3 mb-4">
             {cart.items.map((item) => (

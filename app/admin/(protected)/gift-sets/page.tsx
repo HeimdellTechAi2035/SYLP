@@ -15,7 +15,7 @@ export default async function AdminGiftSetsPage() {
       <AdminPageHeader
         title="Gift Sets"
         action={
-          <Link href="/admin/products/new" className="px-5 py-2.5 rounded-full bg-rose-dark text-cream font-semibold text-sm">
+          <Link href="/admin/products/new" className="px-5 py-2.5 rounded-full bg-rose-dark text-ink font-semibold text-sm">
             + Add Gift Set
           </Link>
         }
@@ -25,7 +25,7 @@ export default async function AdminGiftSetsPage() {
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {giftSets.map((set) => (
-          <Link key={set.id} href={`/admin/products/${set.id}/edit`} className="bg-white rounded-xl p-5 hover:shadow-sm">
+          <Link key={set.id} href={`/admin/products/${set.id}/edit`} className="bg-blush rounded-xl p-5 hover:shadow-sm">
             <h3 className="font-semibold mb-1">{set.name}</h3>
             <p className="text-sm text-ink-soft mb-2">{formatPence(set.price)}</p>
             <ul className="text-xs text-ink-soft space-y-0.5">

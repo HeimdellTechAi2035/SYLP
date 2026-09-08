@@ -5,6 +5,12 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth";
 import { productFormSchema } from "@/lib/validation";
+import {
+  syncProductToStripe,
+  syncVariantToStripe,
+  archiveProductInStripe,
+  deactivateVariantInStripe,
+} from "@/lib/stripe-sync";
 
 function readProductForm(formData: FormData) {
   // "Track stock quantity" is the admin-facing control; madeToOrder (its
@@ -20,7 +26,6 @@ function readProductForm(formData: FormData) {
     status: formData.get("status"),
     productType: formData.get("productType"),
     categoryId: formData.get("categoryId") || "",
-    fragranceId: formData.get("fragranceId") || "",
     shortDescription: formData.get("shortDescription") || "",
     description: formData.get("description") || "",
     price: formData.get("price"),
@@ -52,34 +57,19 @@ function extraFields(formData: FormData) {
   };
 
   return {
-    waxType: str("waxType"),
-    wickType: str("wickType"),
-    vesselInfo: str("vesselInfo"),
+    material: str("material"),
+    careInstructions: str("careInstructions"),
     netWeightGrams: num("netWeightGrams"),
     dimensions: str("dimensions"),
-    meltFormat: str("meltFormat"),
-    piecesCount: num("piecesCount"),
-    recommendedUsage: str("recommendedUsage"),
-    storageGuidance: str("storageGuidance"),
-    candleWeightGrams: num("candleWeightGrams"),
-    vesselSize: str("vesselSize"),
-    burnInstructions: str("burnInstructions"),
-    candleCare: str("candleCare"),
-    burnTimeHours: num("burnTimeHours"),
-    firstBurnInstructions: str("firstBurnInstructions"),
-    wickTrimmingGuidance: str("wickTrimmingGuidance"),
-    maxBurnSessionHours: num("maxBurnSessionHours"),
     safetyWarnings: str("safetyWarnings"),
-    allergenInfo: str("allergenInfo"),
-    clpInfo: str("clpInfo"),
     supplierManufacturerDetails: str("supplierManufacturerDetails"),
     batchReference: str("batchReference"),
-    ingredientsInfo: str("ingredientsInfo"),
     safetyDocumentUrl: str("safetyDocumentUrl"),
     giftPackagingAvailable: formData.get("giftPackagingAvailable") === "on",
     giftMessageEnabled: formData.get("giftMessageEnabled") === "on",
     seoTitle: str("seoTitle"),
     metaDescription: str("metaDescription"),
+    packagingProfileId: str("packagingProfileId"),
   };
 }
 
@@ -91,13 +81,16 @@ export async function createProduct(formData: FormData) {
     data: {
       ...data,
       categoryId: data.categoryId || null,
-      fragranceId: data.fragranceId || null,
       price: Math.round(data.price * 100),
       salePrice: data.salePrice ? Math.round(data.salePrice * 100) : null,
       costPrice: data.costPrice ? Math.round(data.costPrice * 100) : null,
       ...extraFields(formData),
     },
   });
+
+  // Fire-and-await, but never let a Stripe hiccup block the product actually
+  // saving — syncProductToStripe catches its own errors and records them.
+  await syncProductToStripe(product.id, { priceChanged: true, detailsChanged: true });
 
   revalidatePath("/admin/products");
   redirect(`/admin/products/${product.id}/edit`);
@@ -107,18 +100,48 @@ export async function updateProduct(productId: string, formData: FormData) {
   await requireAdminSession();
   const data = readProductForm(formData);
 
+  const before = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { price: true, salePrice: true, saleActive: true, name: true, description: true, shortDescription: true, mainImage: true, status: true },
+  });
+
+  const newPrice = Math.round(data.price * 100);
+  const newSalePrice = data.salePrice ? Math.round(data.salePrice * 100) : null;
+
   await prisma.product.update({
     where: { id: productId },
     data: {
       ...data,
       categoryId: data.categoryId || null,
-      fragranceId: data.fragranceId || null,
-      price: Math.round(data.price * 100),
-      salePrice: data.salePrice ? Math.round(data.salePrice * 100) : null,
+      price: newPrice,
+      salePrice: newSalePrice,
       costPrice: data.costPrice ? Math.round(data.costPrice * 100) : null,
       ...extraFields(formData),
     },
   });
+
+  // Diff against the pre-update row so the sync engine only redoes the work
+  // that's actually needed — a new Stripe Price only when the price itself
+  // (or sale state) changed, never on every unrelated field edit.
+  const priceChanged =
+    !before ||
+    before.price !== newPrice ||
+    before.salePrice !== newSalePrice ||
+    before.saleActive !== Boolean(formData.get("saleActive") === "on");
+  const detailsChanged =
+    !before ||
+    before.name !== data.name ||
+    before.description !== (data.description || null) ||
+    before.shortDescription !== (data.shortDescription || null) ||
+    before.mainImage !== (data.mainImage || null);
+  const justPublished = before?.status !== "ACTIVE" && data.status === "ACTIVE";
+
+  await syncProductToStripe(productId, { priceChanged: priceChanged || justPublished, detailsChanged });
+
+  if (before?.status === "ACTIVE" && data.status !== "ACTIVE") {
+    // No longer sellable (e.g. unpublished back to draft, or archived via this form).
+    await archiveProductInStripe(productId);
+  }
 
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${productId}/edit`);
@@ -129,6 +152,7 @@ export async function archiveProduct(formData: FormData) {
   await requireAdminSession();
   const productId = String(formData.get("productId") || "");
   await prisma.product.update({ where: { id: productId }, data: { status: "ARCHIVED" } });
+  await archiveProductInStripe(productId);
   revalidatePath("/admin/products");
 }
 
@@ -155,18 +179,23 @@ export async function addVariant(productId: string, formData: FormData) {
   const sku = String(formData.get("variantSku") || "");
   if (!name || !sku) return;
 
-  await prisma.productVariant.create({
+  const variant = await prisma.productVariant.create({
     data: {
       productId,
       name,
       sku,
-      fragranceId: String(formData.get("variantFragranceId") || "") || null,
       size: String(formData.get("variantSize") || "") || null,
       colour: String(formData.get("variantColour") || "") || null,
       priceOverride: formData.get("variantPriceOverride") ? Math.round(Number(formData.get("variantPriceOverride")) * 100) : null,
       stockQuantity: Number(formData.get("variantStock") || 0),
+      packagingProfileId: String(formData.get("variantPackagingProfileId") || "") || null,
     },
   });
+
+  if (variant.priceOverride != null) {
+    await syncVariantToStripe(variant.id, { forceReprice: true });
+  }
+
   revalidatePath(`/admin/products/${productId}/edit`);
 }
 
@@ -174,6 +203,16 @@ export async function removeVariant(formData: FormData) {
   await requireAdminSession();
   const variantId = String(formData.get("variantId") || "");
   const productId = String(formData.get("productId") || "");
+  await deactivateVariantInStripe(variantId);
   await prisma.productVariant.delete({ where: { id: variantId } }).catch(() => {});
   revalidatePath(`/admin/products/${productId}/edit`);
+}
+
+export async function retryStripeSync(productId: string) {
+  await requireAdminSession();
+  // Force a full reconciliation (product + all price-overriding variants),
+  // exactly what "Retry Stripe Sync" should mean — idempotent either way.
+  await syncProductToStripe(productId, { priceChanged: true, detailsChanged: true });
+  revalidatePath(`/admin/products/${productId}/edit`);
+  revalidatePath("/admin/products");
 }

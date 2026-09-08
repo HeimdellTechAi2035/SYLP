@@ -18,6 +18,7 @@ export type AdminSessionPayload = {
   email: string;
   name: string;
   role: string;
+  mustChangePassword: boolean;
 };
 
 export async function createAdminSession(payload: AdminSessionPayload) {

@@ -13,8 +13,8 @@ export type StoreKnowledge = {
 
 /**
  * Explicit whitelist of SiteSettings fields — never the raw row. SiteSettings
- * also holds orderNotificationEmail/orderNotificationEmailEnabled (Mia's
- * private inbox for paid-order alerts) and maintenanceMode, neither of which
+ * also holds orderNotificationEmail/orderNotificationEmailEnabled (the store
+ * owner's private inbox for paid-order alerts) and maintenanceMode, neither of which
  * belongs anywhere near a customer-facing answer.
  */
 export async function getStoreKnowledge(): Promise<StoreKnowledge> {

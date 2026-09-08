@@ -39,7 +39,7 @@ export default function SettingsForm({
       {state.status !== "idle" && (
         <p className={`text-sm ${state.status === "success" ? "text-sage" : "text-rose-dark"}`}>{state.message}</p>
       )}
-      <button type="submit" disabled={pending} className="px-6 py-2.5 rounded-full bg-rose-dark text-cream font-semibold disabled:opacity-60">
+      <button type="submit" disabled={pending} className="px-6 py-2.5 rounded-full bg-rose-dark text-ink font-semibold disabled:opacity-60">
         {pending ? "Saving..." : "Save Changes"}
       </button>
     </form>

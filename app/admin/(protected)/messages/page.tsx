@@ -13,7 +13,7 @@ export default async function AdminMessagesPage() {
           const markRead = setMessageStatus.bind(null, msg.id, "READ");
           const markResponded = setMessageStatus.bind(null, msg.id, "RESPONDED");
           return (
-            <div key={msg.id} className="bg-white rounded-xl p-5">
+            <div key={msg.id} className="bg-blush rounded-xl p-5">
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <p className="font-medium">{msg.name} &middot; <span className="text-ink-soft font-normal">{msg.email}</span></p>
@@ -26,8 +26,8 @@ export default async function AdminMessagesPage() {
               <p className="text-sm text-ink-soft mb-3 whitespace-pre-line">{msg.message}</p>
               <div className="flex gap-2">
                 {msg.status === "NEW" && <form action={markRead}><button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-ink/10 text-ink-soft">Mark Read</button></form>}
-                {msg.status !== "RESPONDED" && <form action={markResponded}><button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-sage text-white">Mark Responded</button></form>}
-                <a href={`mailto:${msg.email}`} className="text-xs px-3 py-1.5 rounded-full bg-ink text-cream">Reply by Email</a>
+                {msg.status !== "RESPONDED" && <form action={markResponded}><button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-sage text-ink">Mark Responded</button></form>}
+                <a href={`mailto:${msg.email}`} className="text-xs px-3 py-1.5 rounded-full bg-rose-dark text-ink">Reply by Email</a>
               </div>
             </div>
           );

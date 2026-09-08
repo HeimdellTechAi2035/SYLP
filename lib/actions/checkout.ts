@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { getCartToken, getCartWithItems, cartSubtotal, priceForCartItem } from "@/lib/cart";
 import { checkoutSchema } from "@/lib/validation";
 import { validateDiscountCode } from "@/lib/discounts";
-import { calculateDeliveryAmount } from "@/lib/delivery";
+import { resolveDeliveryDetails } from "@/lib/delivery";
+import { resolveOrderPackagingCost } from "@/lib/packaging";
 import { createOrderWithUniqueNumber } from "@/lib/order-number";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { getCustomerSession } from "@/lib/customer-auth";
@@ -44,7 +45,7 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
 
   // Server-side availability check — never trust what the client last saw,
   // and never trust that a cart added before a product was archived is still
-  // valid. Made-to-order bypasses the stock-quantity check (Mia makes more as
+  // valid. Made-to-order bypasses the stock-quantity check (more is made as
   // orders arrive, so there's no finite number to enforce) but never bypasses
   // whether the product is still published at all.
   for (const item of cart.items) {
@@ -72,8 +73,15 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
   }
 
   const chargeableSubtotal = subtotal - discountAmount;
-  const deliveryAmount = await calculateDeliveryAmount(chargeableSubtotal, data.shippingCountry);
+  const delivery = await resolveDeliveryDetails(chargeableSubtotal, data.shippingCountry);
+  const deliveryAmount = delivery.amount;
   const total = chargeableSubtotal + deliveryAmount;
+
+  // Internal fulfilment cost — snapshotted below regardless of what the
+  // customer paid for delivery. Free delivery is a pricing decision, not
+  // free fulfilment: the postage still gets bought and the parcel still
+  // gets packed either way.
+  const packagingCost = resolveOrderPackagingCost(cart.items);
 
   const customerSession = await getCustomerSession();
 
@@ -96,6 +104,9 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
         discountCode,
         discountAmount,
         deliveryAmount,
+        deliveryMethodName: delivery.methodName,
+        estimatedPostageCost: delivery.estimatedPostageCost,
+        packagingCost,
         total,
         giftMessage: data.giftMessage || null,
         paymentStatus: "PENDING",
@@ -106,8 +117,7 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
             variantId: item.variantId,
             productName: item.product.name,
             variantLabel: item.variant?.name ?? null,
-            fragranceName: null,
-            sku: item.variant?.sku ?? null,
+            sku: item.variant?.sku ?? item.product.sku ?? null,
             unitPrice: priceForCartItem(item) / item.quantity,
             quantity: item.quantity,
             lineTotal: priceForCartItem(item),

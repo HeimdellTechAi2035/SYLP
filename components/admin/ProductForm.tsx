@@ -9,7 +9,6 @@ type ProductWithRelations = {
   status: string;
   productType: string;
   categoryId: string | null;
-  fragranceId: string | null;
   shortDescription: string | null;
   description: string | null;
   price: number;
@@ -22,29 +21,13 @@ type ProductWithRelations = {
   madeToOrder: boolean;
   productionTimeDays: number | null;
   mainImage: string | null;
-  waxType: string | null;
-  wickType: string | null;
-  vesselInfo: string | null;
+  material: string | null;
+  careInstructions: string | null;
   netWeightGrams: number | null;
   dimensions: string | null;
-  meltFormat: string | null;
-  piecesCount: number | null;
-  recommendedUsage: string | null;
-  storageGuidance: string | null;
-  candleWeightGrams: number | null;
-  vesselSize: string | null;
-  burnInstructions: string | null;
-  candleCare: string | null;
-  burnTimeHours: number | null;
-  firstBurnInstructions: string | null;
-  wickTrimmingGuidance: string | null;
-  maxBurnSessionHours: number | null;
   safetyWarnings: string | null;
-  allergenInfo: string | null;
-  clpInfo: string | null;
   supplierManufacturerDetails: string | null;
   batchReference: string | null;
-  ingredientsInfo: string | null;
   safetyDocumentUrl: string | null;
   featured: boolean;
   bestSeller: boolean;
@@ -55,18 +38,19 @@ type ProductWithRelations = {
   giftMessageEnabled: boolean;
   seoTitle: string | null;
   metaDescription: string | null;
+  packagingProfileId: string | null;
 } | null;
 
 export default function ProductForm({
   action,
   product,
   categories,
-  fragrances,
+  packagingProfiles,
 }: {
   action: (formData: FormData) => Promise<void> | void;
   product: ProductWithRelations;
   categories: { id: string; name: string }[];
-  fragrances: { id: string; name: string }[];
+  packagingProfiles: { id: string; name: string }[];
 }) {
   const p = product;
   const pence = (v: number | null | undefined) => (v != null ? (v / 100).toFixed(2) : "");
@@ -76,7 +60,7 @@ export default function ProductForm({
       <Section title="Core">
         <div className="grid sm:grid-cols-2 gap-4">
           <FormField label="Product name" name="name" defaultValue={p?.name} required />
-          <FormField label="Slug (URL)" name="slug" defaultValue={p?.slug} required placeholder="vanilla-dream-candle" />
+          <FormField label="Slug (URL)" name="slug" defaultValue={p?.slug} required placeholder="patriot-platform-hoodie" />
           <FormField label="SKU" name="sku" defaultValue={p?.sku} required />
           <FormSelect
             label="Status"
@@ -87,10 +71,13 @@ export default function ProductForm({
           <FormSelect
             label="Product type"
             name="productType"
-            defaultValue={p?.productType ?? "WAX_MELT"}
+            defaultValue={p?.productType ?? "APPAREL"}
             options={[
-              { value: "WAX_MELT", label: "Wax Melt" },
-              { value: "CANDLE", label: "Candle" },
+              { value: "APPAREL", label: "Apparel" },
+              { value: "ACCESSORY", label: "Accessory" },
+              { value: "DRINKWARE", label: "Drinkware" },
+              { value: "STATIONERY", label: "Stationery" },
+              { value: "HOMEWARE", label: "Homeware" },
               { value: "GIFT_SET", label: "Gift Set" },
               { value: "OTHER", label: "Other" },
             ]}
@@ -100,12 +87,6 @@ export default function ProductForm({
             name="categoryId"
             defaultValue={p?.categoryId ?? ""}
             options={[{ value: "", label: "None" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
-          />
-          <FormSelect
-            label="Fragrance"
-            name="fragranceId"
-            defaultValue={p?.fragranceId ?? ""}
-            options={[{ value: "", label: "None" }, ...fragrances.map((f) => ({ value: f.id, label: f.name }))]}
           />
         </div>
         <FormTextarea label="Short description" name="shortDescription" defaultValue={p?.shortDescription ?? ""} rows={2} />
@@ -131,6 +112,15 @@ export default function ProductForm({
         <FormField label="Production time (days)" name="productionTimeDays" type="number" min="0" defaultValue={p?.productionTimeDays ?? undefined} />
       </Section>
 
+      <Section title="Fulfilment Packaging" description="Internal only — never shown to the customer. Works the same whether this product is made to order or stock-tracked.">
+        <FormSelect
+          label="Packaging profile"
+          name="packagingProfileId"
+          defaultValue={p?.packagingProfileId ?? ""}
+          options={[{ value: "", label: "None assigned" }, ...packagingProfiles.map((prof) => ({ value: prof.id, label: prof.name }))]}
+        />
+      </Section>
+
       <Section title="Media">
         <FormField label="Main image URL" name="mainImage" defaultValue={p?.mainImage ?? ""} placeholder="https://..." />
         <p className="text-xs text-ink-soft">Additional gallery images and variants can be managed after saving.</p>
@@ -138,41 +128,15 @@ export default function ProductForm({
 
       <Section title="Materials & Size">
         <div className="grid sm:grid-cols-2 gap-4">
-          <FormField label="Wax type" name="waxType" defaultValue={p?.waxType ?? ""} />
-          <FormField label="Wick type" name="wickType" defaultValue={p?.wickType ?? ""} />
-          <FormField label="Vessel info" name="vesselInfo" defaultValue={p?.vesselInfo ?? ""} />
+          <FormField label="Material" name="material" defaultValue={p?.material ?? ""} placeholder="100% cotton, stainless steel..." />
           <FormField label="Net weight (g)" name="netWeightGrams" type="number" min="0" defaultValue={p?.netWeightGrams ?? undefined} />
           <FormField label="Dimensions" name="dimensions" defaultValue={p?.dimensions ?? ""} />
         </div>
-      </Section>
-
-      <Section title="Wax Melt Specific">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <FormField label="Melt format" name="meltFormat" defaultValue={p?.meltFormat ?? ""} placeholder="Snap Bar" />
-          <FormField label="Pieces count" name="piecesCount" type="number" min="0" defaultValue={p?.piecesCount ?? undefined} />
-        </div>
-        <FormTextarea label="Recommended usage" name="recommendedUsage" defaultValue={p?.recommendedUsage ?? ""} />
-        <FormTextarea label="Storage guidance" name="storageGuidance" defaultValue={p?.storageGuidance ?? ""} />
-      </Section>
-
-      <Section title="Candle Specific">
-        <div className="grid sm:grid-cols-3 gap-4">
-          <FormField label="Candle weight (g)" name="candleWeightGrams" type="number" min="0" defaultValue={p?.candleWeightGrams ?? undefined} />
-          <FormField label="Vessel size" name="vesselSize" defaultValue={p?.vesselSize ?? ""} />
-          <FormField label="Approx. burn time (hours)" name="burnTimeHours" type="number" min="0" defaultValue={p?.burnTimeHours ?? undefined} />
-          <FormField label="Max burn session (hours)" name="maxBurnSessionHours" type="number" min="0" defaultValue={p?.maxBurnSessionHours ?? undefined} />
-        </div>
-        <FormTextarea label="Burn instructions" name="burnInstructions" defaultValue={p?.burnInstructions ?? ""} />
-        <FormTextarea label="First burn instructions" name="firstBurnInstructions" defaultValue={p?.firstBurnInstructions ?? ""} />
-        <FormTextarea label="Candle care" name="candleCare" defaultValue={p?.candleCare ?? ""} />
-        <FormTextarea label="Wick trimming guidance" name="wickTrimmingGuidance" defaultValue={p?.wickTrimmingGuidance ?? ""} />
+        <FormTextarea label="Care instructions (e.g. wash/dry guidance)" name="careInstructions" defaultValue={p?.careInstructions ?? ""} />
       </Section>
 
       <Section title="Compliance & Safety" description="Leave fields blank if not applicable to this product. Do not copy generic wording — enter reviewed, product-specific information.">
-        <FormTextarea label="Safety warnings" name="safetyWarnings" defaultValue={p?.safetyWarnings ?? ""} />
-        <FormTextarea label="Allergen information" name="allergenInfo" defaultValue={p?.allergenInfo ?? ""} />
-        <FormTextarea label="CLP / hazard information" name="clpInfo" defaultValue={p?.clpInfo ?? ""} />
-        <FormTextarea label="Ingredients / fragrance information" name="ingredientsInfo" defaultValue={p?.ingredientsInfo ?? ""} />
+        <FormTextarea label="Safety warnings (e.g. small-parts choking hazard)" name="safetyWarnings" defaultValue={p?.safetyWarnings ?? ""} />
         <div className="grid sm:grid-cols-2 gap-4">
           <FormField label="Supplier / manufacturer details" name="supplierManufacturerDetails" defaultValue={p?.supplierManufacturerDetails ?? ""} />
           <FormField label="Batch reference" name="batchReference" defaultValue={p?.batchReference ?? ""} />

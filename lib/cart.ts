@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { unitPriceFor } from "@/lib/pricing";
 
 export const CART_COOKIE = "hbm_cart";
 const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 60; // 60 days
@@ -40,8 +41,8 @@ export async function getCartWithItems(token: string | null) {
     include: {
       items: {
         include: {
-          product: { include: { images: true } },
-          variant: true,
+          product: { include: { images: true, packagingProfile: true } },
+          variant: { include: { packagingProfile: true } },
         },
         orderBy: { createdAt: "asc" },
       },
@@ -55,12 +56,7 @@ export function priceForCartItem(item: {
   product: { price: number; salePrice: number | null; saleActive: boolean };
   variant: { priceOverride: number | null } | null;
 }) {
-  const base = item.variant?.priceOverride ?? (
-    item.product.saleActive && item.product.salePrice != null
-      ? item.product.salePrice
-      : item.product.price
-  );
-  return base * item.quantity;
+  return unitPriceFor(item.product, item.variant) * item.quantity;
 }
 
 export function cartSubtotal(

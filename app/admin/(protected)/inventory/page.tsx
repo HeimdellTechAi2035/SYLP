@@ -13,7 +13,7 @@ export default async function AdminInventoryPage() {
   return (
     <div>
       <AdminPageHeader title="Inventory" />
-      <div className="bg-white rounded-xl overflow-x-auto">
+      <div className="bg-blush rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-ink-soft border-b border-ink/10">
@@ -90,7 +90,7 @@ function StockForm({
         min={0}
         className={`w-20 rounded-lg border px-2 py-1 text-sm ${low ? "border-rose-dark text-rose-dark font-semibold" : "border-ink/15"}`}
       />
-      <button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-ink text-cream">Update</button>
+      <button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-rose-dark text-ink">Update</button>
     </form>
   );
 }

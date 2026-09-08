@@ -1,16 +1,25 @@
 // Deterministic fixtures for the automated test suite ONLY.
 // Intentionally separate from prisma/seed.ts (the dev sample catalog) so test
 // runs never depend on — or risk corrupting — the developer's seeded data.
-import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+// See prisma/seed.ts for why this is a default-import + destructure.
+import pkg from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+const { PrismaClient } = pkg;
 
+// FIXME (Postgres migration): the old guard here refused to run unless
+// DATABASE_URL pointed at a file named test.db — meaningless now that the
+// database is Postgres (Netlify DB), not a SQLite file. The whole test
+// database isolation strategy (this guard, scripts/reset-test-db.mjs,
+// vitest.config.mts, playwright.config.ts) needs a Postgres-appropriate
+// redesign — e.g. a dedicated Neon branch reset via `netlify database
+// reset` — before the automated test suite can run again. Not done yet.
 const dbUrl = process.env.DATABASE_URL || "";
-if (!dbUrl.includes("test.db")) {
-  throw new Error(`Refusing to seed — DATABASE_URL does not point at a test.db file: ${dbUrl}`);
+if (!dbUrl) {
+  throw new Error("DATABASE_URL is not set.");
 }
 
-const adapter = new PrismaBetterSqlite3({ url: dbUrl });
+const adapter = new PrismaPg({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
@@ -25,7 +34,7 @@ async function main() {
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: { freeDeliveryThreshold: 3000, standardDeliveryPrice: 295 },
-    create: { id: 1, businessName: "HandMade by Mia (Test)", freeDeliveryThreshold: 3000, standardDeliveryPrice: 295 },
+    create: { id: 1, businessName: "Support Your Local Patriot (Test)", freeDeliveryThreshold: 3000, standardDeliveryPrice: 295 },
   });
 
   await prisma.deliveryZone.deleteMany({});
@@ -37,12 +46,6 @@ async function main() {
     where: { slug: "test-wax-melts" },
     update: {},
     create: { slug: "test-wax-melts", name: "Test Wax Melts", isActive: true },
-  });
-
-  const fragrance = await prisma.fragrance.upsert({
-    where: { slug: "test-fragrance" },
-    update: {},
-    create: { slug: "test-fragrance", name: "Test Fragrance", scentFamily: "Fresh", isActive: true },
   });
 
   const products: Record<string, string> = {};
@@ -78,7 +81,6 @@ async function main() {
         status: def.status ?? "ACTIVE",
         productType: "WAX_MELT",
         categoryId: category.id,
-        fragranceId: fragrance.id,
         price: def.price,
         salePrice: def.salePrice ?? null,
         saleActive: def.saleActive ?? false,
@@ -101,7 +103,6 @@ async function main() {
       status: "ACTIVE",
       productType: "CANDLE",
       categoryId: category.id,
-      fragranceId: fragrance.id,
       price: 1500,
       stockQuantity: 20,
     },

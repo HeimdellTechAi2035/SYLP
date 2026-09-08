@@ -62,7 +62,7 @@ export default async function AccountPage() {
 
 function AccountLink({ href, title, body }: { href: string; title: string; body: string }) {
   return (
-    <Link href={href} className="block rounded-xl bg-white/70 p-5 border border-ink/5 hover:border-rose-dark/40 transition-colors">
+    <Link href={href} className="block rounded-xl bg-blush/70 p-5 border border-ink/5 hover:border-rose-dark/40 transition-colors">
       <h3 className="font-semibold mb-1">{title}</h3>
       <p className="text-sm text-ink-soft">{body}</p>
     </Link>

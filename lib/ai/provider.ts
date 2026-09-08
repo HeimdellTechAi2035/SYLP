@@ -12,9 +12,9 @@ export function aiProviderConfigured(): boolean {
 }
 
 const GROUNDING_INSTRUCTIONS =
-  "Answer using only the HandMade by Mia knowledge supplied below. " +
+  "Answer using only the Support Your Local Patriot knowledge supplied below. " +
   "If the answer is not supported by this knowledge, say you do not have " +
-  "confirmed information about that and suggest contacting HandMade by Mia. " +
+  "confirmed information about that and suggest contacting Support Your Local Patriot. " +
   "Never invent prices, availability, ingredients, safety claims, delivery " +
   "promises, discounts, tracking numbers or order statuses.";
 

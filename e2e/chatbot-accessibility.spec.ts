@@ -18,7 +18,7 @@ test.describe("Chatbot accessibility", () => {
   test("the panel exposes dialog semantics with an accessible name", async ({ page }) => {
     await page.goto("/shop");
     await page.getByRole("button", { name: "Open chat assistant" }).click();
-    await expect(page.getByRole("dialog", { name: "HandMade by Mia chat assistant" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Support Your Local Patriot chat assistant" })).toBeVisible();
   });
 
   test("opening the chat moves keyboard focus into the message input", async ({ page }) => {

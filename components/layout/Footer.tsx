@@ -7,11 +7,11 @@ export default async function Footer() {
   const settings = await getSiteSettings();
 
   const shopLinks = [
-    { label: "Wax Melts", href: "/collections/wax-melts" },
-    { label: "Candles", href: "/collections/candles" },
+    { label: "Hoodies", href: "/collections/hoodies" },
+    { label: "T-Shirts", href: "/collections/t-shirts" },
     { label: "Gift Sets", href: "/collections/gift-sets" },
     { label: "Best Sellers", href: "/collections/best-sellers" },
-    { label: "Seasonal", href: "/collections/seasonal" },
+    { label: "New In", href: "/collections/new" },
   ];
 
   const helpLinks = [
@@ -26,30 +26,31 @@ export default async function Footer() {
     { label: "Terms & Conditions", href: "/legal/terms" },
     { label: "Privacy Policy", href: "/legal/privacy" },
     { label: "Cookie Policy", href: "/legal/cookies" },
-    { label: "Candle Safety", href: "/legal/candle-safety" },
-    { label: "Wax Melt Safety", href: "/legal/wax-melt-safety" },
+    { label: "Cancellation Policy", href: "/legal/cancellation" },
+    { label: "Complaints", href: "/legal/complaints" },
+    { label: "Product Care Guide", href: "/legal/product-care" },
     { label: "Accessibility", href: "/legal/accessibility" },
   ];
 
   return (
-    <footer className="bg-ink text-cream mt-24">
-      <div className="container-page py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="lg:col-span-2">
-          <span className="font-display text-xl">
-            HandMade <span className="text-blush">by Mia</span>
+    <footer className="bg-rose-dark text-ink mt-12">
+      <div className="container-page py-8 flex flex-wrap gap-x-16 gap-y-6">
+        <div className="w-full sm:w-auto sm:max-w-[220px]">
+          <span className="font-display text-lg">
+            SYLP <span className="text-ink/70 text-sm font-sans">Support Your Local Patriot</span>
           </span>
-          <p className="mt-3 text-sm text-cream/70 max-w-xs">
-            Small-batch wax melts, candles and gifts, handmade with care.
+          <p className="mt-2 text-sm text-ink/80">
+            Hoodies, tees and everyday gear for the community, printed and packed to order.
             {settings.estimatedDispatchDays ? ` UK dispatch in ${settings.estimatedDispatchDays}.` : ""}
           </p>
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-2 mt-3">
             {settings.instagramUrl && (
-              <a href={settings.instagramUrl} aria-label="Instagram" className="p-2 rounded-full bg-cream/10 hover:bg-cream/20">
+              <a href={settings.instagramUrl} aria-label="Instagram" className="p-2 rounded-full bg-ink/10 hover:bg-ink/20">
                 <InstagramIcon className="h-4 w-4" />
               </a>
             )}
             {settings.facebookUrl && (
-              <a href={settings.facebookUrl} aria-label="Facebook" className="p-2 rounded-full bg-cream/10 hover:bg-cream/20">
+              <a href={settings.facebookUrl} aria-label="Facebook" className="p-2 rounded-full bg-ink/10 hover:bg-ink/20">
                 <FacebookIcon className="h-4 w-4" />
               </a>
             )}
@@ -61,16 +62,16 @@ export default async function Footer() {
         <FooterColumn title="Policies" links={legalLinks} />
       </div>
 
-      <div className="border-t border-cream/10">
-        <div className="container-page py-8">
+      <div className="border-t border-ink/15">
+        <div className="container-page py-4">
           <NewsletterForm />
         </div>
       </div>
 
-      <div className="border-t border-cream/10">
-        <div className="container-page py-4 text-xs text-cream/50 flex flex-col sm:flex-row justify-between gap-2">
-          <span>&copy; {new Date().getFullYear()} {settings.businessName}. All rights reserved.</span>
-          <span>Company registration and VAT details: placeholder — to be added once registered.</span>
+      <div className="border-t border-ink/15">
+        <div className="container-page py-3 text-xs text-ink/70 space-y-0.5">
+          <p>&copy; {new Date().getFullYear()} {settings.businessName}, operated by Heimdell Tech Ai Ltd. All rights reserved.</p>
+          <p>Registered in England &amp; Wales, Company No. 16478408. Preston, PR1 9DJ. ICO Registration: ZC079121.</p>
         </div>
       </div>
     </footer>
@@ -79,12 +80,12 @@ export default async function Footer() {
 
 function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
   return (
-    <div>
-      <h3 className="font-semibold text-sm text-cream mb-3">{title}</h3>
-      <ul className="space-y-2">
+    <div className="min-w-[130px]">
+      <h3 className="font-semibold text-sm text-ink mb-2">{title}</h3>
+      <ul className="space-y-1.5">
         {links.map((link) => (
           <li key={link.href}>
-            <Link href={link.href} className="text-sm text-cream/70 hover:text-cream transition-colors">
+            <Link href={link.href} className="text-sm text-ink/80 hover:text-ink underline-offset-2 hover:underline transition-colors">
               {link.label}
             </Link>
           </li>

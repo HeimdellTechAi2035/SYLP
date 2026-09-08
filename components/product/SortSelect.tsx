@@ -21,7 +21,7 @@ export default function SortSelect({ base }: { base: Record<string, string | und
           if (e.target.value !== "newest") params.set("sort", e.target.value);
           router.push(`/shop?${params.toString()}`);
         }}
-        className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-ink/15 bg-blush px-3 py-2 text-sm"
       >
         <option value="newest">Newest</option>
         <option value="price-asc">Price: Low to High</option>

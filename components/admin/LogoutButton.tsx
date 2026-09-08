@@ -10,7 +10,7 @@ async function logout() {
 export default function LogoutButton() {
   return (
     <form action={logout}>
-      <button type="submit" className="text-cream/70 hover:text-cream underline text-xs">
+      <button type="submit" className="text-ink/80 hover:text-ink underline text-xs">
         Sign out
       </button>
     </form>

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { FormField, FormCheckbox } from "@/components/admin/FormField";
 
 /**
- * Most HandMade by Mia products are made to order — stock is effectively
- * unlimited because Mia makes more as orders arrive. Rather than making
+ * Most Support Your Local Patriot products are made to order — stock is effectively
+ * unlimited because more is made as orders arrive. Rather than making
  * admins type an artificial number like 9999 for those, this only asks for
  * a stock quantity at all once "Track stock quantity" is switched on.
  */

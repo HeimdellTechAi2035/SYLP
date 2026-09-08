@@ -21,7 +21,7 @@ export default function ReviewsSection({ reviews }: { reviews: HomeReview[] }) {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.map((review) => (
-            <div key={review.id} className="rounded-2xl bg-white/70 p-6 border border-ink/5">
+            <div key={review.id} className="rounded-2xl bg-blush/70 p-6 border border-ink/5">
               <StarRating rating={review.rating} />
               {review.title && <h3 className="font-medium mt-2">{review.title}</h3>}
               <p className="text-sm text-ink-soft mt-2 line-clamp-4">{review.body}</p>

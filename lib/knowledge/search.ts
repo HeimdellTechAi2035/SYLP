@@ -8,7 +8,7 @@ export type KnowledgeSearchResult = {
 
 /**
  * Plain keyword search over already-public knowledge (published products,
- * their fragrance/category, and published FAQs). No vector database or
+ * their category, and published FAQs). No vector database or
  * embeddings — with a catalogue this size a direct filter is fast enough,
  * and it's trivially correct: whatever getProductKnowledge()/getFaqKnowledge()
  * would allow is exactly what search can surface, no separate index to
@@ -21,7 +21,7 @@ export async function searchKnowledge(query: string): Promise<KnowledgeSearchRes
   const [products, faqs] = await Promise.all([getProductKnowledge(), getFaqKnowledge()]);
 
   const matchedProducts = products.filter((p) =>
-    [p.name, p.shortDescription, p.description, p.fragrance, p.category, p.productType]
+    [p.name, p.shortDescription, p.description, p.category, p.productType]
       .filter(Boolean)
       .some((field) => field!.toLowerCase().includes(q))
   );

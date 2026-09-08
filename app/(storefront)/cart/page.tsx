@@ -23,8 +23,8 @@ export default async function CartPage() {
     return (
       <div className="container-page py-20 text-center">
         <h1 className="font-display text-3xl mb-3">Your basket is empty</h1>
-        <p className="text-ink-soft mb-6">Find your new favourite fragrance.</p>
-        <Link href="/shop" className="inline-block px-6 py-3 rounded-full bg-rose-dark text-cream font-semibold">
+        <p className="text-ink-soft mb-6">Find your new favourite piece.</p>
+        <Link href="/shop" className="inline-block px-6 py-3 rounded-full bg-rose text-ink font-semibold">
           Continue Shopping
         </Link>
       </div>
@@ -72,7 +72,7 @@ export default async function CartPage() {
           ))}
         </ul>
 
-        <div className="bg-white/70 rounded-2xl p-6 h-fit">
+        <div className="bg-blush/70 rounded-2xl p-6 h-fit">
           <div className="flex justify-between text-sm mb-2">
             <span>Subtotal</span>
             <span className="font-semibold">{formatPence(subtotal)}</span>
@@ -80,7 +80,7 @@ export default async function CartPage() {
           <p className="text-xs text-ink-soft mb-4">Delivery and any discounts are calculated at checkout.</p>
           <Link
             href="/checkout"
-            className="block text-center w-full py-3 rounded-full bg-rose-dark text-cream font-semibold hover:bg-ink transition-colors"
+            className="block text-center w-full py-3 rounded-full bg-rose text-ink font-semibold hover:bg-rose-dark transition-colors"
           >
             Checkout
           </Link>

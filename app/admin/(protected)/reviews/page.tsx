@@ -18,7 +18,7 @@ export default async function AdminReviewsPage() {
           const reject = setReviewStatus.bind(null, review.id, "REJECTED");
           const respond = respondToReview.bind(null, review.id);
           return (
-            <div key={review.id} className="bg-white rounded-xl p-5">
+            <div key={review.id} className="bg-blush rounded-xl p-5">
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <StarRating rating={review.rating} />
@@ -34,7 +34,7 @@ export default async function AdminReviewsPage() {
 
               <div className="flex gap-2 mb-3">
                 {review.status !== "APPROVED" && (
-                  <form action={approve}><button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-sage text-white">Approve</button></form>
+                  <form action={approve}><button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-sage text-ink">Approve</button></form>
                 )}
                 {review.status !== "REJECTED" && (
                   <form action={reject}><button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-ink/10 text-ink-soft">Reject</button></form>
@@ -48,7 +48,7 @@ export default async function AdminReviewsPage() {
                   placeholder="Write a public response (optional)"
                   className="flex-1 rounded-lg border border-ink/15 px-3 py-1.5 text-sm"
                 />
-                <button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-ink text-cream">Save Response</button>
+                <button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-rose-dark text-ink">Save Response</button>
               </form>
             </div>
           );

@@ -21,7 +21,7 @@ export default function PasswordChangeForm() {
       {state.status !== "idle" && (
         <p className={`text-sm ${state.status === "success" ? "text-sage" : "text-rose-dark"}`}>{state.message}</p>
       )}
-      <button type="submit" disabled={pending} className="px-6 py-2.5 rounded-full bg-rose-dark text-cream font-semibold text-sm disabled:opacity-60">
+      <button type="submit" disabled={pending} className="px-6 py-2.5 rounded-full bg-rose-dark text-ink font-semibold text-sm disabled:opacity-60">
         {pending ? "Updating..." : "Change Password"}
       </button>
     </form>

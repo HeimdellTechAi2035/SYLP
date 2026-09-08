@@ -20,7 +20,7 @@ export async function markOrderPaid(orderId: string) {
     });
 
     for (const item of order.items) {
-      // Made-to-order products have no finite stock to track — Mia makes
+      // Made-to-order products have no finite stock to track — more is made
       // more as orders arrive, so a paid order never touches stockQuantity.
       if (item.product?.madeToOrder) continue;
 

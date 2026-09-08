@@ -24,7 +24,7 @@ export default async function OrderDetailPage({
       <h1 className="font-display text-3xl mb-1">Order {order.orderNumber}</h1>
       <p className="text-ink-soft mb-8">{order.createdAt.toLocaleDateString("en-GB")} &middot; {order.fulfilmentStatus}</p>
 
-      <div className="bg-white/70 rounded-2xl p-6 space-y-4">
+      <div className="bg-blush/70 rounded-2xl p-6 space-y-4">
         <ul className="space-y-2 text-sm">
           {order.items.map((item) => (
             <li key={item.id} className="flex justify-between">

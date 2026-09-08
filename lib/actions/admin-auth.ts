@@ -30,6 +30,12 @@ export async function loginAdmin(_prev: AdminLoginState, formData: FormData): Pr
     return { status: "error", message: "Incorrect email or password." };
   }
 
-  await createAdminSession({ sub: admin.id, email: admin.email, name: admin.name, role: admin.role });
+  await createAdminSession({
+    sub: admin.id,
+    email: admin.email,
+    name: admin.name,
+    role: admin.role,
+    mustChangePassword: admin.mustChangePassword,
+  });
   redirect("/admin");
 }

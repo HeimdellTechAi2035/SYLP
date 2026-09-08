@@ -22,7 +22,7 @@ export default function LoginRegisterForms() {
           <Field label="Email" name="email" type="email" required />
           <Field label="Password" name="password" type="password" required />
           {loginState.status === "error" && <p className="text-rose-dark text-sm">{loginState.message}</p>}
-          <button type="submit" disabled={loginPending} className="w-full py-3 rounded-full bg-rose-dark text-cream font-semibold disabled:opacity-60">
+          <button type="submit" disabled={loginPending} className="w-full py-3 rounded-full bg-rose-dark text-ink font-semibold disabled:opacity-60">
             {loginPending ? "Signing in..." : "Sign In"}
           </button>
         </form>
@@ -35,7 +35,7 @@ export default function LoginRegisterForms() {
           <Field label="Email" name="email" type="email" required />
           <Field label="Password" name="password" type="password" required minLength={8} />
           {registerState.status === "error" && <p className="text-rose-dark text-sm">{registerState.message}</p>}
-          <button type="submit" disabled={registerPending} className="w-full py-3 rounded-full bg-rose-dark text-cream font-semibold disabled:opacity-60">
+          <button type="submit" disabled={registerPending} className="w-full py-3 rounded-full bg-rose-dark text-ink font-semibold disabled:opacity-60">
             {registerPending ? "Creating account..." : "Create Account"}
           </button>
         </form>

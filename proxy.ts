@@ -23,7 +23,12 @@ export async function proxy(request: NextRequest) {
   try {
     const secret = process.env.SESSION_SECRET;
     if (!secret) throw new Error("missing secret");
-    await jwtVerify(token, new TextEncoder().encode(secret));
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    // A freshly-seeded/reset admin account must change its password before
+    // reaching anywhere else — /admin/settings is where that form lives.
+    if (payload.mustChangePassword && pathname !== "/admin/settings") {
+      return NextResponse.redirect(new URL("/admin/settings", request.url));
+    }
     return NextResponse.next();
   } catch {
     const response = NextResponse.redirect(new URL("/admin/login", request.url));

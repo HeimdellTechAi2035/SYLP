@@ -1,17 +1,27 @@
-// HandMade by Mia — data model
+// Preston Patriot — data model
 //
-// Dev database is SQLite (zero-config, file-based, no external service to install).
-// To move to production Postgres later: change `provider` below to "postgresql",
-// set DATABASE_URL to a Postgres connection string, and re-run `npx prisma migrate dev`.
-// SQLite has no native enum support, so status/type fields below are plain String
-// columns with the allowed values documented in a comment and enforced in code (lib/validation).
+// Postgres, provisioned via Netlify DB (Neon-backed) — see lib/prisma.ts for
+// how the connection string is resolved (Netlify's injected env locally via
+// `netlify dev` / at build+runtime once deployed, DATABASE_URL otherwise).
+// Status/type fields below are still plain String columns with the allowed
+// values documented in a comment and enforced in code (lib/validation) —
+// carried over unchanged from the original SQLite schema rather than
+// introduced now, so this migration doesn't also change validation behaviour.
+//
+// Catalogue rebuilt for a general merch line (apparel, drinkware, accessories,
+// stationery, homeware, gift sets) — see migration
+// 20260908000000_merch_catalog_rebuild. The old Fragrance model and the
+// candle/wax-melt-specific Product fields it and the melt/burn instructions
+// used are gone; Product now carries generic `material`/`careInstructions`
+// fields instead, and ProductVariant's size/colour/packSize cover apparel and
+// pack-based items alike.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ---------------------------------------------------------------------------
@@ -19,13 +29,36 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         String   @default("OWNER") // OWNER | STAFF
-  createdAt    DateTime @default(now())
-  auditLogs    AuditLog[]
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  passwordHash       String
+  name               String
+  role               String   @default("OWNER") // OWNER | STAFF
+  // Set on a freshly-seeded/reset admin account; forces a password change
+  // (enforced in middleware.ts, cleared by changeAdminPassword) before any
+  // other admin page is usable, so a shared/known initial password can never
+  // stay live past first login.
+  mustChangePassword Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  auditLogs          AuditLog[]
+  pushSubscriptions  AdminPushSubscription[]
+}
+
+// A registered browser/device that should receive Web Push order alerts.
+// Deliberately tied to an AdminUser, never to a customer session — see
+// requireAdminSession() calls in lib/actions/admin/push-subscriptions.ts.
+model AdminPushSubscription {
+  id          String   @id @default(cuid())
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  endpoint    String   @unique
+  p256dh      String
+  auth        String
+  label       String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  lastSuccessfulNotificationAt DateTime?
+  notifications OrderNotification[]
 }
 
 model AuditLog {
@@ -56,39 +89,16 @@ model Category {
   products    Product[]
 }
 
-model Fragrance {
-  id             String    @id @default(cuid())
-  slug           String    @unique
-  name           String
-  description    String?
-  scentFamily    String?   // Fresh | Floral | Fruity | Sweet | Woody | Clean | Seasonal | ...
-  topNotes       String?   // comma-separated
-  heartNotes     String?   // comma-separated
-  baseNotes      String?   // comma-separated
-  isActive       Boolean   @default(true)
-  isSeasonal     Boolean   @default(false)
-  image          String?
-  internalNotes  String?   // owner-only notes, never rendered on storefront
-  safetyRef      String?   // reference to safety/compliance documentation for this fragrance oil
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  products       Product[]
-  variants       ProductVariant[]
-}
-
 model Product {
   id          String   @id @default(cuid())
   slug        String   @unique
   sku         String   @unique
   name        String
   status      String   @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
-  productType String   @default("WAX_MELT") // WAX_MELT | CANDLE | GIFT_SET | OTHER
+  productType String   @default("APPAREL") // APPAREL | ACCESSORY | DRINKWARE | STATIONERY | HOMEWARE | GIFT_SET | OTHER
 
   categoryId  String?
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-
-  fragranceId String?
-  fragrance   Fragrance? @relation(fields: [fragranceId], references: [id], onDelete: SetNull)
 
   shortDescription String?
   description      String?
@@ -106,41 +116,27 @@ model Product {
   madeToOrder          Boolean @default(false)
   productionTimeDays   Int?
 
+  // Internal fulfilment cost — independent of inventory mode; a made-to-order
+  // product still gets packed and posted like any other. Variants may
+  // override this; see ProductVariant.packagingProfileId.
+  packagingProfileId String?
+  packagingProfile   PackagingProfile? @relation(fields: [packagingProfileId], references: [id], onDelete: SetNull)
+
   // Media
   mainImage   String?
   videoUrl    String?
   images      ProductImage[]
 
   // Material / general product info
-  waxType         String?
-  wickType        String?
-  vesselInfo      String?
+  material        String? // e.g. "100% cotton", "stainless steel", "PU leather"
+  careInstructions String? // e.g. "Machine wash cold, do not tumble dry"
   netWeightGrams  Int?
   dimensions      String?
 
-  // Wax melt specific
-  meltFormat          String? // e.g. "Clamshell", "Snap Bar", "Wax Bar"
-  piecesCount         Int?
-  recommendedUsage    String?
-  storageGuidance     String?
-
-  // Candle specific
-  candleWeightGrams     Int?
-  vesselSize            String?
-  burnInstructions      String?
-  candleCare            String?
-  burnTimeHours         Int?
-  firstBurnInstructions String?
-  wickTrimmingGuidance  String?
-  maxBurnSessionHours   Int?
-
   // Compliance / safety (configurable per product — never assumed identical across products)
   safetyWarnings              String?
-  allergenInfo                String?
-  clpInfo                     String?
   supplierManufacturerDetails String?
   batchReference              String?
-  ingredientsInfo             String?
   safetyDocumentUrl           String?
 
   // Merchandising
@@ -161,9 +157,18 @@ model Product {
   socialImage      String?
   canonicalUrl     String?
 
-  // Payments
-  stripeProductId String?
-  stripePriceId   String?
+  // Payments — Stripe catalogue mirror (Stripe is a downstream payment
+  // catalogue here, never the source of truth for price/stock/availability).
+  // stripePriceId is the Stripe Price for the regular `price`; stripeSalePriceId
+  // (created lazily) is the Stripe Price for `salePrice`, when one is set.
+  // Only used for products with no variant override — see lib/pricing.ts and
+  // lib/stripe-sync.ts for exactly how a variant's own priceOverride changes this.
+  stripeProductId   String?
+  stripePriceId     String?
+  stripeSalePriceId String?
+  stripeSyncedAt    DateTime?
+  stripeSyncStatus  String    @default("NOT_SYNCED") // NOT_SYNCED | PENDING | SYNCED | FAILED
+  stripeSyncError   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -191,12 +196,9 @@ model ProductVariant {
   id            String   @id @default(cuid())
   productId     String
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  name          String   // display label, e.g. "Vanilla Dream — Large"
-  fragranceId   String?
-  fragrance     Fragrance? @relation(fields: [fragranceId], references: [id], onDelete: SetNull)
+  name          String   // display label, e.g. "Preston Patriot Hoodie — Large / Black"
   size          String?
   colour        String?
-  vesselStyle   String?
   packSize      String?
   isGiftOption  Boolean  @default(false)
   sku           String   @unique
@@ -205,6 +207,16 @@ model ProductVariant {
   isDefault     Boolean  @default(false)
   sortOrder     Int      @default(0)
   createdAt     DateTime @default(now())
+
+  // Overrides the parent Product's packaging profile when set — e.g. a
+  // large gift-set variant that needs bigger packaging than its siblings.
+  packagingProfileId String?
+  packagingProfile   PackagingProfile? @relation(fields: [packagingProfileId], references: [id], onDelete: SetNull)
+
+  // Only ever set for a variant with its own priceOverride — a variant that
+  // inherits the product's price/sale has no distinct Stripe Price of its own
+  // (it reuses the parent Product's stripePriceId / stripeSalePriceId).
+  stripePriceId String?
 
   orderItems OrderItem[]
   cartItems  CartItem[]
@@ -325,8 +337,16 @@ model Order {
   subtotal        Int
   discountCode    String?
   discountAmount  Int      @default(0)
-  deliveryAmount  Int      @default(0)
+  deliveryAmount  Int      @default(0)  // what the customer actually paid for delivery — £0 when free delivery applied
+  deliveryMethodName String? // snapshot of the DeliveryZone.name used, e.g. "UK Standard" — for admin/email display only
   total           Int
+
+  // Internal fulfilment cost snapshot — fixed at order creation and never
+  // recalculated, so a later admin rate change can't rewrite history. Both
+  // are independent of deliveryAmount: they still exist even when the
+  // customer paid nothing for delivery (free-delivery threshold met).
+  estimatedPostageCost Int @default(0)
+  packagingCost        Int @default(0)
 
   paymentStatus     String  @default("PENDING")   // PENDING | PAID | FAILED | REFUNDED | PART_REFUNDED
   fulfilmentStatus  String  @default("NEW")        // NEW | PAID | MAKING | READY_TO_PACK | PACKED | DISPATCHED | DELIVERED | CANCELLED
@@ -344,8 +364,32 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  items   OrderItem[]
-  reviews Review[]
+  items         OrderItem[]
+  reviews       Review[]
+  notifications OrderNotification[]
+}
+
+// Tracks each attempted admin notification delivery (email or push) for a
+// paid order, so a retried Stripe webhook can never resend a notification
+// that already went out. The unique constraint below is the idempotency
+// guard: EMAIL is keyed by (order, recipient email); PUSH is keyed by
+// (order, subscription id stored as `recipient`) — see lib/notifications/.
+model OrderNotification {
+  id                 String    @id @default(cuid())
+  orderId            String
+  order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  channel            String    // EMAIL | PUSH
+  event              String    @default("ORDER_PAID")
+  recipient          String    // email address (EMAIL) or AdminPushSubscription.id (PUSH)
+  pushSubscriptionId String?
+  pushSubscription   AdminPushSubscription? @relation(fields: [pushSubscriptionId], references: [id], onDelete: SetNull)
+  status             String    @default("PENDING") // PENDING | SENT | FAILED
+  providerMessageId  String?
+  attemptedAt        DateTime  @default(now())
+  sentAt             DateTime?
+  errorMessage       String?
+
+  @@unique([orderId, channel, event, recipient])
 }
 
 model OrderItem {
@@ -360,7 +404,6 @@ model OrderItem {
   // Snapshots at time of purchase — must not change if the product changes later
   productName   String
   variantLabel  String?
-  fragranceName String?
   sku           String?
   unitPrice     Int
   quantity      Int
@@ -420,7 +463,7 @@ model ContactMessage {
   email       String
   phone       String?
   orderNumber String?
-  category    String   // Product question | Fragrance question | Order question | Delivery | Return | Refund | Damaged item | Complaint | Wholesale enquiry | Other
+  category    String   // Product question | Sizing question | Order question | Delivery | Return | Refund | Damaged item | Complaint | Wholesale enquiry | Other
   message     String
   status      String   @default("NEW") // NEW | READ | RESPONDED
   createdAt   DateTime @default(now())
@@ -430,7 +473,7 @@ model FaqItem {
   id        String   @id @default(cuid())
   question  String
   answer    String
-  category  String   // Products | Wax Melts | Candles | Fragrances | How to Use | Candle Care | Safety | Orders | Delivery | Returns | Payments | Gift Sets | Contact
+  category  String   // Products | Sizing | Materials & Care | Safety | Orders | Delivery | Returns | Payments | Gift Sets | Contact
   sortOrder Int      @default(0)
   isActive  Boolean  @default(true)
 
@@ -453,7 +496,7 @@ model UnansweredQuestion {
 
 model Policy {
   id          String   @id @default(cuid())
-  slug        String   @unique // terms | privacy | cookies | delivery | returns-refunds | cancellation | complaints | candle-safety | wax-melt-safety | accessibility
+  slug        String   @unique // terms | privacy | cookies | delivery | returns-refunds | cancellation | complaints | product-care | accessibility
   title       String
   body        String
   isDraft     Boolean  @default(true)
@@ -498,11 +541,51 @@ model DeliveryZone {
   estimatedDays  String?
   isActive       Boolean  @default(true)
   sortOrder      Int      @default(0)
+
+  // What the store actually expects to pay the carrier when this zone's
+  // method is used — independent of `price`, the amount charged to the
+  // customer. Optional: a zone with no rate assigned yet just records no
+  // internal postage cost, rather than guessing at one.
+  postageRateId String?
+  postageRate   PostageRate? @relation(fields: [postageRateId], references: [id], onDelete: SetNull)
+}
+
+// Reference data for what carrier services actually cost the store —
+// never charged to the customer directly, and never invented by this codebase:
+// the admin enters real rates via /admin/delivery. Weight fields are recorded
+// for a future weight-based auto-selection; today a rate is picked explicitly
+// per DeliveryZone.
+model PostageRate {
+  id             String  @id @default(cuid())
+  name           String  // e.g. "Royal Mail Tracked 48"
+  cost           Int     // pence
+  minWeightGrams Int?
+  maxWeightGrams Int?
+  isActive       Boolean @default(true)
+  sortOrder      Int     @default(0)
+
+  deliveryZones DeliveryZone[]
+}
+
+// A reusable internal packaging cost profile (box + protection + label/tape,
+// or a single flat figure) assigned to a Product/Variant, then snapshotted
+// once per Order — never summed per line item, since a multi-item order
+// realistically still ships in one parcel.
+model PackagingProfile {
+  id          String  @id @default(cuid())
+  name        String  // e.g. "Small Parcel"
+  description String?
+  cost        Int     // pence
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  products  Product[]
+  variants  ProductVariant[]
 }
 
 model SiteSettings {
   id                      Int      @id @default(1)
-  businessName            String   @default("HandMade by Mia")
+  businessName            String   @default("Preston Patriot")
   supportEmail            String?
   supportPhone            String?
   freeDeliveryThreshold   Int?     // pence; null = disabled
@@ -515,6 +598,12 @@ model SiteSettings {
   gaMeasurementId         String?
   metaPixelId             String?
   maintenanceMode         Boolean  @default(false)
+
+  // Admin new-paid-order notifications (separate from any customer-facing
+  // transactional email). The address is entered here, never hardcoded.
+  orderNotificationEmail        String?
+  orderNotificationEmailEnabled Boolean @default(false)
+
   updatedAt               DateTime @updatedAt
 }
 

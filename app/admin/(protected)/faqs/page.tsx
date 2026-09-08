@@ -11,11 +11,8 @@ import {
 
 const CATEGORIES = [
   "Products",
-  "Wax Melts",
-  "Candles",
-  "Fragrances",
-  "How to Use",
-  "Candle Care",
+  "Sizing",
+  "Materials & Care",
   "Safety",
   "Orders",
   "Delivery",
@@ -52,7 +49,7 @@ export default async function AdminFaqsPage() {
           </p>
           <div className="space-y-3">
             {unansweredQuestions.map((q) => (
-              <details key={q.id} className="bg-white rounded-xl p-4">
+              <details key={q.id} className="bg-blush rounded-xl p-4">
                 <summary className="cursor-pointer flex justify-between items-center gap-4">
                   <span className="text-sm">{q.question}</span>
                   <span className="text-xs text-ink-soft shrink-0">Asked {q.askCount} time{q.askCount === 1 ? "" : "s"}</span>
@@ -83,7 +80,7 @@ export default async function AdminFaqsPage() {
           {faqs.map((faq) => {
             const bound = updateFaq.bind(null, faq.id);
             return (
-              <details key={faq.id} className="bg-white rounded-xl p-4">
+              <details key={faq.id} className="bg-blush rounded-xl p-4">
                 <summary className="cursor-pointer font-medium flex justify-between items-center gap-4">
                   <span className="truncate">{faq.question}</span>
                   <span className={`text-xs shrink-0 ${faq.isActive ? "text-sage" : "text-ink-soft"}`}>{faq.isActive ? "Published" : "Unpublished"}</span>
@@ -112,7 +109,7 @@ export default async function AdminFaqsPage() {
           {faqs.length === 0 && <p className="text-sm text-ink-soft">No FAQs yet.</p>}
         </div>
 
-        <div className="bg-white rounded-xl p-6 max-w-xl">
+        <div className="bg-blush rounded-xl p-6 max-w-xl">
           <h3 className="font-semibold mb-4">Add FAQ</h3>
           <form action={createFaq} className="space-y-4">
             <FormField label="Question" name="question" required />

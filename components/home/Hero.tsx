@@ -24,26 +24,26 @@ export default function Hero({
       <div className="grid lg:grid-cols-2 gap-8 items-center">
         <div>
           <p className="text-rose-dark font-semibold tracking-wide text-sm uppercase mb-3">
-            Handmade in the UK
+            Printed in the UK
           </p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-[1.1] text-ink">
-            {title ?? "Beautiful home fragrance, handmade by Mia"}
+            {title ?? "Support Your Local Patriot — wear your colours"}
           </h1>
           <p className="mt-5 text-ink-soft text-lg max-w-xl">
-            {subtitle ?? "Small-batch wax melts and candles, poured and packed by hand."}
+            {subtitle ?? "Hoodies, tees and everyday gear, printed and packed to order in the UK."}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href={primaryHref ?? "/collections/wax-melts"}
-              className="px-6 py-3 rounded-full bg-rose-dark text-cream font-semibold hover:bg-ink transition-colors"
+              href={primaryHref ?? "/collections/hoodies"}
+              className="px-6 py-3 rounded-full bg-rose text-ink font-semibold hover:bg-rose-dark transition-colors"
             >
-              {primaryLabel ?? "Shop Wax Melts"}
+              {primaryLabel ?? "Shop Hoodies"}
             </Link>
             <Link
-              href={secondaryHref ?? "/collections/candles"}
-              className="px-6 py-3 rounded-full bg-white text-ink font-semibold border border-ink/10 hover:border-ink/30 transition-colors"
+              href={secondaryHref ?? "/shop"}
+              className="px-6 py-3 rounded-full bg-blush text-ink font-semibold border border-ink/10 hover:border-ink/30 transition-colors"
             >
-              {secondaryLabel ?? "Shop Candles"}
+              {secondaryLabel ?? "Shop All"}
             </Link>
           </div>
         </div>
@@ -52,7 +52,7 @@ export default function Hero({
           {image ? (
             <Image src={image} alt="" fill priority className="object-cover" />
           ) : (
-            <PlaceholderImage label="Hero photo — add in Admin > Homepage" />
+            <PlaceholderImage />
           )}
         </div>
       </div>

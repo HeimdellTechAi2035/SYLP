@@ -1,20 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand palette — warm, handmade, giftable. Sampled from the HandMade by Mia logo. */
-  --color-cream: #fbf4ec;
-  --color-cream-dark: #f3e7d8;
-  --color-blush: #f3ddd4;
-  --color-rose: #c97c6b;
-  --color-rose-dark: #a65c4e;
-  --color-sage: #8a9a80;
-  --color-ink: #3b2e2a;
-  --color-ink-soft: #6b5b54;
-  --color-gold: #c9a66b;
-  --color-cloud: #ffffff;
+  /* Preston Patriot heraldic palette — black, crimson, antique gold and
+     navy, drawn from the crest logo (knight, St George's cross, Union Jack).
+     All tokens below are aliases onto this family — repointing them here
+     re-themes every existing bg-cream/text-ink/etc. utility class across the
+     app with no per-component changes required. Kept as separate named
+     tokens (cream/blush/rose/...) rather than renamed to generic
+     charcoal-1/charcoal-2/etc. so the hundreds of existing call sites didn't
+     need touching for this theme pass. Background flipped dark (was a light
+     pink page), so --color-ink flips to a light parchment tone and
+     --color-ink-soft to a muted stone — both were pure black under the old
+     light theme and would be unreadable against this dark background. */
+  --color-cream: #121010;      /* PRIMARY DARK GROUND — main page background, near-black charcoal */
+  --color-cream-dark: #121010; /* admin shell background — same charcoal, kept as a distinct token in case admin ever wants to diverge */
+  --color-blush: #1e1a18;      /* RAISED DARK SURFACE — cards, inputs, subtle panels; one step lighter than the page ground */
+  --color-rose: #d94e4e;       /* CRIMSON — primary button fill, links (St George's cross red) */
+  --color-rose-dark: #b32a2a;  /* deep crimson — button hover, chrome (header/footer/sidebar/chatbot), danger/remove actions */
+  --color-sage: #55805a;       /* positive/active status accent — heraldic green, restored to an actual green hue (previously a pink alias with no hue signal) */
+  --color-gold: #c9a227;       /* attention/pending status accent — antique gold, also used for star ratings/best-seller badge (crest's gold trim) */
+  --color-ink: #ece6da;        /* TEXT — parchment off-white; all readable text against the dark ground */
+  --color-ink-soft: #a89f90;   /* secondary/meta text — muted stone/silver; hierarchy comes from both this and size/weight */
+  --color-cloud: #1f3155;      /* unused by any component today; reserved navy from the Union Jack, kept ready rather than reintroducing white */
 
   --background: var(--color-cream);
   --foreground: var(--color-ink);
+
+  /* Section 18's requested generic aliases, for any future code that wants
+     semantic names instead of the brand-named tokens above. Both sets point
+     at the same values. */
+  --surface: var(--color-blush);
+  --surface-strong: var(--color-rose);
+  --border: #3a352e;
+  --primary: var(--color-rose);
+  --primary-hover: var(--color-rose-dark);
 }
 
 @theme inline {
@@ -30,6 +49,11 @@
   --color-cloud: var(--color-cloud);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --font-display: var(--font-playfair);
   --font-sans: var(--font-poppins);
 }
@@ -38,6 +62,15 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Reserves clearance at the bottom of the viewport for the fixed chat
+   launcher (and cookie-consent bar) so scrolling a page's own content into
+   view — e.g. a product page's "Add to Basket" button once scrolled all the
+   way down — never lands flush against them. Affects the browser's native
+   scroll-into-view calculation, not just trailing whitespace. */
+html {
+  scroll-padding-bottom: 6rem;
 }
 
 h1, h2, h3, h4,

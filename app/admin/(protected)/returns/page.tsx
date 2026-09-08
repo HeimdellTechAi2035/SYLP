@@ -15,7 +15,7 @@ export default async function AdminReturnsPage() {
       <p className="text-sm text-ink-soft mb-6">
         Refunds are issued from an order&apos;s detail page. This list shows every order with a refund recorded.
       </p>
-      <div className="bg-white rounded-xl overflow-x-auto">
+      <div className="bg-blush rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-ink-soft border-b border-ink/10">

@@ -34,7 +34,7 @@ export default async function AdminAnalyticsPage() {
       <div className="grid lg:grid-cols-2 gap-8">
         <div>
           <h2 className="font-semibold mb-3">Top products by quantity sold</h2>
-          <div className="bg-white rounded-xl divide-y divide-ink/10">
+          <div className="bg-blush rounded-xl divide-y divide-ink/10">
             {topProducts.map((p) => (
               <div key={p.productName} className="flex justify-between p-4 text-sm">
                 <span>{p.productName}</span>
@@ -47,7 +47,7 @@ export default async function AdminAnalyticsPage() {
 
         <div>
           <h2 className="font-semibold mb-3">Orders by status</h2>
-          <div className="bg-white rounded-xl divide-y divide-ink/10">
+          <div className="bg-blush rounded-xl divide-y divide-ink/10">
             {statusCounts.map((s) => (
               <div key={s.fulfilmentStatus} className="flex justify-between p-4 text-sm">
                 <span>{s.fulfilmentStatus}</span>
@@ -63,7 +63,7 @@ export default async function AdminAnalyticsPage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white rounded-xl p-5">
+    <div className="bg-blush rounded-xl p-5">
       <p className="text-xs text-ink-soft uppercase tracking-wide mb-1">{label}</p>
       <p className="font-display text-2xl">{value}</p>
     </div>

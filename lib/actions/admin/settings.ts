@@ -3,14 +3,14 @@
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireAdminSession, createAdminSession } from "@/lib/auth";
 
 export async function updateSiteSettings(formData: FormData) {
   await requireAdminSession();
   const str = (key: string) => String(formData.get(key) || "") || null;
 
   const data = {
-    businessName: String(formData.get("businessName") || "HandMade by Mia"),
+    businessName: String(formData.get("businessName") || "Support Your Local Patriot"),
     supportEmail: str("supportEmail"),
     supportPhone: str("supportPhone"),
     freeDeliveryThreshold: formData.get("freeDeliveryThreshold") ? Math.round(Number(formData.get("freeDeliveryThreshold")) * 100) : null,
@@ -47,7 +47,13 @@ export async function changeAdminPassword(_prev: PasswordState, formData: FormDa
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
-  await prisma.adminUser.update({ where: { id: admin.id }, data: { passwordHash } });
+  await prisma.adminUser.update({ where: { id: admin.id }, data: { passwordHash, mustChangePassword: false } });
+
+  // Re-issue the session with mustChangePassword cleared — the JWT is
+  // stateless, so without this the middleware would keep redirecting back to
+  // this same page until the next login, even though the password is
+  // already changed.
+  await createAdminSession({ sub: admin.id, email: admin.email, name: admin.name, role: admin.role, mustChangePassword: false });
 
   return { status: "success", message: "Password updated." };
 }

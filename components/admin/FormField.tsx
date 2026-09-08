@@ -81,7 +81,7 @@ export function FormSelect({
   return (
     <div>
       <label htmlFor={fieldId} className="block text-sm font-medium mb-1">{label}</label>
-      <select id={fieldId} name={name} defaultValue={defaultValue} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm bg-white">
+      <select id={fieldId} name={name} defaultValue={defaultValue} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm bg-blush">
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}
@@ -101,7 +101,7 @@ export function FormCheckbox({ label, name, defaultChecked }: { label: string; n
 
 export function SubmitButton({ children }: { children: React.ReactNode }) {
   return (
-    <button type="submit" className="px-6 py-2.5 rounded-full bg-rose-dark text-cream font-semibold text-sm hover:bg-ink transition-colors">
+    <button type="submit" className="px-6 py-2.5 rounded-full bg-rose text-ink font-semibold text-sm hover:bg-rose-dark transition-colors">
       {children}
     </button>
   );

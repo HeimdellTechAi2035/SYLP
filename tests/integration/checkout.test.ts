@@ -249,4 +249,31 @@ describe("startCheckout", () => {
     // Whether or not an order row was left behind, it must never be left as PAID.
     if (order) expect(order.paymentStatus).not.toBe("PAID");
   });
+
+  it("15. checkout charges the live database price even when the product's mirrored Stripe catalogue is stale/mismatched", async () => {
+    // Simulates a product whose synced Stripe Price no longer represents its
+    // current price (e.g. sync failed after an admin reprice). Checkout must
+    // never reference stripePriceId at all — it always recomputes the amount
+    // fresh via unitPriceFor(), so a stale catalogue mirror can't matter.
+    vi.mocked(stripeConfigured).mockReturnValue(true);
+    vi.mocked(stripe.checkout.sessions.create).mockResolvedValue({ id: "sess_stale", url: "https://stripe.test/stale" } as never);
+
+    const product = await prisma.product.findUniqueOrThrow({ where: { slug: "test-melt-standard" } });
+    await prisma.product.update({
+      where: { id: product.id },
+      data: { stripeProductId: "prod_stale", stripePriceId: "price_stale_wrong_amount", stripeSyncStatus: "SYNCED" },
+    });
+
+    await seedCartWithProduct("test-melt-standard", 1); // £5.00 in the database, regardless of the stale mirror above
+    const email = `stale-catalogue-${randomUUID().slice(0, 8)}@example.com`;
+
+    await expect(startCheckout({ status: "idle" }, checkoutFormData({ email }))).rejects.toThrow("NEXT_REDIRECT");
+
+    const call = vi.mocked(stripe.checkout.sessions.create).mock.calls[0];
+    const sessionArgs = call![0]!;
+    // £5.00, from the database — never anything derived from stripePriceId.
+    expect(sessionArgs.line_items?.[0]).toMatchObject({ price_data: expect.objectContaining({ unit_amount: 500 }) });
+    // Confirms the assumption too: nothing in checkout ever reads stripePriceId at all.
+    expect(JSON.stringify(sessionArgs)).not.toContain("price_stale_wrong_amount");
+  });
 });

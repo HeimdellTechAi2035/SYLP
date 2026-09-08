@@ -1,4 +1,4 @@
-# Testing — HandMade by Mia
+# Testing — Support Your Local Patriot
 
 ## Stack
 

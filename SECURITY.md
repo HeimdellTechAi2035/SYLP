@@ -1,4 +1,4 @@
-# Security — HandMade by Mia
+# Security — Support Your Local Patriot
 
 ## Environment variables
 

@@ -46,8 +46,6 @@ export default async function ProductPage({
       ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
       : 0;
 
-  const isWaxMelt = product.productType === "WAX_MELT";
-  const isCandle = product.productType === "CANDLE";
   const isGiftSet = product.productType === "GIFT_SET";
 
   const jsonLd = {
@@ -88,12 +86,12 @@ export default async function ProductPage({
         <ProductGallery images={images} name={product.name} />
 
         <div>
-          {product.fragrance && (
+          {product.category && (
             <Link
-              href={`/shop?scent=${encodeURIComponent(product.fragrance.scentFamily || "")}`}
+              href={`/collections/${product.category.slug}`}
               className="text-xs uppercase tracking-wide text-rose-dark font-semibold"
             >
-              {product.fragrance.name}
+              {product.category.name}
             </Link>
           )}
           <h1 className="font-display text-3xl sm:text-4xl mt-1 mb-2">{product.name}</h1>
@@ -143,29 +141,11 @@ export default async function ProductPage({
           </DetailSection>
         )}
 
-        {product.fragrance && (
-          <DetailSection title="Fragrance & Scent Notes">
-            <p className="mb-3">{product.fragrance.description}</p>
-            <dl className="grid grid-cols-3 gap-4 text-sm">
-              <div><dt className="font-semibold mb-1">Top</dt><dd className="text-ink-soft">{product.fragrance.topNotes || "—"}</dd></div>
-              <div><dt className="font-semibold mb-1">Heart</dt><dd className="text-ink-soft">{product.fragrance.heartNotes || "—"}</dd></div>
-              <div><dt className="font-semibold mb-1">Base</dt><dd className="text-ink-soft">{product.fragrance.baseNotes || "—"}</dd></div>
-            </dl>
-          </DetailSection>
-        )}
-
         <DetailSection title="Product Details, Materials & Size">
           <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-            {product.waxType && <Field label="Wax type" value={product.waxType} />}
-            {product.wickType && <Field label="Wick" value={product.wickType} />}
-            {product.vesselInfo && <Field label="Vessel" value={product.vesselInfo} />}
+            {product.material && <Field label="Material" value={product.material} />}
             {product.netWeightGrams && <Field label="Net weight" value={`${product.netWeightGrams}g`} />}
             {product.dimensions && <Field label="Dimensions" value={product.dimensions} />}
-            {isWaxMelt && product.meltFormat && <Field label="Format" value={product.meltFormat} />}
-            {isWaxMelt && product.piecesCount && <Field label="Pieces" value={String(product.piecesCount)} />}
-            {isCandle && product.candleWeightGrams && <Field label="Candle weight" value={`${product.candleWeightGrams}g`} />}
-            {isCandle && product.vesselSize && <Field label="Vessel size" value={product.vesselSize} />}
-            {isCandle && product.burnTimeHours && <Field label="Approx. burn time" value={`${product.burnTimeHours} hours`} />}
           </dl>
           {isGiftSet && product.giftSetItems.length > 0 && (
             <div className="mt-4">
@@ -179,41 +159,15 @@ export default async function ProductPage({
           )}
         </DetailSection>
 
-        {(isWaxMelt ? product.recommendedUsage : product.burnInstructions || product.firstBurnInstructions) && (
-          <DetailSection title="How to Use">
-            {isWaxMelt ? (
-              <p>{product.recommendedUsage}</p>
-            ) : (
-              <div className="space-y-2">
-                {product.firstBurnInstructions && <p><strong>First burn:</strong> {product.firstBurnInstructions}</p>}
-                {product.burnInstructions && <p>{product.burnInstructions}</p>}
-              </div>
-            )}
-          </DetailSection>
-        )}
-
-        {(isWaxMelt ? product.storageGuidance : product.candleCare || product.wickTrimmingGuidance) && (
+        {product.careInstructions && (
           <DetailSection title="Care Instructions">
-            {isWaxMelt ? (
-              <p>{product.storageGuidance}</p>
-            ) : (
-              <div className="space-y-2">
-                {product.candleCare && <p>{product.candleCare}</p>}
-                {product.wickTrimmingGuidance && <p><strong>Wick trimming:</strong> {product.wickTrimmingGuidance}</p>}
-                {product.maxBurnSessionHours && <p>Do not burn for longer than {product.maxBurnSessionHours} hours at a time.</p>}
-              </div>
-            )}
+            <p>{product.careInstructions}</p>
           </DetailSection>
         )}
 
-        {(product.safetyWarnings || product.allergenInfo || product.clpInfo || product.ingredientsInfo) && (
+        {product.safetyWarnings && (
           <DetailSection title="Safety Information">
-            <div className="space-y-2">
-              {product.safetyWarnings && <p>{product.safetyWarnings}</p>}
-              {product.allergenInfo && <p><strong>Allergen information:</strong> {product.allergenInfo}</p>}
-              {product.clpInfo && <p><strong>Hazard information:</strong> {product.clpInfo}</p>}
-              {product.ingredientsInfo && <p><strong>Ingredients:</strong> {product.ingredientsInfo}</p>}
-            </div>
+            <p>{product.safetyWarnings}</p>
           </DetailSection>
         )}
 
@@ -239,7 +193,7 @@ export default async function ProductPage({
                 </p>
                 {review.merchantResponse && (
                   <p className="text-xs bg-blush rounded-lg p-3 mt-2">
-                    <strong>HandMade by Mia:</strong> {review.merchantResponse}
+                    <strong>Support Your Local Patriot:</strong> {review.merchantResponse}
                   </p>
                 )}
               </div>

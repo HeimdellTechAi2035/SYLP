@@ -7,7 +7,7 @@ export const contactFormSchema = z.object({
   orderNumber: z.string().max(40).optional().or(z.literal("")),
   category: z.enum([
     "Product question",
-    "Fragrance question",
+    "Sizing question",
     "Order question",
     "Delivery",
     "Return",
@@ -51,7 +51,7 @@ export const reviewSchema = z.object({
 // --- Admin ---
 
 export const productStatuses = ["DRAFT", "ACTIVE", "ARCHIVED"] as const;
-export const productTypes = ["WAX_MELT", "CANDLE", "GIFT_SET", "OTHER"] as const;
+export const productTypes = ["APPAREL", "ACCESSORY", "DRINKWARE", "STATIONERY", "HOMEWARE", "GIFT_SET", "OTHER"] as const;
 
 export const productFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(160),
@@ -63,7 +63,6 @@ export const productFormSchema = z.object({
   status: z.enum(productStatuses),
   productType: z.enum(productTypes),
   categoryId: z.string().optional().or(z.literal("")),
-  fragranceId: z.string().optional().or(z.literal("")),
   shortDescription: z.string().max(300).optional().or(z.literal("")),
   description: z.string().max(8000).optional().or(z.literal("")),
   price: z.coerce.number().min(0),
@@ -81,19 +80,6 @@ export const productFormSchema = z.object({
   isNew: z.coerce.boolean().optional(),
   seasonal: z.coerce.boolean().optional(),
   giftable: z.coerce.boolean().optional(),
-});
-
-export const fragranceFormSchema = z.object({
-  name: z.string().min(1).max(160),
-  slug: z.string().min(1).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  description: z.string().max(2000).optional().or(z.literal("")),
-  scentFamily: z.string().max(60).optional().or(z.literal("")),
-  topNotes: z.string().max(300).optional().or(z.literal("")),
-  heartNotes: z.string().max(300).optional().or(z.literal("")),
-  baseNotes: z.string().max(300).optional().or(z.literal("")),
-  isActive: z.coerce.boolean().optional(),
-  isSeasonal: z.coerce.boolean().optional(),
-  image: z.string().optional().or(z.literal("")),
 });
 
 export const categoryFormSchema = z.object({

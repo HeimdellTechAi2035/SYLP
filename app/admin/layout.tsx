@@ -9,7 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Admin | HandMade by Mia", template: "%s | HandMade by Mia Admin" },
+  title: { default: "Admin | Support Your Local Patriot", template: "%s | Support Your Local Patriot Admin" },
   robots: { index: false, follow: false },
 };
 

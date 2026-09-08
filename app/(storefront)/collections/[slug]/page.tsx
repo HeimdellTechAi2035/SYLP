@@ -5,9 +5,9 @@ import { getShopProducts } from "@/lib/queries/products";
 import ProductGrid from "@/components/product/ProductGrid";
 
 const smartCollections: Record<string, { title: string; description: string }> = {
-  new: { title: "New In", description: "Our newest wax melts, candles and gift sets." },
+  new: { title: "New In", description: "Our newest merch, added to the range." },
   "best-sellers": { title: "Best Sellers", description: "Customer favourites, loved again and again." },
-  seasonal: { title: "Seasonal", description: "Limited-time seasonal fragrances." },
+  seasonal: { title: "Seasonal", description: "Limited-time seasonal designs." },
 };
 
 async function resolveCollection(slug: string) {

@@ -53,7 +53,7 @@ export default function CheckoutForm({ giftMessageEnabled }: { giftMessageEnable
       <button
         type="submit"
         disabled={pending}
-        className="w-full py-3.5 rounded-full bg-rose-dark text-cream font-semibold hover:bg-ink transition-colors disabled:opacity-60"
+        className="w-full py-3.5 rounded-full bg-rose text-ink font-semibold hover:bg-rose-dark transition-colors disabled:opacity-60"
       >
         {pending ? "Redirecting to payment..." : "Continue to Payment"}
       </button>

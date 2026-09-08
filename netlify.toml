@@ -1,0 +1,28 @@
+[dev]
+  # Without this, netlify dev's framework auto-detection can't find an actual
+  # `next dev` invocation to run underneath it — package.json's own "dev"
+  # script is "netlify dev" itself (self-referential), so auto-detection
+  # falls back to running the "start" script (`next start`) instead, which
+  # then fails with "Could not find a production build in the '.next'
+  # directory" since nothing was ever built. Naming the real command here
+  # sidesteps that guesswork entirely.
+  command = "npx next dev"
+  targetPort = 3000
+
+[build]
+  # Schema itself is applied by Netlify's own migration system (see
+  # netlify/database/migrations/) before this command ever runs — that path
+  # uses a properly-permissioned connection, unlike a raw `pg` connection
+  # opened from inside build.command, which hit a persistent (not transient)
+  # "permission denied for schema public" against this project's database.
+  #
+  # `npx prisma generate` first: Netlify's `npm install` skips Prisma's own
+  # postinstall script (npm's install-script allowlist blocks it by default),
+  # so without this, `@prisma/client` stays an empty stub and every type that
+  # normally comes from it resolves to `any`/`unknown`, failing `tsc` with
+  # hundreds of unrelated-looking errors.
+  command = "npx prisma generate && node scripts/deploy-seed.mjs && npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

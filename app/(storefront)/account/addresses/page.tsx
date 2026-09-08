@@ -18,7 +18,7 @@ export default async function AddressesPage() {
 
       <ul className="space-y-3 mb-10">
         {addresses.map((address) => (
-          <li key={address.id} className="bg-white/70 rounded-xl p-4 flex justify-between items-start">
+          <li key={address.id} className="bg-blush/70 rounded-xl p-4 flex justify-between items-start">
             <div className="text-sm text-ink-soft">
               {address.label && <p className="font-semibold text-ink">{address.label}</p>}
               <p>{address.line1}{address.line2 && `, ${address.line2}`}</p>
@@ -47,7 +47,7 @@ export default async function AddressesPage() {
           <input name="postcode" placeholder="Postcode" required className="rounded-lg border border-ink/15 px-3 py-2.5" />
           <input name="country" placeholder="Country" defaultValue="United Kingdom" className="rounded-lg border border-ink/15 px-3 py-2.5" />
         </div>
-        <button type="submit" className="px-6 py-2.5 rounded-full bg-rose-dark text-cream font-semibold">Save Address</button>
+        <button type="submit" className="px-6 py-2.5 rounded-full bg-rose-dark text-ink font-semibold">Save Address</button>
       </form>
     </div>
   );

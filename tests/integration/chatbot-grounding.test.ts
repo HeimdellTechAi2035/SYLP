@@ -74,7 +74,7 @@ describe("21. an admin-created FAQ resolves a previously unanswered question", (
     const unanswered = await prisma.unansweredQuestion.findUniqueOrThrow({ where: { question: question.trim().toLowerCase() } });
 
     cookieStore._map.clear();
-    await createAdminSession({ sub: "test-admin", email: "admin@example.com", name: "Test Admin", role: "OWNER" });
+    await createAdminSession({ sub: "test-admin", email: "admin@example.com", name: "Test Admin", role: "OWNER", mustChangePassword: false });
 
     const fd = new FormData();
     fd.set("question", question);

@@ -14,7 +14,7 @@ export default async function AdminCategoriesPage() {
         {categories.map((cat) => {
           const bound = updateCategory.bind(null, cat.id);
           return (
-            <details key={cat.id} className="bg-white rounded-xl p-4">
+            <details key={cat.id} className="bg-blush rounded-xl p-4">
               <summary className="cursor-pointer font-medium flex justify-between items-center">
                 {cat.name}
                 <span className="text-xs text-ink-soft">{cat.isActive ? "Active" : "Hidden"}</span>
@@ -40,7 +40,7 @@ export default async function AdminCategoriesPage() {
         })}
       </div>
 
-      <div className="bg-white rounded-xl p-6 max-w-xl">
+      <div className="bg-blush rounded-xl p-6 max-w-xl">
         <h2 className="font-semibold mb-4">Add Category</h2>
         <form action={createCategory} className="space-y-4">
           <FormField label="Name" name="name" required />

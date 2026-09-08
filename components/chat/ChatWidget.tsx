@@ -21,7 +21,7 @@ const QUICK_ACTIONS = [
 ];
 
 const GREETING =
-  "Hi 👋 I'm the HandMade by Mia assistant. I can help with products, delivery, orders, returns and general questions.";
+  "Hi 👋 I'm the Support Your Local Patriot assistant. I can help with products, delivery, orders, returns and general questions.";
 
 export default function ChatWidget() {
   const pathname = usePathname();
@@ -37,6 +37,19 @@ export default function ChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const userInteractedRef = useRef(false);
+
+  // Auto-opens once per browser tab, 30s after the widget first mounts —
+  // but never overrides a visitor who has already opened or dismissed it
+  // themselves, and never fires twice in the same session/navigation.
+  useEffect(() => {
+    if (sessionStorage.getItem("hbm_chat_auto_shown")) return;
+    const timer = setTimeout(() => {
+      sessionStorage.setItem("hbm_chat_auto_shown", "1");
+      if (!userInteractedRef.current) setOpen(true);
+    }, 30000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
@@ -101,12 +114,20 @@ export default function ChatWidget() {
           ref={panelRef}
           role="dialog"
           aria-modal="true"
-          aria-label="HandMade by Mia chat assistant"
-          className="mb-3 w-[calc(100vw-2rem)] max-w-sm h-[28rem] max-h-[70vh] bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden border border-ink/10"
+          aria-label="Support Your Local Patriot chat assistant"
+          className="mb-3 w-[calc(100vw-2rem)] max-w-sm h-[28rem] max-h-[70vh] bg-cream rounded-2xl shadow-xl flex flex-col overflow-hidden border border-ink/20"
         >
-          <div className="flex items-center justify-between px-4 py-3 bg-ink text-cream">
-            <span className="font-display text-sm">HandMade by Mia Assistant</span>
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close chat" className="text-cream/80 hover:text-cream">
+          <div className="flex items-center justify-between px-4 py-3 bg-rose-dark text-ink">
+            <span className="font-display text-sm">Support Your Local Patriot Assistant</span>
+            <button
+              type="button"
+              onClick={() => {
+                userInteractedRef.current = true;
+                setOpen(false);
+              }}
+              aria-label="Close chat"
+              className="text-ink/80 hover:text-ink"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -115,8 +136,8 @@ export default function ChatWidget() {
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
                 <p
-                  className={`inline-block rounded-xl px-3 py-2 max-w-[85%] whitespace-pre-line ${
-                    m.role === "user" ? "bg-rose-dark text-cream" : "bg-blush text-ink"
+                  className={`inline-block rounded-xl px-3 py-2 max-w-[85%] whitespace-pre-line border ${
+                    m.role === "user" ? "bg-rose-dark text-ink border-ink/20" : "bg-blush text-ink border-ink/10"
                   }`}
                 >
                   <span className="sr-only">{m.role === "user" ? "You said: " : "Assistant said: "}</span>
@@ -135,14 +156,14 @@ export default function ChatWidget() {
             ))}
 
             {awaitingOrderVerification && (
-              <form onSubmit={submitOrderVerification} className="space-y-2 bg-cream rounded-xl p-3">
+              <form onSubmit={submitOrderVerification} className="space-y-2 bg-blush rounded-xl p-3 border border-ink/10">
                 <label htmlFor="chat-order-number" className="sr-only">Order number</label>
                 <input
                   id="chat-order-number"
                   value={orderNumberInput}
                   onChange={(e) => setOrderNumberInput(e.target.value)}
                   placeholder="Order number (e.g. HM-1001)"
-                  className="w-full rounded-lg border border-ink/15 px-2 py-1.5 text-xs"
+                  className="w-full rounded-lg border border-ink/20 px-2 py-1.5 text-xs text-ink placeholder:text-ink/50"
                 />
                 <label htmlFor="chat-order-email" className="sr-only">Email used at checkout</label>
                 <input
@@ -151,9 +172,9 @@ export default function ChatWidget() {
                   onChange={(e) => setEmailInput(e.target.value)}
                   type="email"
                   placeholder="Email used at checkout"
-                  className="w-full rounded-lg border border-ink/15 px-2 py-1.5 text-xs"
+                  className="w-full rounded-lg border border-ink/20 px-2 py-1.5 text-xs text-ink placeholder:text-ink/50"
                 />
-                <button type="submit" className="w-full rounded-lg bg-ink text-cream text-xs py-1.5 font-medium">
+                <button type="submit" className="w-full rounded-lg bg-rose-dark text-ink text-xs py-1.5 font-medium">
                   Check order
                 </button>
               </form>
@@ -191,7 +212,7 @@ export default function ChatWidget() {
               type="submit"
               disabled={pending || !input.trim()}
               aria-label="Send"
-              className="p-2 rounded-full bg-rose-dark text-cream disabled:opacity-50"
+              className="p-2 rounded-full bg-rose-dark text-ink disabled:opacity-50"
             >
               <Send className="h-4 w-4" />
             </button>
@@ -202,10 +223,13 @@ export default function ChatWidget() {
       <button
         ref={launcherRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          userInteractedRef.current = true;
+          setOpen((o) => !o);
+        }}
         aria-label={open ? "Close chat assistant" : "Open chat assistant"}
         aria-expanded={open}
-        className="w-14 h-14 rounded-full bg-rose-dark text-cream shadow-lg flex items-center justify-center hover:bg-ink transition-colors"
+        className="w-14 h-14 rounded-full bg-rose-dark text-ink border-2 border-ink/20 shadow-lg flex items-center justify-center hover:bg-rose transition-colors"
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>

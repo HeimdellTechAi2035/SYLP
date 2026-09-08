@@ -15,7 +15,6 @@ export type ProductCardData = {
   stockQuantity: number;
   continueSellingOOS: boolean;
   madeToOrder: boolean;
-  fragrance?: { name: string } | null;
 };
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
@@ -24,7 +23,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group flex flex-col rounded-2xl overflow-hidden bg-white/60 border border-ink/5 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+      className="group flex flex-col rounded-2xl overflow-hidden bg-blush border border-ink/15 hover:shadow-lg hover:-translate-y-0.5 transition-all"
     >
       <div className="relative aspect-square bg-blush">
         {product.mainImage ? (
@@ -45,18 +44,13 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
           {product.saleActive && product.salePrice != null && <Badge tone="rose">Sale</Badge>}
         </div>
         {outOfStock && (
-          <div className="absolute inset-x-0 bottom-0 bg-ink/80 text-cream text-xs text-center py-1.5 font-medium">
+          <div className="absolute inset-x-0 bottom-0 bg-rose-dark text-ink text-xs text-center py-1.5 font-semibold border-t border-ink/20">
             Out of stock
           </div>
         )}
       </div>
 
       <div className="p-4 flex flex-col gap-1">
-        {product.fragrance?.name && (
-          <span className="text-xs uppercase tracking-wide text-rose-dark font-medium">
-            {product.fragrance.name}
-          </span>
-        )}
         <h3 className="font-medium text-ink leading-snug">{product.name}</h3>
         <div className="mt-1">
           <Price price={product.price} salePrice={product.salePrice} saleActive={product.saleActive} size="sm" />
@@ -71,9 +65,9 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
 
 function Badge({ children, tone = "sage" }: { children: React.ReactNode; tone?: "sage" | "gold" | "rose" }) {
   const toneClasses = {
-    sage: "bg-sage text-white",
-    gold: "bg-gold text-ink",
-    rose: "bg-rose-dark text-white",
+    sage: "bg-sage text-ink border border-ink/20",
+    gold: "bg-gold text-cream border border-ink/20",
+    rose: "bg-rose-dark text-ink border border-ink/20",
   }[tone];
 
   return (

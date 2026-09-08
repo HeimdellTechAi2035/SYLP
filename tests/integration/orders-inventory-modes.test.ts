@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { randomUUID } from "crypto";
 
 // Proves markOrderPaid's inventory-mode split: MADE_TO_ORDER products have
-// no finite stock to track (Mia makes more as orders arrive), so a paid
+// no finite stock to track (more is made as orders arrive), so a paid
 // order must never touch stockQuantity for them, while TRACK_STOCK products
 // keep decrementing exactly as before — including under a duplicate webhook.
 

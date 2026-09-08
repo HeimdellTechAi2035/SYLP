@@ -102,29 +102,34 @@ function productLink(product: PublicProductKnowledge): ChatLink {
   return { label: `View ${product.name}`, href: `/products/${product.slug}` };
 }
 
-// Generic category/domain words that appear in almost every product's own
-// name/fragrance/category text — matching on these alone would make nearly
-// any product-shaped question "confidently" match an unrelated product
-// (e.g. a question containing the word "fragrance" matching a product whose
-// fragrance is literally named "Test Fragrance"). Only a distinctive word
-// unique to a specific product should count as a match.
+// Generic words that appear across many/most products regardless of type —
+// matching on these alone would make nearly any product-shaped question
+// "confidently" match an unrelated product. Deliberately does NOT include
+// product-type words (hoodie, keyring, mug, ...): in this catalogue every
+// product shares the same brand-name prefix, so the type word is the ONLY
+// thing that distinguishes one product from another — filtering it out here
+// would strip away the sole distinctive signal for every single-item query.
 const GENERIC_PRODUCT_WORDS = new Set([
-  "wax", "melt", "melts", "candle", "candles", "fragrance", "fragrances",
-  "scent", "scents", "product", "products", "gift", "gifts", "set", "sets",
+  "product", "products", "gift", "gifts", "set", "sets",
   "standard", "test", "one", "ones",
+  // Every product name shares this brand prefix (e.g. "Support Your Local
+  // Patriot Hoodie") — without filtering these out, a query containing
+  // "patriot" alone would match all products at once, the same failure mode
+  // "wax"/"candle" caused before this catalogue was renamed.
+  "support", "local", "patriot", "sylp",
 ]);
 
 // Common English words that must never, on their own, be treated as a
 // "distinctive" signal pointing at a specific product or FAQ — including
 // question words and words that show up in adversarial/financial probes
 // ("cost", "price", "profit"). Without this, generic conversational words
-// can coincidentally exact- or fuzzy-match an unrelated product/fragrance
+// can coincidentally exact- or fuzzy-match an unrelated product
 // name (found live: "how much does royal mail actually COST you" fuzzy-
 // matched a product called "COSy Nights Gift Set" purely by 1-letter edit
 // distance) and answer the wrong question confidently.
 const STOPWORDS = new Set([
   "what", "does", "much", "your", "have", "this", "that", "with", "from",
-  "about", "when", "will", "make", "need", "cost", "cheap", "price",
+  "about", "when", "will", "make", "made", "need", "cost", "cheap", "price",
   "actually", "really", "just", "only", "very", "some", "were", "there",
   "their", "them", "then", "than", "also", "more", "most", "many", "such",
   "into", "over", "under", "would", "could", "should", "might", "must",
@@ -157,7 +162,7 @@ function wordsMatch(messageWord: string, knowledgeWord: string): boolean {
 }
 
 function distinctiveWords(product: PublicProductKnowledge): string[] {
-  const haystack = [product.name, product.fragrance, product.category].filter(Boolean).join(" ").toLowerCase();
+  const haystack = [product.name, product.category].filter(Boolean).join(" ").toLowerCase();
   return haystack.split(/\W+/).filter((w) => w.length > 2 && !GENERIC_PRODUCT_WORDS.has(w) && !STOPWORDS.has(w));
 }
 
@@ -182,7 +187,7 @@ function extractQuantity(message: string): number | null {
 function productShortlist(products: PublicProductKnowledge[]): ChatResponse {
   const top = products.slice(0, 5);
   const lines = top.map((p) => {
-    const distinction = p.fragrance ? `${p.fragrance}` : p.shortDescription || "";
+    const distinction = p.category ? `${p.category}` : p.shortDescription || "";
     return `${p.name}${distinction ? ` (${distinction})` : ""} — ${formatPence(p.currentPrice)}`;
   });
   return {
@@ -192,7 +197,7 @@ function productShortlist(products: PublicProductKnowledge[]): ChatResponse {
   };
 }
 
-const PRONOUN_ONLY = /^(how much (is|for) it\??|is it available\??|what size( is it)?\??|does it smell nice\??|how long( does it last)?\??|is it made to order\??|what'?s in it\??|what fragrance is it\??)$/;
+const PRONOUN_ONLY = /^(how much (is|for) it\??|is it available\??|what size( is it)?\??|what colou?rs? does it come in\??|is it made to order\??|what'?s it made (of|from)\??)$/;
 const REFERS_TO_PRIOR_SUBJECT = /\b(it|this one|that one)\b/;
 
 async function answerOrderStatus(context: ChatContext): Promise<ChatResponse> {
@@ -282,31 +287,34 @@ async function answerPolicy(message: string, store: StoreKnowledge): Promise<Cha
   };
 }
 
-async function answerFragranceList(store: StoreKnowledge): Promise<ChatResponse> {
+async function answerCategoryList(store: StoreKnowledge): Promise<ChatResponse> {
   const products = await getProductKnowledge();
-  const fragrances = [...new Set(products.map((p) => p.fragrance).filter(Boolean))] as string[];
-  if (fragrances.length === 0) return unresolved("fragrance list", store);
+  const categories = [...new Set(products.map((p) => p.category).filter(Boolean))] as string[];
+  if (categories.length === 0) return unresolved("category list", store);
 
   return {
-    text: `Our current fragrances include: ${fragrances.join(", ")}.`,
+    text: `Our current range includes: ${categories.join(", ")}.`,
     links: [{ label: "Shop all", href: "/shop" }],
     resolved: true,
   };
 }
 
+function categoryScoped(products: PublicProductKnowledge[], message: string): PublicProductKnowledge[] {
+  const namedCategory = [...new Set(products.map((p) => p.category).filter(Boolean))].find((c) =>
+    message.includes(c!.toLowerCase())
+  ) as string | undefined;
+  return namedCategory ? products.filter((p) => p.category === namedCategory) : products;
+}
+
 async function answerCheapest(message: string, store: StoreKnowledge): Promise<ChatResponse> {
   const products = await getProductKnowledge();
-  const scoped = message.includes("wax melt")
-    ? products.filter((p) => p.productType === "WAX_MELT")
-    : message.includes("candle")
-    ? products.filter((p) => p.productType === "CANDLE")
-    : products;
+  const scoped = categoryScoped(products, message);
 
   if (scoped.length === 0) return unresolved(message, store);
 
   const cheapest = scoped.reduce((min, p) => (p.currentPrice < min.currentPrice ? p : min));
   return {
-    text: `Our cheapest ${message.includes("wax melt") ? "wax melt" : message.includes("candle") ? "candle" : "product"} is currently ${cheapest.name} at ${formatPence(cheapest.currentPrice)}.`,
+    text: `Our cheapest ${scoped === products ? "product" : cheapest.category} is currently ${cheapest.name} at ${formatPence(cheapest.currentPrice)}.`,
     links: [productLink(cheapest)],
     resolved: true,
     subjectProductSlug: cheapest.slug,
@@ -330,15 +338,10 @@ function answerAboutProduct(message: string, product: PublicProductKnowledge, st
     return { text, links: [productLink(product)], resolved: true, subjectProductSlug: product.slug };
   }
 
-  if (/\bwhat's in|whats in|ingredients|what is this made from|made from\b/.test(message)) {
-    const info = product.ingredientsInfo || product.materials;
+  if (/\bmade (of|from)\b|what'?s? it made|whats it made|what material\b/.test(message)) {
+    const info = product.material;
     if (!info) return unresolved(message, store);
     return { text: `${product.name}: ${info}`, links: [productLink(product)], resolved: true, subjectProductSlug: product.slug };
-  }
-
-  if (/\bwhat fragrance\b/.test(message)) {
-    const text = product.fragrance ? `${product.name} is ${product.fragrance}.` : `${product.name} doesn't have a specific listed fragrance.`;
-    return { text, links: [productLink(product)], resolved: true, subjectProductSlug: product.slug };
   }
 
   if (/\b(available|in stock|do you have|can i order|can i get|still sell)\b/.test(message)) {
@@ -369,7 +372,7 @@ function answerAboutProduct(message: string, product: PublicProductKnowledge, st
 
 async function answerProductQuestion(message: string, context: ChatContext, store: StoreKnowledge): Promise<ChatResponse | null> {
   const isProductQuestion =
-    /\b(how much|price|cost|available|in stock|do you have|made to order|what's in|whats in|ingredients|made from|bigger size|larger size|other size|what size|can i order|can i get|still sell|what fragrance)\b/.test(
+    /\b(how much|price|cost|available|in stock|do you have|made to order|made (of|from)|what'?s? it made|whats it made|what material|bigger size|larger size|other size|what size|can i order|can i get|still sell)\b/.test(
       message
     );
   if (!isProductQuestion) return null;
@@ -377,15 +380,12 @@ async function answerProductQuestion(message: string, context: ChatContext, stor
   const products = await getProductKnowledge();
   let matches = findMatchingProducts(message, products);
 
-  // "vanilla wax melt" should mean the wax melt, not also the candle that
-  // happens to share the same fragrance name — narrow by type when the
-  // customer named one and it actually distinguishes the matches.
-  if (matches.length > 1 && message.includes("wax melt")) {
-    const narrowed = matches.filter((p) => p.productType === "WAX_MELT");
-    if (narrowed.length > 0) matches = narrowed;
-  } else if (matches.length > 1 && message.includes("candle")) {
-    const narrowed = matches.filter((p) => p.productType === "CANDLE");
-    if (narrowed.length > 0) matches = narrowed;
+  // "black hoodie" should mean the hoodie, not also a t-shirt in the same
+  // colour — narrow by category when the customer named one and it actually
+  // distinguishes the matches.
+  const narrowedByCategory = categoryScoped(matches, message);
+  if (matches.length > 1 && narrowedByCategory.length > 0 && narrowedByCategory.length < matches.length) {
+    matches = narrowedByCategory;
   }
 
   if (matches.length > 1) return productShortlist(matches);
@@ -411,21 +411,19 @@ async function answerProductQuestion(message: string, context: ChatContext, stor
 }
 
 async function answerProductDiscovery(message: string): Promise<ChatResponse | null> {
-  const isDiscovery = /\b(what .* (do you sell|have you got|do you have|do you offer)|show me|anything|what fragrances|what scents|u got|you got)\b/.test(
+  const isDiscovery = /\b(what .* (do you sell|have you got|do you have|do you offer)|show me|anything|what have you got|u got|you got)\b/.test(
     message
   );
   if (!isDiscovery) return null;
 
   const products = await getProductKnowledge();
-  let scoped = products;
-  if (message.includes("wax melt")) scoped = products.filter((p) => p.productType === "WAX_MELT");
-  else if (message.includes("candle")) scoped = products.filter((p) => p.productType === "CANDLE");
+  const scoped = categoryScoped(products, message);
 
-  // "anything coconut" / "show me sweet smells" style — a specific term was named.
+  // "anything with a union jack" / "show me hoodies" style — a specific term was named.
   const messageWords = message.split(/\W+/).filter((w) => w.length > 3 && !GENERIC_PRODUCT_WORDS.has(w) && !STOPWORDS.has(w));
 
   if (messageWords.length === 0) {
-    // Pure category browsing ("what wax melts do you sell") — no specific
+    // Pure category browsing ("what hoodies do you sell") — no specific
     // term to match against, so the scoped catalogue itself is the answer.
     return scoped.length > 0 ? productShortlist(scoped) : null;
   }
@@ -489,8 +487,8 @@ export async function askChatbot(rawMessage: string, context: ChatContext = {}):
   if (/\b(returns?|refund|cancel|send it back)\b/.test(message)) {
     return answerPolicy(message, store);
   }
-  if (/\bwhat fragrances\b|\bfragrances do you\b|\bscents do you\b|\bwhat scents\b/.test(message)) {
-    return answerFragranceList(store);
+  if (/\bwhat (categories|ranges|collections) do you\b|\bwhat do you sell\b/.test(message)) {
+    return answerCategoryList(store);
   }
   if (/\bcheapest\b|\blowest price\b/.test(message)) {
     return answerCheapest(message, store);

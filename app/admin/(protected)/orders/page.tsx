@@ -27,7 +27,7 @@ export default async function AdminOrdersPage({
         ))}
       </div>
 
-      <div className="bg-white rounded-xl overflow-x-auto">
+      <div className="bg-blush rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-ink-soft border-b border-ink/10">
@@ -62,7 +62,7 @@ export default async function AdminOrdersPage({
 
 function FilterLink({ label, active, href }: { label: string; active: boolean; href: string }) {
   return (
-    <Link href={href} className={`px-3 py-1.5 rounded-full text-xs font-medium ${active ? "bg-rose-dark text-cream" : "bg-white text-ink-soft"}`}>
+    <Link href={href} className={`px-3 py-1.5 rounded-full text-xs font-medium ${active ? "bg-rose-dark text-ink" : "bg-blush text-ink-soft"}`}>
       {label}
     </Link>
   );

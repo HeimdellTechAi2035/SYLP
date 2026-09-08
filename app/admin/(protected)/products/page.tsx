@@ -2,26 +2,33 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import StripeCatalogueSyncPanel from "@/components/admin/StripeCatalogueSyncPanel";
 import { archiveProduct } from "@/lib/actions/admin/products";
+import { getStripeCatalogueSummary } from "@/lib/actions/admin/stripe-catalogue-sync";
 
 export default async function AdminProductsPage() {
-  const products = await prisma.product.findMany({
-    orderBy: { updatedAt: "desc" },
-    include: { category: true },
-  });
+  const [products, stripeSummary] = await Promise.all([
+    prisma.product.findMany({
+      orderBy: { updatedAt: "desc" },
+      include: { category: true },
+    }),
+    getStripeCatalogueSummary(),
+  ]);
 
   return (
     <div>
       <AdminPageHeader
         title="Products"
         action={
-          <Link href="/admin/products/new" className="px-5 py-2.5 rounded-full bg-rose-dark text-cream font-semibold text-sm">
+          <Link href="/admin/products/new" className="px-5 py-2.5 rounded-full bg-rose-dark text-ink font-semibold text-sm">
             + Add Product
           </Link>
         }
       />
 
-      <div className="bg-white rounded-xl overflow-x-auto">
+      <StripeCatalogueSyncPanel totalSellable={stripeSummary.totalSellable} needsSync={stripeSummary.needsSync} />
+
+      <div className="bg-blush rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-ink-soft border-b border-ink/10">
@@ -30,6 +37,7 @@ export default async function AdminProductsPage() {
               <th className="p-4">Status</th>
               <th className="p-4">Price</th>
               <th className="p-4">Stock</th>
+              <th className="p-4">Stripe</th>
               <th className="p-4"></th>
             </tr>
           </thead>
@@ -56,6 +64,9 @@ export default async function AdminProductsPage() {
                     </span>
                   )}
                 </td>
+                <td className="p-4">
+                  <StripeSyncBadge status={product.status} syncStatus={product.stripeSyncStatus} />
+                </td>
                 <td className="p-4 text-right">
                   {product.status !== "ARCHIVED" && (
                     <form action={archiveProduct}>
@@ -67,7 +78,7 @@ export default async function AdminProductsPage() {
               </tr>
             ))}
             {products.length === 0 && (
-              <tr><td colSpan={6} className="p-8 text-center text-ink-soft">No products yet. Add your first one.</td></tr>
+              <tr><td colSpan={7} className="p-8 text-center text-ink-soft">No products yet. Add your first one.</td></tr>
             )}
           </tbody>
         </table>
@@ -83,4 +94,16 @@ function StatusBadge({ status }: { status: string }) {
     ARCHIVED: "bg-ink/10 text-ink-soft",
   };
   return <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] ?? ""}`}>{status}</span>;
+}
+
+function StripeSyncBadge({ status, syncStatus }: { status: string; syncStatus: string }) {
+  if (status !== "ACTIVE") return <span className="text-xs text-ink-soft/60">—</span>;
+  const labels: Record<string, { text: string; className: string }> = {
+    SYNCED: { text: "Synced", className: "text-sage" },
+    PENDING: { text: "Syncing…", className: "text-ink-soft" },
+    FAILED: { text: "Sync failed", className: "text-rose-dark font-medium" },
+    NOT_SYNCED: { text: "Needs sync", className: "text-gold" },
+  };
+  const label = labels[syncStatus] ?? labels.NOT_SYNCED;
+  return <span className={`text-xs ${label.className}`}>{label.text}</span>;
 }

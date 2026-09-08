@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CookieConsent from "@/components/marketing/CookieConsent";
 import Analytics from "@/components/marketing/Analytics";
+import ChatWidget from "@/components/chat/ChatWidget";
 import { getSiteSettings } from "@/lib/settings";
 import "./globals.css";
 
@@ -22,11 +23,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "HandMade by Mia | Handmade Wax Melts & Candles",
-    template: "%s | HandMade by Mia",
+    default: "Support Your Local Patriot | Hoodies, Apparel & Gifts",
+    template: "%s | Support Your Local Patriot",
   },
   description:
-    "Small-batch, hand-poured wax melts, scented candles and gift sets — handmade in the UK by Mia.",
+    "Hoodies, t-shirts, keyrings, stickers, cups, pens, phone cases, puzzles, wallets, wristbands and bags — printed and packed in the UK.",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -39,10 +40,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <body className="min-h-full flex flex-col bg-cream text-ink">
         <Header />
-        <main className="flex-1">{children}</main>
+        {/* pb-24: real reserved space (not just scroll-padding, see globals.css)
+            so a visitor's own manual scroll to the true bottom of a page — not
+            just a programmatic scroll-to-element — still leaves the fixed
+            chat launcher / cookie-consent bar with clear space below the
+            last piece of real content (e.g. a product page's full-width
+            "Add to Basket" button). Not needed on larger screens, which
+            already have more headroom relative to the launcher's fixed size. */}
+        <main className="flex-1 pb-24 sm:pb-0">{children}</main>
         <Footer />
         <CookieConsent />
         <Analytics gaMeasurementId={settings.gaMeasurementId} metaPixelId={settings.metaPixelId} />
+        <ChatWidget />
       </body>
     </html>
   );
