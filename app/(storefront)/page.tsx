@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getHomepageContent, getHomepageFeatures } from "@/lib/settings";
+import { getHomepageContent, getHomepageFeatures, getSiteSettings } from "@/lib/settings";
 import {
   getBestSellers,
   getFeaturedProducts,
@@ -18,9 +18,10 @@ import SectionHeading from "@/components/home/SectionHeading";
 import Link from "next/link";
 
 export default async function HomePage() {
-  const [homepage, bestSellers, featured, categories, features, faqs, reviews] =
+  const [homepage, settings, bestSellers, featured, categories, features, faqs, reviews] =
     await Promise.all([
       getHomepageContent(),
+      getSiteSettings(),
       getBestSellers(8),
       getFeaturedProducts(8),
       getCategories(),
@@ -44,6 +45,7 @@ export default async function HomePage() {
         primaryHref={homepage.heroCtaPrimaryHref}
         secondaryLabel={homepage.heroCtaSecondaryLabel}
         secondaryHref={homepage.heroCtaSecondaryHref}
+        supportEmail={settings.supportEmail}
       />
 
       <CategoryGrid
