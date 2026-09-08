@@ -343,7 +343,6 @@ async function main() {
     { slug: "hoodies", name: "Hoodies", description: "Heavyweight printed hoodies.", sortOrder: 0, image: "/products/hoodie-front.jpg" },
     { slug: "t-shirts", name: "T-Shirts", description: "Soft, printed cotton tees.", sortOrder: 1, image: "/products/tshirt-front.jpg" },
     { slug: "keyrings", name: "Keyrings", description: "Durable metal and enamel keyrings.", sortOrder: 2 },
-    { slug: "stickers", name: "Stickers", description: "Weatherproof vinyl stickers.", sortOrder: 3 },
     { slug: "cups", name: "Cups", description: "Enamel mugs and travel cups.", sortOrder: 4 },
     { slug: "phone-cases", name: "Phone Cases", description: "Protective printed phone cases.", sortOrder: 5 },
     { slug: "wallets", name: "Wallets", description: "Engraved leather wallets.", sortOrder: 6 },
@@ -414,20 +413,6 @@ async function main() {
       safetyWarnings: "Small parts — choking hazard for children under 3 years.",
       shortDescription: "A durable enamel keyring.",
       description: "Hard enamel keyring on a sturdy split ring, finished with a polished edge.",
-    },
-    {
-      slug: "sylp-sticker-pack",
-      sku: "ST-400",
-      name: "Support Your Local Patriot Sticker Pack",
-      category: "stickers",
-      productType: "ACCESSORY",
-      price: 450,
-      stockQuantity: 150,
-      material: "Weatherproof vinyl",
-      netWeightGrams: 10,
-      shortDescription: "A pack of weatherproof vinyl stickers.",
-      description: "Set of die-cut vinyl stickers, UV and water resistant — built to last outdoors.",
-      giftable: true,
     },
     {
       slug: "sylp-enamel-mug",
@@ -531,8 +516,8 @@ async function main() {
       status: "ACTIVE",
       productType: "GIFT_SET",
       categoryId: categoryRecords["gift-sets"],
-      shortDescription: "A keyring and sticker pack, gift-boxed and ready to give.",
-      description: "A curated bundle pairing our keyring and sticker pack, presented in gift packaging.",
+      shortDescription: "A keyring, gift-boxed and ready to give.",
+      description: "Our keyring, presented in gift packaging.",
       price: 1300,
       stockQuantity: 25,
       lowStockThreshold: 5,
@@ -547,7 +532,6 @@ async function main() {
   await prisma.giftSetItem.createMany({
     data: [
       { giftSetId: giftSet.id, componentId: productRecords["sylp-keyring"], quantity: 1 },
-      { giftSetId: giftSet.id, componentId: productRecords["sylp-sticker-pack"], quantity: 1 },
     ],
   });
 
