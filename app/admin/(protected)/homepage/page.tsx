@@ -1,6 +1,7 @@
 import { getHomepageContent, getHomepageFeatures } from "@/lib/settings";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { FormField, FormTextarea, SubmitButton } from "@/components/admin/FormField";
+import ImageDropzone from "@/components/admin/ImageDropzone";
 import { updateHomepageContent, addHomepageFeature, removeHomepageFeature } from "@/lib/actions/admin/homepage";
 
 export default async function AdminHomepagePage() {
@@ -20,7 +21,7 @@ export default async function AdminHomepagePage() {
           <legend className="font-semibold text-lg mb-2">Hero</legend>
           <FormField label="Hero title" name="heroTitle" defaultValue={content.heroTitle ?? ""} />
           <FormTextarea label="Hero subtitle" name="heroSubtitle" defaultValue={content.heroSubtitle ?? ""} />
-          <FormField label="Hero image URL" name="heroImage" defaultValue={content.heroImage ?? ""} />
+          <ImageDropzone name="heroImage" label="Hero image" defaultValue={content.heroImage} />
           <div className="grid sm:grid-cols-2 gap-4">
             <FormField label="Primary CTA label" name="heroCtaPrimaryLabel" defaultValue={content.heroCtaPrimaryLabel ?? ""} />
             <FormField label="Primary CTA link" name="heroCtaPrimaryHref" defaultValue={content.heroCtaPrimaryHref ?? ""} />
@@ -35,14 +36,14 @@ export default async function AdminHomepagePage() {
           <legend className="font-semibold text-lg mb-2">Our Story</legend>
           <FormField label="Story title" name="storyTitle" defaultValue={content.storyTitle ?? ""} />
           <FormTextarea label="Story body" name="storyBody" defaultValue={content.storyBody ?? ""} rows={5} />
-          <FormField label="Story image URL" name="storyImage" defaultValue={content.storyImage ?? ""} />
+          <ImageDropzone name="storyImage" label="Story image" defaultValue={content.storyImage} />
         </fieldset>
 
         <fieldset className="space-y-4 border-t border-ink/10 pt-6">
           <legend className="font-semibold text-lg mb-2">Gift Section</legend>
           <FormField label="Gift section title" name="giftSectionTitle" defaultValue={content.giftSectionTitle ?? ""} />
           <FormTextarea label="Gift section body" name="giftSectionBody" defaultValue={content.giftSectionBody ?? ""} />
-          <FormField label="Gift section image URL" name="giftSectionImage" defaultValue={content.giftSectionImage ?? ""} />
+          <ImageDropzone name="giftSectionImage" label="Gift section image" defaultValue={content.giftSectionImage} />
         </fieldset>
 
         <SubmitButton>Save Homepage Content</SubmitButton>

@@ -1,5 +1,6 @@
 import { FormField, FormTextarea, FormSelect, FormCheckbox, SubmitButton } from "@/components/admin/FormField";
 import InventoryFields from "@/components/admin/InventoryFields";
+import ImageDropzone from "@/components/admin/ImageDropzone";
 
 type ProductWithRelations = {
   id: string;
@@ -122,7 +123,7 @@ export default function ProductForm({
       </Section>
 
       <Section title="Media">
-        <FormField label="Main image URL" name="mainImage" defaultValue={p?.mainImage ?? ""} placeholder="https://..." />
+        <ImageDropzone name="mainImage" label="Main image" defaultValue={p?.mainImage} />
         <p className="text-xs text-ink-soft">Additional gallery images and variants can be managed after saving.</p>
       </Section>
 

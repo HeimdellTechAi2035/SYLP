@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { FormField, FormTextarea, FormCheckbox, SubmitButton } from "@/components/admin/FormField";
+import ImageDropzone from "@/components/admin/ImageDropzone";
 import { createCategory, updateCategory, deleteCategory } from "@/lib/actions/admin/categories";
 
 export default async function AdminCategoriesPage() {
@@ -26,7 +27,7 @@ export default async function AdminCategoriesPage() {
                 <div className="sm:col-span-2">
                   <FormTextarea label="Description" name="description" id={`cat-${cat.id}-description`} defaultValue={cat.description ?? ""} />
                 </div>
-                <FormField label="Image URL" name="image" id={`cat-${cat.id}-image`} defaultValue={cat.image ?? ""} />
+                <ImageDropzone name="image" label="Image" defaultValue={cat.image} />
                 <FormCheckbox label="Active (visible on storefront)" name="isActive" defaultChecked={cat.isActive} />
                 <div className="sm:col-span-2 flex justify-between items-center">
                   <SubmitButton>Save</SubmitButton>
@@ -46,7 +47,7 @@ export default async function AdminCategoriesPage() {
           <FormField label="Name" name="name" required />
           <FormField label="Slug" name="slug" required placeholder="wax-melts" />
           <FormTextarea label="Description" name="description" />
-          <FormField label="Image URL" name="image" />
+          <ImageDropzone name="image" label="Image" />
           <FormCheckbox label="Active (visible on storefront)" name="isActive" defaultChecked />
           <SubmitButton>Add Category</SubmitButton>
         </form>

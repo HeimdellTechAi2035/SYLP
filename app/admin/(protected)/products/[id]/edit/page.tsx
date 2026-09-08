@@ -13,6 +13,7 @@ import {
 import { addGiftSetItem, removeGiftSetItem } from "@/lib/actions/admin/gift-sets";
 import { addRelatedProduct, removeRelatedProduct } from "@/lib/actions/admin/related-products";
 import { FormField, FormSelect, SubmitButton } from "@/components/admin/FormField";
+import ImageDropzone from "@/components/admin/ImageDropzone";
 
 export default async function EditProductPage({
   params,
@@ -77,10 +78,12 @@ export default async function EditProductPage({
             </li>
           ))}
         </ul>
-        <form action={boundAddImage} className="flex gap-3">
-          <input name="url" placeholder="Image URL" required className="flex-1 rounded-lg border border-ink/15 px-3 py-2 text-sm" />
-          <input name="altText" placeholder="Alt text" className="flex-1 rounded-lg border border-ink/15 px-3 py-2 text-sm" />
-          <button type="submit" className="px-4 py-2 rounded-lg bg-rose-dark text-ink text-sm font-medium">Add</button>
+        <form action={boundAddImage} className="space-y-3">
+          <ImageDropzone name="url" />
+          <div className="flex gap-3">
+            <input name="altText" placeholder="Alt text" className="flex-1 rounded-lg border border-ink/15 px-3 py-2 text-sm" />
+            <button type="submit" className="px-4 py-2 rounded-lg bg-rose-dark text-ink text-sm font-medium shrink-0">Add</button>
+          </div>
         </form>
       </div>
 

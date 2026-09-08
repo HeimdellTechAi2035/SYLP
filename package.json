@@ -14,6 +14,7 @@
     "db:reset": "netlify dev --command \"prisma migrate reset\""
   },
   "dependencies": {
+    "@netlify/blobs": "^11.0.3",
     "@netlify/database": "^2.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
