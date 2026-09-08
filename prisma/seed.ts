@@ -34,8 +34,8 @@ const { PrismaClient } = pkg;
 // - ICO registration: ZC079121
 // - Contact: support@support-your-local-patriot.online (general),
 //   complaints@support-your-local-patriot.online (complaints)
-// - UK delivery only, standard price £2.95, free over £35, dispatch 1-3
-//   working days, delivery 2-4 working days (matches this file's seeded values)
+// - UK delivery only, standard price £2.95, free over £35, dispatch 7-14
+//   days, delivery 7-14 days (matches this file's seeded values)
 // - The engraved wallet is made to order (personalised) — legally distinct
 //   from the rest of the catalogue for cancellation-right purposes
 const COMPANY_LINE =
@@ -140,10 +140,10 @@ If you have any questions about our use of cookies, contact us at support@suppor
 We currently deliver within the United Kingdom only.
 
 2. Dispatch times
-Orders are typically dispatched within 1-3 working days of being placed. Made-to-order items — currently the engraved wallet — need additional production time before dispatch; the current lead time is shown on that product's page.
+Orders are typically dispatched within 7-14 days of being placed. Made-to-order items — currently the engraved wallet — need additional production time before dispatch; the current lead time is shown on that product's page.
 
 3. Delivery times
-Once dispatched, standard UK delivery typically takes 2-4 working days.
+Once dispatched, standard UK delivery typically takes 7-14 days.
 
 4. Delivery costs
 Standard UK delivery costs £2.95. We offer free UK delivery on orders over £35 — the current threshold is always shown at checkout.
@@ -281,8 +281,8 @@ async function main() {
       supportEmail: "support@support-your-local-patriot.online",
       freeDeliveryThreshold: 3500,
       standardDeliveryPrice: 295,
-      estimatedDispatchDays: "1-3 working days",
-      estimatedDeliveryDays: "2-4 working days",
+      estimatedDispatchDays: "7-14 days",
+      estimatedDeliveryDays: "7-14 days",
       instagramUrl: null,
       facebookUrl: null,
     },
@@ -332,7 +332,7 @@ async function main() {
         countries: "United Kingdom",
         price: 295,
         freeThreshold: 3500,
-        estimatedDays: "2-4 working days",
+        estimatedDays: "7-14 days",
         sortOrder: 0,
       },
     });
@@ -542,7 +542,7 @@ async function main() {
       data: [
         { category: "Sizing", question: "What size should I order?", answer: "Check the size guide on each hoodie or t-shirt product page — our fit runs true to size. If you're between sizes, we recommend sizing up.", sortOrder: 0 },
         { category: "Materials & Care", question: "How do I wash my hoodie or t-shirt?", answer: "Machine wash cold, inside out, and avoid tumble drying to protect the print. Full care instructions are listed on each product page.", sortOrder: 1 },
-        { category: "Orders", question: "How long will my order take to arrive?", answer: "Orders are typically dispatched within 1-3 working days, with UK delivery taking 2-4 working days after dispatch.", sortOrder: 2 },
+        { category: "Orders", question: "How long will my order take to arrive?", answer: "Orders are typically dispatched within 7-14 days, with UK delivery taking 7-14 days after dispatch.", sortOrder: 2 },
         { category: "Delivery", question: "Do you offer free delivery?", answer: "Yes — free UK delivery is available on orders over the threshold shown at checkout.", sortOrder: 3 },
         { category: "Returns", question: "Can I return my order?", answer: "See our Returns & Refunds policy for full details on eligibility and how to start a return.", sortOrder: 4 },
         { category: "Products", question: "Is the engraved wallet made to order?", answer: "Yes — please allow a few extra days for engraving before dispatch; see the product page for the current lead time.", sortOrder: 5 },
