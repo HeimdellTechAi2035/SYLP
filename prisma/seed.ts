@@ -315,8 +315,8 @@ async function main() {
   await prisma.homepageFeature.deleteMany({ where: { section: "WHY_SHOP" } });
   await prisma.homepageFeature.createMany({
     data: [
-      { section: "WHY_SHOP", icon: "sparkles", title: "Quality made", body: "Every item is printed and finished with care.", sortOrder: 0 },
-      { section: "WHY_SHOP", icon: "package", title: "Small-batch", body: "Made in limited runs, never mass-produced.", sortOrder: 1 },
+      { section: "WHY_SHOP", icon: "sparkles", title: "Quality made", body: "Every item is checked for quality before it's packed and sent to you.", sortOrder: 0 },
+      { section: "WHY_SHOP", icon: "package", title: "UK-printed apparel", body: "Our hoodies and tees are printed to order here in the UK, not mass-produced overseas.", sortOrder: 1 },
       { section: "WHY_SHOP", icon: "gift", title: "Giftable", body: "Thoughtful packaging, ready to give.", sortOrder: 2 },
       { section: "WHY_SHOP", icon: "shield", title: "Secure checkout", body: "Payments processed securely via Stripe.", sortOrder: 3 },
       { section: "WHY_SHOP", icon: "truck", title: "UK delivery", body: "Dispatched from the UK — get in touch if you'd like tracking added.", sortOrder: 4 },

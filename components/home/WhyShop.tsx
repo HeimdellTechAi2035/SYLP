@@ -12,8 +12,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export type Feature = { icon: string | null; title: string; body: string | null };
 
 const defaultFeatures: Feature[] = [
-  { icon: "sparkles", title: "Handmade", body: "Every item is poured and finished by hand in small batches." },
-  { icon: "package", title: "Small-batch", body: "We make in limited runs rather than mass production." },
+  { icon: "sparkles", title: "Quality made", body: "Every item is checked for quality before it's packed and sent to you." },
+  { icon: "package", title: "UK-printed apparel", body: "Our hoodies and tees are printed to order here in the UK, not mass-produced overseas." },
   { icon: "gift", title: "Giftable", body: "Thoughtful packaging that's ready to give." },
   { icon: "shield", title: "Secure checkout", body: "Payments are processed securely via Stripe." },
   { icon: "truck", title: "UK delivery", body: "Dispatched from the UK — get in touch if you'd like tracking added." },
