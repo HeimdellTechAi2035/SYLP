@@ -11,12 +11,15 @@ export default function CategoryGrid({ categories }: { categories: CategoryTile[
   return (
     <section className="container-page py-16">
       <SectionHeading eyebrow="Shop by category" title="Find your favourite" align="center" />
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* flex-wrap + justify-center (not a grid) so an odd category count's
+          leftover last-row tile centers itself instead of staying pinned to
+          the grid's first column. */}
+      <div className="flex flex-wrap justify-center gap-4">
         {categories.map((cat) => (
           <Link
             key={cat.slug}
             href={`/collections/${cat.slug}`}
-            className="group relative aspect-[4/5] rounded-2xl overflow-hidden bg-blush"
+            className="group relative w-[calc(50%-0.5rem)] sm:w-[calc(25%-0.75rem)] aspect-[4/5] rounded-2xl overflow-hidden bg-blush"
           >
             {cat.image ? (
               <Image src={cat.image} alt={cat.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />

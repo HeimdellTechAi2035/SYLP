@@ -112,8 +112,20 @@ export default async function ProductPage({
             continueSellingOOS={product.continueSellingOOS}
             madeToOrder={product.madeToOrder}
             giftMessageEnabled={product.giftMessageEnabled}
-            supportEmail={settings.supportEmail}
           />
+
+          {product.variants.length > 0 && settings.supportEmail && (
+            <div className="mt-4 rounded-xl border border-rose-dark/30 bg-blush px-4 py-3">
+              <h2 className="font-display text-lg text-ink mb-1">Need a different size?</h2>
+              <p className="text-sm text-ink-soft">
+                Email us at{" "}
+                <a href={`mailto:${settings.supportEmail}`} className="underline hover:text-ink">
+                  {settings.supportEmail}
+                </a>{" "}
+                and we&apos;ll sort out your hoodie or t-shirt.
+              </p>
+            </div>
+          )}
 
           {product.madeToOrder && product.productionTimeDays && (
             <p className="text-sm text-ink-soft mt-3">

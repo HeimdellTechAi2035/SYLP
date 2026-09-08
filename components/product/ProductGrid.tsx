@@ -12,9 +12,19 @@ export default function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+    // flex-wrap + justify-center (not a grid) so a leftover last-row item —
+    // an odd product count — centers itself instead of staying pinned to
+    // the grid's first column with an empty gap beside it. Each item's
+    // width is sized to match what the old grid-cols-N/gap-N would have
+    // given it at each breakpoint.
+    <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
       {products.map((product) => (
-        <ProductCard key={product.slug} product={product} />
+        <div
+          key={product.slug}
+          className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)]"
+        >
+          <ProductCard product={product} />
+        </div>
       ))}
     </div>
   );

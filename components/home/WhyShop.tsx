@@ -25,11 +25,17 @@ export default function WhyShop({ features }: { features?: Feature[] }) {
   return (
     <section className="container-page py-16">
       <SectionHeading eyebrow="Why Support Your Local Patriot" title="Made with care, start to finish" align="center" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+      {/* flex-wrap + justify-center (not a grid) so a leftover last-row item
+          — e.g. 5 features across 2 mobile columns — centers itself instead
+          of staying pinned to the grid's first column. */}
+      <div className="flex flex-wrap justify-center gap-6">
         {items.map((feature, i) => {
           const Icon = (feature.icon && iconMap[feature.icon]) || Sparkles;
           return (
-            <div key={i} className="text-center flex flex-col items-center gap-2">
+            <div
+              key={i}
+              className="w-[calc(50%-0.75rem)] sm:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)] text-center flex flex-col items-center gap-2"
+            >
               <div className="p-3 rounded-full bg-blush text-rose-dark">
                 <Icon className="h-5 w-5" />
               </div>
