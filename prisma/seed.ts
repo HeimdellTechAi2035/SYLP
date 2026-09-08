@@ -366,7 +366,7 @@ async function main() {
   // --- Products -----------------------------------------------------------
   const products = [
     {
-      slug: "preston-patriot-hoodie",
+      slug: "sylp-hoodie",
       sku: "HD-100",
       name: "Support Your Local Patriot Hoodie",
       category: "hoodies",
@@ -387,7 +387,7 @@ async function main() {
       ],
     },
     {
-      slug: "preston-patriot-t-shirt",
+      slug: "sylp-t-shirt",
       sku: "TS-200",
       name: "Support Your Local Patriot T-Shirt",
       category: "t-shirts",
@@ -407,7 +407,7 @@ async function main() {
       ],
     },
     {
-      slug: "preston-patriot-keyring",
+      slug: "sylp-keyring",
       sku: "KR-300",
       name: "Support Your Local Patriot Keyring",
       category: "keyrings",
@@ -420,7 +420,7 @@ async function main() {
       description: "Hard enamel keyring on a sturdy split ring, finished with a polished edge.",
     },
     {
-      slug: "preston-patriot-sticker-pack",
+      slug: "sylp-sticker-pack",
       sku: "ST-400",
       name: "Support Your Local Patriot Sticker Pack",
       category: "stickers",
@@ -434,7 +434,7 @@ async function main() {
       giftable: true,
     },
     {
-      slug: "preston-patriot-enamel-mug",
+      slug: "sylp-enamel-mug",
       sku: "CP-500",
       name: "Support Your Local Patriot Enamel Mug",
       category: "cups",
@@ -449,7 +449,7 @@ async function main() {
       giftable: true,
     },
     {
-      slug: "preston-patriot-pen",
+      slug: "sylp-pen",
       sku: "PN-600",
       name: "Support Your Local Patriot Pen",
       category: "pens",
@@ -461,7 +461,7 @@ async function main() {
       description: "Everyday ballpoint pen with black ink and a printed barrel.",
     },
     {
-      slug: "preston-patriot-phone-case",
+      slug: "sylp-phone-case",
       sku: "PC-700",
       name: "Support Your Local Patriot Phone Case",
       category: "phone-cases",
@@ -474,7 +474,7 @@ async function main() {
       isNew: true,
     },
     {
-      slug: "preston-patriot-puzzle-board",
+      slug: "sylp-puzzle-board",
       sku: "PZ-800",
       name: "Support Your Local Patriot Puzzle Board",
       category: "puzzles",
@@ -489,7 +489,7 @@ async function main() {
       giftable: true,
     },
     {
-      slug: "preston-patriot-engraved-wallet",
+      slug: "sylp-engraved-wallet",
       sku: "WL-900",
       name: "Support Your Local Patriot Engraved Wallet",
       category: "wallets",
@@ -506,7 +506,7 @@ async function main() {
       giftable: true,
     },
     {
-      slug: "preston-patriot-wristband",
+      slug: "sylp-wristband",
       sku: "WB-1000",
       name: "Support Your Local Patriot Wristband",
       category: "wristbands",
@@ -518,7 +518,7 @@ async function main() {
       description: "One-size silicone wristband with a debossed design.",
     },
     {
-      slug: "preston-patriot-shopping-bag",
+      slug: "sylp-shopping-bag",
       sku: "BAG-1100",
       name: "Support Your Local Patriot Shopping Bag",
       category: "bags",
@@ -604,9 +604,9 @@ async function main() {
   await prisma.giftSetItem.deleteMany({ where: { giftSetId: giftSet.id } });
   await prisma.giftSetItem.createMany({
     data: [
-      { giftSetId: giftSet.id, componentId: productRecords["preston-patriot-keyring"], quantity: 1 },
-      { giftSetId: giftSet.id, componentId: productRecords["preston-patriot-sticker-pack"], quantity: 1 },
-      { giftSetId: giftSet.id, componentId: productRecords["preston-patriot-wristband"], quantity: 1 },
+      { giftSetId: giftSet.id, componentId: productRecords["sylp-keyring"], quantity: 1 },
+      { giftSetId: giftSet.id, componentId: productRecords["sylp-sticker-pack"], quantity: 1 },
+      { giftSetId: giftSet.id, componentId: productRecords["sylp-wristband"], quantity: 1 },
     ],
   });
 
