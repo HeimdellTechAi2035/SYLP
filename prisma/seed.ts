@@ -302,6 +302,7 @@ async function main() {
       heroCtaPrimaryHref: "/collections/hoodies",
       heroCtaSecondaryLabel: "Shop All",
       heroCtaSecondaryHref: "/shop",
+      heroImage: "/products/hoodie-front.jpg",
       storyTitle: "Support Your Local Patriot",
       storyBody:
         "[Placeholder] Every item is printed, packed and checked by hand before it comes to you. Replace this with the real story once written.",
@@ -339,8 +340,8 @@ async function main() {
 
   // --- Categories -------------------------------------------------------
   const categories = [
-    { slug: "hoodies", name: "Hoodies", description: "Heavyweight printed hoodies.", sortOrder: 0 },
-    { slug: "t-shirts", name: "T-Shirts", description: "Soft, printed cotton tees.", sortOrder: 1 },
+    { slug: "hoodies", name: "Hoodies", description: "Heavyweight printed hoodies.", sortOrder: 0, image: "/products/hoodie-front.jpg" },
+    { slug: "t-shirts", name: "T-Shirts", description: "Soft, printed cotton tees.", sortOrder: 1, image: "/products/tshirt-front.jpg" },
     { slug: "keyrings", name: "Keyrings", description: "Durable metal and enamel keyrings.", sortOrder: 2 },
     { slug: "stickers", name: "Stickers", description: "Weatherproof vinyl stickers.", sortOrder: 3 },
     { slug: "cups", name: "Cups", description: "Enamel mugs and travel cups.", sortOrder: 4 },
@@ -370,7 +371,7 @@ async function main() {
       name: "Support Your Local Patriot Hoodie",
       category: "hoodies",
       productType: "APPAREL",
-      price: 3500,
+      price: 5500,
       stockQuantity: 40,
       material: "80% cotton, 20% polyester fleece",
       careInstructions: "Machine wash cold, inside out. Do not tumble dry or iron the print.",
@@ -379,6 +380,11 @@ async function main() {
       description: "Soft fleece-lined hoodie with a durable front print. Printed and packed to order in the UK.",
       bestSeller: true,
       featured: true,
+      mainImage: "/products/hoodie-front.jpg",
+      images: [
+        { url: "/products/hoodie-front.jpg", altText: "Support Your Local Patriot Hoodie, front view" },
+        { url: "/products/hoodie-back.jpg", altText: "Support Your Local Patriot Hoodie, back print detail" },
+      ],
     },
     {
       slug: "preston-patriot-t-shirt",
@@ -386,7 +392,7 @@ async function main() {
       name: "Support Your Local Patriot T-Shirt",
       category: "t-shirts",
       productType: "APPAREL",
-      price: 1800,
+      price: 2499,
       stockQuantity: 60,
       material: "100% ringspun cotton",
       careInstructions: "Machine wash cold, inside out. Do not tumble dry.",
@@ -394,6 +400,11 @@ async function main() {
       shortDescription: "A soft, everyday printed tee.",
       description: "Classic-fit cotton t-shirt with a durable front print.",
       isNew: true,
+      mainImage: "/products/tshirt-front.jpg",
+      images: [
+        { url: "/products/tshirt-front.jpg", altText: "Support Your Local Patriot T-Shirt, front view" },
+        { url: "/products/tshirt-back.jpg", altText: "Support Your Local Patriot T-Shirt, back print detail" },
+      ],
     },
     {
       slug: "preston-patriot-keyring",
@@ -550,9 +561,22 @@ async function main() {
         bestSeller: "bestSeller" in p ? Boolean(p.bestSeller) : false,
         isNew: "isNew" in p ? Boolean(p.isNew) : false,
         giftable: "giftable" in p ? Boolean(p.giftable) : false,
+        mainImage: "mainImage" in p ? p.mainImage : null,
       },
     });
     productRecords[p.slug] = record.id;
+
+    if ("images" in p && p.images) {
+      await prisma.productImage.deleteMany({ where: { productId: record.id } });
+      await prisma.productImage.createMany({
+        data: p.images.map((img, sortOrder) => ({
+          productId: record.id,
+          url: img.url,
+          altText: img.altText,
+          sortOrder,
+        })),
+      });
+    }
   }
 
   const giftSet = await prisma.product.upsert({
