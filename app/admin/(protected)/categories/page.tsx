@@ -27,7 +27,7 @@ export default async function AdminCategoriesPage() {
                 <div className="sm:col-span-2">
                   <FormTextarea label="Description" name="description" id={`cat-${cat.id}-description`} defaultValue={cat.description ?? ""} />
                 </div>
-                <ImageDropzone name="image" label="Image" defaultValue={cat.image} />
+                <ImageDropzone name="image" label="Image" defaultValue={cat.image} aspect={4 / 5} />
                 <FormCheckbox label="Active (visible on storefront)" name="isActive" defaultChecked={cat.isActive} />
                 <div className="sm:col-span-2 flex justify-between items-center">
                   <SubmitButton>Save</SubmitButton>
@@ -47,7 +47,7 @@ export default async function AdminCategoriesPage() {
           <FormField label="Name" name="name" required />
           <FormField label="Slug" name="slug" required placeholder="wax-melts" />
           <FormTextarea label="Description" name="description" />
-          <ImageDropzone name="image" label="Image" />
+          <ImageDropzone name="image" label="Image" aspect={4 / 5} />
           <FormCheckbox label="Active (visible on storefront)" name="isActive" defaultChecked />
           <SubmitButton>Add Category</SubmitButton>
         </form>
