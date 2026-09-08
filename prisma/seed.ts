@@ -297,7 +297,7 @@ async function main() {
       announcementBarText: "New drop just landed · UK delivery available · Free delivery over £35",
       heroTitle: "Support Your Local Patriot",
       heroSubtitle:
-        "Proud, patriotic apparel and everyday essentials for people who back local. Our hoodies and tees are printed and packed to order right here in the UK — every order, whatever's in it, is fulfilled by a small independent business, not a warehouse, so shopping with us means backing someone local instead of a faceless corporation.",
+        "Support Your Local Patriot started with a simple idea: give people who are proud of where they're from something real to wear it with. Our hoodies and t-shirts are printed and packed to order right here in the UK. We're working on bringing the rest of the range home too — for now, some items are sourced from trusted suppliers abroad while we find the right UK partners — but every order is still checked by hand before it reaches you.",
       heroCtaPrimaryLabel: "Shop Hoodies",
       heroCtaPrimaryHref: "/collections/hoodies",
       heroCtaSecondaryLabel: "Shop All",
