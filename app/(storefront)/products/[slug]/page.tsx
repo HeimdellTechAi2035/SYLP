@@ -112,6 +112,7 @@ export default async function ProductPage({
             continueSellingOOS={product.continueSellingOOS}
             madeToOrder={product.madeToOrder}
             giftMessageEnabled={product.giftMessageEnabled}
+            supportEmail={settings.supportEmail}
           />
 
           {product.madeToOrder && product.productionTimeDays && (

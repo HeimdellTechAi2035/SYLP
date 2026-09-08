@@ -21,6 +21,7 @@ export default function AddToCartForm({
   continueSellingOOS,
   madeToOrder,
   giftMessageEnabled,
+  supportEmail,
 }: {
   productId: string;
   price: number;
@@ -31,6 +32,7 @@ export default function AddToCartForm({
   continueSellingOOS: boolean;
   madeToOrder: boolean;
   giftMessageEnabled?: boolean;
+  supportEmail?: string | null;
 }) {
   const [variantId, setVariantId] = useState(variants[0]?.id ?? "");
   const [quantity, setQuantity] = useState(1);
@@ -77,6 +79,15 @@ export default function AddToCartForm({
               </option>
             ))}
           </select>
+          {supportEmail && (
+            <p className="text-xs text-ink-soft mt-1.5">
+              Need a different size?{" "}
+              <a href={`mailto:${supportEmail}`} className="underline hover:text-ink">
+                Email {supportEmail}
+              </a>{" "}
+              and we&apos;ll sort it out.
+            </p>
+          )}
         </div>
       )}
 
