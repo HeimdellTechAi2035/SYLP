@@ -295,9 +295,9 @@ async function main() {
     create: {
       id: 1,
       announcementBarText: "New drop just landed · UK delivery available · Free delivery over £35",
-      heroTitle: "Support Your Local Patriot — wear your colours",
+      heroTitle: "Support Your Local Patriot",
       heroSubtitle:
-        "Hoodies, tees and everyday gear for the community. Printed and packed to order in the UK. [Placeholder copy — replace with confirmed brand messaging.]",
+        "Proud, patriotic apparel and everyday essentials — printed and packed to order right here in the UK. Every order is fulfilled by a small independent business, not a warehouse, so shopping with us means backing someone local instead of a faceless corporation.",
       heroCtaPrimaryLabel: "Shop Hoodies",
       heroCtaPrimaryHref: "/collections/hoodies",
       heroCtaSecondaryLabel: "Shop All",
@@ -305,10 +305,10 @@ async function main() {
       heroImage: "/products/hoodie-front.jpg",
       storyTitle: "Support Your Local Patriot",
       storyBody:
-        "[Placeholder] Every item is printed, packed and checked by hand before it comes to you. Replace this with the real story once written.",
+        "Support Your Local Patriot started with a simple idea: give people who are proud of where they're from something real to wear it with. Not mass-produced, not outsourced overseas — printed and packed to order right here in the UK, with every item checked by hand before it reaches you.",
       giftSectionTitle: "The perfect gift, ready to give",
       giftSectionBody:
-        "[Placeholder] Giftable sets and accessories for birthdays, thank-yous and every occasion in between.",
+        "Giftable sets and accessories for birthdays, thank-yous and every occasion in between — each one packed with the same care as if we were keeping it for ourselves.",
     },
   });
 

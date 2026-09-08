@@ -22,17 +22,17 @@ export default function Hero({
   return (
     <section className="container-page pt-8 sm:pt-12 pb-16">
       <div className="grid lg:grid-cols-2 gap-8 items-center">
-        <div>
+        <div className="text-center lg:text-left">
           <p className="text-rose-dark font-semibold tracking-wide text-sm uppercase mb-3">
             Printed in the UK
           </p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-[1.1] text-ink">
             {title ?? "Support Your Local Patriot — wear your colours"}
           </h1>
-          <p className="mt-5 text-ink-soft text-lg max-w-xl">
+          <p className="mt-5 text-ink-soft text-lg max-w-xl mx-auto lg:mx-0">
             {subtitle ?? "Hoodies, tees and everyday gear, printed and packed to order in the UK."}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3 justify-center lg:justify-start">
             <Link
               href={primaryHref ?? "/collections/hoodies"}
               className="px-6 py-3 rounded-full bg-rose text-ink font-semibold hover:bg-rose-dark transition-colors"

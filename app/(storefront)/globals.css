@@ -58,6 +58,16 @@
   --font-sans: var(--font-poppins);
 }
 
+/* Defensive guard against horizontal drift/rubber-banding on mobile —
+   without this, a single element even 1px wider than the viewport (a
+   subpixel rounding error, a not-yet-loaded image before it reserves its
+   final size, etc.) makes the whole page horizontally scrollable, which on
+   iOS Safari shows up as the page bouncing left/right on a vertical swipe
+   instead of just scrolling. */
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

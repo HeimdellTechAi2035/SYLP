@@ -20,7 +20,7 @@ export default function StorySection({
             <PlaceholderImage />
           )}
         </div>
-        <div className="order-1 lg:order-2">
+        <div className="order-1 lg:order-2 text-center lg:text-left">
           <p className="text-rose-dark font-semibold tracking-wide text-xs uppercase mb-2">Our story</p>
           <h2 className="font-display text-3xl sm:text-4xl text-ink mb-4">{title ?? "Support Your Local Patriot"}</h2>
           <p className="text-ink-soft leading-relaxed whitespace-pre-line">{body}</p>
