@@ -22,6 +22,18 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      {
+        // Every /admin response — page loads AND Server Action replies — is
+        // per-session and mutates state. Without this, the CDN can cache and
+        // replay a stale response (observed in production: a save's Server
+        // Action reply got cached and later replayed to a different admin
+        // session as a stale "redirect to login", making saves silently
+        // fail for everyone until that cache entry expired).
+        source: "/admin/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, no-cache, must-revalidate, max-age=0" },
+        ],
+      },
     ];
   },
 };
