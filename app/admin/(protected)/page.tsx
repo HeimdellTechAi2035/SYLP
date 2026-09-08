@@ -4,7 +4,7 @@ import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 export default async function AdminDashboardPage() {
-  const [recentOrders, lowStockProducts, pendingReviews, newMessages, totalRevenue] = await Promise.all([
+  const [recentOrders, lowStockProducts, pendingReviews, newMessages, totalRevenue, paidOrderItems] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.product.findMany({
       where: { status: "ACTIVE" },
@@ -13,14 +13,29 @@ export default async function AdminDashboardPage() {
     prisma.review.count({ where: { status: "PENDING" } }),
     prisma.contactMessage.count({ where: { status: "NEW" } }),
     prisma.order.aggregate({ where: { paymentStatus: "PAID" }, _sum: { total: true } }),
+    prisma.orderItem.findMany({
+      where: { order: { paymentStatus: "PAID" } },
+      select: { quantity: true, product: { select: { costPrice: true } } },
+    }),
   ]);
+
+  // Best-effort gross profit for the headline card — full breakdown (postage,
+  // packaging, per-product) lives on /admin/analytics. See the same
+  // "exclude, don't zero-fill" reasoning there for items with no cost price.
+  const revenue = totalRevenue._sum.total ?? 0;
+  const totalCogs = paidOrderItems.reduce(
+    (sum, item) => sum + (item.product?.costPrice != null ? item.product.costPrice * item.quantity : 0),
+    0
+  );
+  const grossProfit = revenue - totalCogs;
 
   return (
     <div>
       <AdminPageHeader title="Dashboard" />
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <StatCard label="Total revenue" value={formatPence(totalRevenue._sum.total ?? 0)} />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+        <StatCard label="Total revenue" value={formatPence(revenue)} />
+        <StatCard label="Gross profit" value={formatPence(grossProfit)} href="/admin/analytics" />
         <StatCard label="Low stock products" value={String(lowStockProducts.length)} href="/admin/inventory" />
         <StatCard label="Pending reviews" value={String(pendingReviews)} href="/admin/reviews" />
         <StatCard label="New messages" value={String(newMessages)} href="/admin/messages" />
