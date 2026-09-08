@@ -345,10 +345,9 @@ async function main() {
     { slug: "keyrings", name: "Keyrings", description: "Durable metal and enamel keyrings.", sortOrder: 2 },
     { slug: "stickers", name: "Stickers", description: "Weatherproof vinyl stickers.", sortOrder: 3 },
     { slug: "cups", name: "Cups", description: "Enamel mugs and travel cups.", sortOrder: 4 },
-    { slug: "pens", name: "Pens", description: "Branded everyday pens.", sortOrder: 5 },
-    { slug: "phone-cases", name: "Phone Cases", description: "Protective printed phone cases.", sortOrder: 6 },
-    { slug: "wallets", name: "Wallets", description: "Engraved leather wallets.", sortOrder: 7 },
-    { slug: "gift-sets", name: "Gift Sets", description: "Curated gift sets, ready to give.", sortOrder: 8 },
+    { slug: "phone-cases", name: "Phone Cases", description: "Protective printed phone cases.", sortOrder: 5 },
+    { slug: "wallets", name: "Wallets", description: "Engraved leather wallets.", sortOrder: 6 },
+    { slug: "gift-sets", name: "Gift Sets", description: "Curated gift sets, ready to give.", sortOrder: 7 },
   ];
   const categoryRecords: Record<string, string> = {};
   for (const cat of categories) {
@@ -444,18 +443,6 @@ async function main() {
       description: "Durable enamel-coated steel mug with a printed design, ideal for camping or everyday use.",
       bestSeller: true,
       giftable: true,
-    },
-    {
-      slug: "sylp-pen",
-      sku: "PN-600",
-      name: "Support Your Local Patriot Pen",
-      category: "pens",
-      productType: "STATIONERY",
-      price: 350,
-      stockQuantity: 200,
-      material: "Recycled ABS plastic",
-      shortDescription: "A smooth-writing branded pen.",
-      description: "Everyday ballpoint pen with black ink and a printed barrel.",
     },
     {
       slug: "sylp-phone-case",

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | Support Your Local Patriot",
   },
   description:
-    "Hoodies, t-shirts, keyrings, stickers, cups, pens, phone cases and wallets — UK-printed apparel and everyday essentials.",
+    "Hoodies, t-shirts, keyrings, stickers, cups, phone cases and wallets — UK-printed apparel and everyday essentials.",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
