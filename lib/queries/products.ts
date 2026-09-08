@@ -113,5 +113,17 @@ export async function getCategories() {
   return prisma.category.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
+    // A category's own `image` (set from Admin -> Categories) always wins
+    // when present — this is only a fallback so a freshly-added product's
+    // photo shows up on its category tile immediately, with no separate
+    // "also set the category image" step required.
+    include: {
+      products: {
+        where: { status: "ACTIVE", mainImage: { not: null } },
+        select: { mainImage: true },
+        orderBy: { createdAt: "asc" },
+        take: 1,
+      },
+    },
   });
 }

@@ -46,7 +46,9 @@ export default async function HomePage() {
         secondaryHref={homepage.heroCtaSecondaryHref}
       />
 
-      <CategoryGrid categories={categories.map((c) => ({ name: c.name, slug: c.slug, image: c.image }))} />
+      <CategoryGrid
+        categories={categories.map((c) => ({ name: c.name, slug: c.slug, image: c.image ?? c.products[0]?.mainImage ?? null }))}
+      />
 
       <ProductSection
         products={bestSellers}
