@@ -3,19 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "netlify dev",
-    "build": "next build",
+    "dev": "next dev",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "db:migrate": "netlify dev --command \"prisma migrate dev\"",
-    "db:seed": "netlify dev --command \"npm run db:seed:inner\"",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "npm run db:seed:inner",
     "db:seed:inner": "node --experimental-strip-types prisma/seed.ts",
-    "db:studio": "netlify dev --command \"prisma studio\"",
-    "db:reset": "netlify dev --command \"prisma migrate reset\""
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
+    "db:deploy": "prisma migrate deploy"
   },
   "dependencies": {
-    "@netlify/blobs": "^11.0.3",
-    "@netlify/database": "^2.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "bcryptjs": "^3.0.3",

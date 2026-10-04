@@ -1,8 +1,7 @@
 // Preston Patriot — data model
 //
-// Postgres, provisioned via Netlify DB (Neon-backed) — see lib/prisma.ts for
-// how the connection string is resolved (Netlify's injected env locally via
-// `netlify dev` / at build+runtime once deployed, DATABASE_URL otherwise).
+// Postgres (Neon) — see lib/prisma.ts; the connection string comes from
+// DATABASE_URL.
 // Status/type fields below are still plain String columns with the allowed
 // values documented in a comment and enforced in code (lib/validation) —
 // carried over unchanged from the original SQLite schema rather than

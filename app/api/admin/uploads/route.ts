@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getAdminSession } from "@/lib/auth";
-import { mediaStore, ALLOWED_IMAGE_TYPES, MAX_UPLOAD_BYTES } from "@/lib/storage/media";
+import { saveMedia, ALLOWED_IMAGE_TYPES, MAX_UPLOAD_BYTES } from "@/lib/storage/media";
 
 // Deliberately NOT using requireAdminSession() — that redirects on failure,
 // which is wrong for a fetch()-based API (see the same reasoning in
@@ -31,8 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   const key = `${randomUUID()}.${ext}`;
-  const store = mediaStore();
-  await store.set(key, await file.arrayBuffer(), { metadata: { contentType: file.type } });
+  await saveMedia(key, await file.arrayBuffer());
 
   return NextResponse.json({ url: `/media/${key}` });
 }
