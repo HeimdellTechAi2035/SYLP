@@ -171,7 +171,8 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
       success_url: `${siteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/checkout`,
     });
-  } catch {
+  } catch (err) {
+    console.error("[checkout] Stripe session creation failed:", err instanceof Error ? `${err.name}: ${err.message}` : err);
     await prisma.order.delete({ where: { id: order.id } }).catch(() => {});
     return { status: "error", message: "We couldn't start checkout just now. Please try again in a moment." };
   }
