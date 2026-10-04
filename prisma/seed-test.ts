@@ -9,11 +9,10 @@ const { PrismaClient } = pkg;
 
 // FIXME (Postgres migration): the old guard here refused to run unless
 // DATABASE_URL pointed at a file named test.db — meaningless now that the
-// database is Postgres (Netlify DB), not a SQLite file. The whole test
+// database is Postgres (Neon), not a SQLite file. The whole test
 // database isolation strategy (this guard, scripts/reset-test-db.mjs,
 // vitest.config.mts, playwright.config.ts) needs a Postgres-appropriate
-// redesign — e.g. a dedicated Neon branch reset via `netlify database
-// reset` — before the automated test suite can run again. Not done yet.
+// redesign — e.g. a dedicated Neon branch reset — before the automated test suite can run again. Not done yet.
 const dbUrl = process.env.DATABASE_URL || "";
 if (!dbUrl) {
   throw new Error("DATABASE_URL is not set.");

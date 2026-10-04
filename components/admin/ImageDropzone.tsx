@@ -6,7 +6,7 @@ import "react-image-crop/dist/ReactCrop.css";
 
 /**
  * Drag-and-drop / click-to-browse image field with a built-in crop step.
- * Uploads the CROPPED result to /api/admin/uploads (Netlify Blobs-backed)
+ * Uploads the CROPPED result to /api/admin/uploads (stored on local disk)
  * and writes the resulting /media/ URL into a hidden input, so it drops
  * straight into any existing form (server action or otherwise) that
  * previously took a plain image URL.

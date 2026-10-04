@@ -240,12 +240,9 @@ We're aware some third-party embedded content (such as social media widgets, if 
 If you find any part of this website difficult to use, please tell us — email support@support-your-local-patriot.online with details of the page and the issue, and we'll do our best to fix it.`,
 };
 
-// Netlify DB injects the local connection string as NETLIFY_DB_URL when this
-// runs through `netlify dev --command` (as db:seed does) — never as
-// DATABASE_URL. Same fallback as lib/prisma.ts and prisma7.config.ts.
-const connectionString = process.env.DATABASE_URL || process.env.NETLIFY_DB_URL;
+const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
-  throw new Error("DATABASE_URL is not set — run this via `netlify dev --command` or with DATABASE_URL exported.");
+  throw new Error("DATABASE_URL is not set — export it before running this script.");
 }
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
