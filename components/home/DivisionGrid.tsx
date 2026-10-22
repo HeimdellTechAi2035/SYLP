@@ -5,7 +5,10 @@ import { Shield, ChevronRight } from "lucide-react";
 type DivisionTile = {
   name: string;
   slug: string;
-  image: string | null;
+  /** The division's own logo/badge, set in Admin -> Divisions. */
+  logo: string | null;
+  /** Fallback when there's no logo yet: first product photo. */
+  photo: string | null;
   productCount: number;
 };
 
@@ -13,10 +16,11 @@ type DivisionTile = {
  * The homepage's main way in: one box per NorthWest Patriots division, each
  * leading to that division's own merch page.
  *
- * Built phone-first (nearly all customers are on mobile): two square tiles
- * per row so every division fits on roughly one screen, with an odd last
- * tile stretched full-width rather than left hanging. The whole tile is the
- * tap target. On large screens all divisions sit in a single row.
+ * Built phone-first (nearly all customers are on mobile): two tiles per row
+ * so every division fits on roughly one screen; an odd last tile is centred
+ * rather than left hanging. Division logos already carry the name, so the
+ * logo sits uncropped on black with the name in a strip underneath instead
+ * of text printed over the artwork. The whole tile is the tap target.
  */
 export default function DivisionGrid({ divisions }: { divisions: DivisionTile[] }) {
   if (divisions.length === 0) return null;
@@ -32,39 +36,44 @@ export default function DivisionGrid({ divisions }: { divisions: DivisionTile[] 
 
       <ul className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         {divisions.map((d) => (
-          <li
-            key={d.slug}
-            className="max-lg:[&:last-child:nth-child(odd)]:col-span-2"
-          >
+          <li key={d.slug} className="max-lg:[&:last-child:nth-child(odd)]:col-span-2">
             <Link
               href={`/divisions/${d.slug}`}
-              className="group relative block h-full min-h-40 aspect-square max-lg:[li:last-child:nth-child(odd)_&]:aspect-[2/1] rounded-2xl overflow-hidden bg-blush ring-1 ring-ink/10 active:scale-[0.98] hover:ring-rose transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose"
+              className="group flex flex-col h-full mx-auto max-lg:[li:last-child:nth-child(odd)_&]:w-[calc(50%-0.375rem)] rounded-2xl overflow-hidden bg-blush ring-1 ring-ink/10 active:scale-[0.98] hover:ring-rose transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose"
             >
-              {d.image ? (
-                <Image
-                  src={d.image}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 20vw, 50vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-dark via-blush to-cloud" aria-hidden>
-                  <Shield className="absolute right-3 top-3 h-10 w-10 text-ink/15" strokeWidth={1.5} />
-                </div>
-              )}
-              {/* Dark scrim keeps the light text readable over any uploaded photo. */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
-                <h3 className="font-display text-lg sm:text-xl text-white leading-tight">{d.name}</h3>
-                <p className="mt-1 flex items-center justify-between gap-2 text-xs sm:text-sm text-white/80">
-                  <span>
+              <div className="relative aspect-square bg-black">
+                {d.logo ? (
+                  <Image
+                    src={d.logo}
+                    alt={`${d.name} logo`}
+                    fill
+                    sizes="(min-width: 1024px) 20vw, 50vw"
+                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : d.photo ? (
+                  <Image
+                    src={d.photo}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1024px) 20vw, 50vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-rose-dark via-blush to-cloud" aria-hidden>
+                    <Shield className="h-12 w-12 text-ink/30" strokeWidth={1.5} />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2 px-3 py-2.5">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-sm sm:text-base text-ink leading-tight">{d.name}</h3>
+                  <p className="text-xs text-ink-soft mt-0.5">
                     {d.productCount > 0
                       ? `${d.productCount} item${d.productCount === 1 ? "" : "s"}`
                       : "Coming soon"}
-                  </span>
-                  <ChevronRight className="h-5 w-5 shrink-0 rounded-full bg-rose text-white p-0.5" aria-hidden />
-                </p>
+                  </p>
+                </div>
+                <ChevronRight className="h-6 w-6 shrink-0 rounded-full bg-rose text-white p-1" aria-hidden />
               </div>
             </Link>
           </li>
