@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Package,
   Layers,
+  Shield,
   Boxes,
   ShoppingBag,
   ClipboardList,
@@ -26,6 +27,7 @@ import type { AdminSessionPayload } from "@/lib/auth";
 const nav = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/divisions", label: "Divisions", icon: Shield },
   { href: "/admin/categories", label: "Categories", icon: Layers },
   { href: "/admin/inventory", label: "Inventory", icon: Boxes },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },

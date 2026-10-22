@@ -88,6 +88,19 @@ model Category {
   products    Product[]
 }
 
+model Division {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  image       String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
 model Product {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -98,6 +111,11 @@ model Product {
 
   categoryId  String?
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Which NorthWest Patriots division this item belongs to (e.g. Preston,
+  // Blackpool). Each division has its own versions of the merch.
+  divisionId  String?
+  division    Division? @relation(fields: [divisionId], references: [id], onDelete: SetNull)
 
   shortDescription String?
   description      String?

@@ -64,6 +64,7 @@ export async function getGiftSets(limit = 8): Promise<ProductCardData[]> {
 
 export async function getShopProducts(params: {
   categorySlug?: string;
+  divisionSlug?: string;
   smartCollection?: "new" | "best-sellers" | "seasonal";
   q?: string;
   sort?: "price-asc" | "price-desc" | "newest";
@@ -72,6 +73,9 @@ export async function getShopProducts(params: {
 
   if (params.categorySlug) {
     where.category = { slug: params.categorySlug };
+  }
+  if (params.divisionSlug) {
+    where.division = { slug: params.divisionSlug };
   }
   if (params.smartCollection === "new") where.isNew = true;
   if (params.smartCollection === "best-sellers") where.bestSeller = true;
@@ -125,5 +129,39 @@ export async function getCategories() {
         take: 1,
       },
     },
+  });
+}
+
+export async function getDivisions() {
+  return prisma.division.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+    // Same fallback as categories: the division's own badge/image wins, else
+    // the first product photo, so a new division never shows a blank box.
+    include: {
+      products: {
+        where: { status: "ACTIVE", mainImage: { not: null } },
+        select: { mainImage: true },
+        orderBy: { createdAt: "asc" },
+        take: 1,
+      },
+      _count: { select: { products: { where: { status: "ACTIVE" } } } },
+    },
+  });
+}
+
+export async function getDivisionBySlug(slug: string) {
+  return prisma.division.findFirst({ where: { slug, isActive: true } });
+}
+
+/** Product-type categories that actually have live items in this division. */
+export async function getCategoriesForDivision(divisionSlug: string) {
+  return prisma.category.findMany({
+    where: {
+      isActive: true,
+      products: { some: { status: "ACTIVE", division: { slug: divisionSlug } } },
+    },
+    orderBy: { sortOrder: "asc" },
+    select: { name: true, slug: true },
   });
 }

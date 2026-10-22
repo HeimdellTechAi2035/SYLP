@@ -18,6 +18,17 @@ cd "$APP_DIR"
 g() { git -c safe.directory="$APP_DIR" "$@"; }
 
 g fetch -q origin "$BRANCH"
+
+# Keep this script itself up to date: if GitHub has a newer version of it,
+# install that and re-run, so deploy changes never need a manual step.
+SELF=/usr/local/bin/deploy-sylp
+if NEW=$(g show "origin/$BRANCH:deploy/deploy-sylp.sh" 2>/dev/null) && [[ "$NEW" != "$(cat "$SELF")" ]]; then
+  echo "Updating deploy script from GitHub"
+  printf '%s\n' "$NEW" > "$SELF.new" && chmod 755 "$SELF.new" && mv "$SELF.new" "$SELF"
+  flock -u 9
+  exec "$SELF" "$@"
+fi
+
 CURRENT=$(g rev-parse HEAD)
 LATEST=$(g rev-parse "origin/$BRANCH")
 
@@ -48,6 +59,11 @@ set -a; . "$ENV_FILE"; set +a
 # Only reinstall packages when they actually changed - keeps deploys quick.
 if [[ ! -d node_modules ]] || ! g diff --quiet "$CURRENT" "$LATEST" -- package.json package-lock.json; then
   npm ci --no-audit --no-fund --silent
+fi
+# Apply new database changes (e.g. new tables) before building.
+if ! g diff --quiet "$CURRENT" "$LATEST" -- prisma/migrations prisma/schema.prisma || [[ "${1:-}" == "--migrate" ]]; then
+  echo "Applying database migrations"
+  npx prisma migrate deploy
 fi
 npm run build
 

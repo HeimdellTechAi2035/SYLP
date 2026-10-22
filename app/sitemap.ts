@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  const [products, categories, policies] = await Promise.all([
+  const [products, categories, policies, divisions] = await Promise.all([
     prisma.product.findMany({ where: { status: "ACTIVE" }, select: { slug: true, updatedAt: true } }),
     prisma.category.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
     prisma.policy.findMany({ select: { slug: true, lastUpdated: true } }),
+    prisma.division.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
   ]);
 
   const staticRoutes = ["", "/shop", "/about", "/faq", "/contact", "/track-order"].map((path) => ({
@@ -23,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...smartCollections,
+    ...divisions.map((d) => ({ url: `${siteUrl}/divisions/${d.slug}`, lastModified: d.updatedAt })),
     ...categories.map((c) => ({ url: `${siteUrl}/collections/${c.slug}`, lastModified: c.updatedAt })),
     ...products.map((p) => ({ url: `${siteUrl}/products/${p.slug}`, lastModified: p.updatedAt })),
     ...policies.map((p) => ({ url: `${siteUrl}/legal/${p.slug}`, lastModified: p.lastUpdated })),
