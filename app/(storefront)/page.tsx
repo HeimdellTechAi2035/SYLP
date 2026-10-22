@@ -40,6 +40,16 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Divisions first: on a phone this is the first thing customers see. */}
+      <DivisionGrid
+        divisions={divisions.map((d) => ({
+          name: d.name,
+          slug: d.slug,
+          image: d.image ?? d.products[0]?.mainImage ?? null,
+          productCount: d._count.products,
+        }))}
+      />
+
       <Hero
         title={homepage.heroTitle}
         subtitle={homepage.heroSubtitle}
@@ -49,15 +59,6 @@ export default async function HomePage() {
         secondaryLabel={homepage.heroCtaSecondaryLabel}
         secondaryHref={homepage.heroCtaSecondaryHref}
         supportEmail={settings.supportEmail}
-      />
-
-      <DivisionGrid
-        divisions={divisions.map((d) => ({
-          name: d.name,
-          slug: d.slug,
-          image: d.image ?? d.products[0]?.mainImage ?? null,
-          productCount: d._count.products,
-        }))}
       />
 
       <CategoryGrid

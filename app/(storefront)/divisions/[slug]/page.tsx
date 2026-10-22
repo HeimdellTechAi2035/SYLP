@@ -44,7 +44,7 @@ export default async function DivisionPage({
   const products = await getShopProducts({ divisionSlug: slug, categorySlug: activeType });
 
   const pill = (active: boolean) =>
-    `rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+    `shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
       active ? "bg-rose text-white" : "bg-blush text-ink hover:bg-rose-dark hover:text-white"
     }`;
 
@@ -56,8 +56,8 @@ export default async function DivisionPage({
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-rose-dark/70 via-blush to-cloud" aria-hidden />
         )}
-        <div className="relative container-page py-12 sm:py-16">
-          <nav aria-label="Breadcrumb" className="text-sm text-ink-soft mb-4">
+        <div className="relative container-page py-6 sm:py-14">
+          <nav aria-label="Breadcrumb" className="text-xs sm:text-sm text-ink-soft mb-3">
             <Link href="/" className="hover:text-ink">Home</Link>
             <span className="mx-2" aria-hidden>/</span>
             <Link href="/#divisions" className="hover:text-ink">Divisions</Link>
@@ -65,18 +65,18 @@ export default async function DivisionPage({
             <span className="text-ink">{division.name}</span>
           </nav>
           <div className="flex items-center gap-3">
-            <Shield className="h-9 w-9 text-rose shrink-0" aria-hidden />
-            <h1 className="font-display text-4xl sm:text-5xl">{division.name}</h1>
+            <Shield className="h-7 w-7 sm:h-9 sm:w-9 text-rose shrink-0" aria-hidden />
+            <h1 className="font-display text-3xl sm:text-5xl leading-tight">{division.name}</h1>
           </div>
           {division.description && (
-            <p className="mt-3 max-w-2xl text-ink-soft">{division.description}</p>
+            <p className="mt-2 max-w-2xl text-sm sm:text-base text-ink-soft">{division.description}</p>
           )}
         </div>
       </section>
 
-      <div className="container-page py-10">
+      <div className="container-page py-5 sm:py-10">
         {types.length > 1 && (
-          <div className="flex flex-wrap gap-2 mb-8" role="list" aria-label="Filter by type">
+          <div className="-mx-5 px-5 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto sm:flex-wrap mb-5 sm:mb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="list" aria-label="Filter by type">
             <Link href={`/divisions/${slug}`} className={pill(!activeType)} role="listitem" aria-current={!activeType ? "page" : undefined}>
               All
             </Link>
@@ -99,8 +99,8 @@ export default async function DivisionPage({
           emptyMessage={`${division.name} merch is on its way — check back soon.`}
         />
 
-        <div className="mt-12 text-center">
-          <Link href="/#divisions" className="text-sm font-semibold text-rose hover:text-ink">
+        <div className="mt-8 sm:mt-12 text-center">
+          <Link href="/#divisions" className="inline-block py-3 text-sm font-semibold text-rose hover:text-ink">
             &larr; See all divisions
           </Link>
         </div>

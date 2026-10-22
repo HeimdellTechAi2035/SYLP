@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Shield, ArrowRight } from "lucide-react";
-import SectionHeading from "@/components/home/SectionHeading";
+import { Shield, ChevronRight } from "lucide-react";
 
 type DivisionTile = {
   name: string;
@@ -13,60 +12,64 @@ type DivisionTile = {
 /**
  * The homepage's main way in: one box per NorthWest Patriots division, each
  * leading to that division's own merch page.
+ *
+ * Built phone-first (nearly all customers are on mobile): two square tiles
+ * per row so every division fits on roughly one screen, with an odd last
+ * tile stretched full-width rather than left hanging. The whole tile is the
+ * tap target. On large screens all divisions sit in a single row.
  */
 export default function DivisionGrid({ divisions }: { divisions: DivisionTile[] }) {
   if (divisions.length === 0) return null;
 
   return (
-    <section id="divisions" className="container-page py-16 scroll-mt-24">
-      <SectionHeading
-        eyebrow="Choose your division"
-        title="Merch for every corner of the North West"
-        body="Pick your division to see its own hoodies, tees and gear."
-        align="center"
-      />
-      {/* flex-wrap + justify-center so a 3 + 2 last row centres itself. */}
-      <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+    <section id="divisions" className="container-page pt-6 pb-10 sm:py-14 scroll-mt-20">
+      <div className="mb-5 sm:mb-8 text-center">
+        <p className="text-rose font-semibold tracking-wide text-xs uppercase mb-1.5">Choose your division</p>
+        <h2 className="font-display text-2xl sm:text-4xl text-ink leading-tight">
+          Merch for every corner of the North West
+        </h2>
+      </div>
+
+      <ul className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         {divisions.map((d) => (
-          <Link
+          <li
             key={d.slug}
-            href={`/divisions/${d.slug}`}
-            className="group relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] aspect-[16/10] rounded-2xl overflow-hidden bg-blush ring-1 ring-ink/10 hover:ring-rose transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose"
+            className="max-lg:[&:last-child:nth-child(odd)]:col-span-2"
           >
-            {d.image ? (
-              <Image
-                src={d.image}
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              <div
-                className="absolute inset-0 bg-gradient-to-br from-rose-dark via-blush to-cloud"
-                aria-hidden
-              >
-                <Shield className="absolute right-4 top-4 h-16 w-16 text-ink/15" strokeWidth={1.5} />
-              </div>
-            )}
-            {/* Dark scrim keeps the light text readable over any uploaded photo. */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-5 flex items-end justify-between gap-3">
-              <div>
-                <h3 className="font-display text-2xl text-white leading-tight">{d.name}</h3>
-                <p className="text-sm text-white/80 mt-1">
-                  {d.productCount > 0
-                    ? `${d.productCount} item${d.productCount === 1 ? "" : "s"}`
-                    : "Merch coming soon"}
+            <Link
+              href={`/divisions/${d.slug}`}
+              className="group relative block h-full min-h-40 aspect-square max-lg:[li:last-child:nth-child(odd)_&]:aspect-[2/1] rounded-2xl overflow-hidden bg-blush ring-1 ring-ink/10 active:scale-[0.98] hover:ring-rose transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose"
+            >
+              {d.image ? (
+                <Image
+                  src={d.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 20vw, 50vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-dark via-blush to-cloud" aria-hidden>
+                  <Shield className="absolute right-3 top-3 h-10 w-10 text-ink/15" strokeWidth={1.5} />
+                </div>
+              )}
+              {/* Dark scrim keeps the light text readable over any uploaded photo. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+                <h3 className="font-display text-lg sm:text-xl text-white leading-tight">{d.name}</h3>
+                <p className="mt-1 flex items-center justify-between gap-2 text-xs sm:text-sm text-white/80">
+                  <span>
+                    {d.productCount > 0
+                      ? `${d.productCount} item${d.productCount === 1 ? "" : "s"}`
+                      : "Coming soon"}
+                  </span>
+                  <ChevronRight className="h-5 w-5 shrink-0 rounded-full bg-rose text-white p-0.5" aria-hidden />
                 </p>
               </div>
-              <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-rose px-3 py-1.5 text-sm font-semibold text-white group-hover:bg-rose-dark transition-colors">
-                Shop <ArrowRight className="h-4 w-4" aria-hidden />
-              </span>
-            </div>
-          </Link>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }
