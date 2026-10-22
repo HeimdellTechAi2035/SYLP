@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -26,6 +27,7 @@ export default async function EditProductPage({
       where: { id },
       include: {
         images: { orderBy: { sortOrder: "asc" } },
+        division: { select: { slug: true, name: true } },
         variants: true,
         giftSetItems: { include: { component: { select: { id: true, name: true } } } },
         relatedFrom: { include: { relatedProduct: { select: { id: true, name: true } } } },
@@ -57,6 +59,12 @@ export default async function EditProductPage({
 
   return (
     <div>
+      <Link
+        href={product.division ? `/admin/products?division=${product.division.slug}` : "/admin/products"}
+        className="inline-block text-sm text-rose mb-2"
+      >
+        &larr; {product.division ? product.division.name : "All products"}
+      </Link>
       <AdminPageHeader title={`Edit: ${product.name}`} />
       <ProductForm action={boundUpdate} product={product} categories={categories} divisions={divisions} packagingProfiles={packagingProfiles} />
 

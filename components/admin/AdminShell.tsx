@@ -32,7 +32,7 @@ const nav = [
   { href: "/admin/inventory", label: "Inventory", icon: Boxes },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/production", label: "Production", icon: ClipboardList },
-  { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/customers", label: "Buyers", icon: Users },
   { href: "/admin/gift-sets", label: "Gift Sets", icon: Gift },
   { href: "/admin/discounts", label: "Discounts", icon: Tag },
   { href: "/admin/reviews", label: "Reviews", icon: Star },

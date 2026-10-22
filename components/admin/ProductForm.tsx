@@ -48,12 +48,15 @@ export default function ProductForm({
   product,
   categories,
   divisions,
+  defaultDivisionId,
   packagingProfiles,
 }: {
   action: (formData: FormData) => Promise<void> | void;
   product: ProductWithRelations;
   categories: { id: string; name: string }[];
   divisions: { id: string; name: string }[];
+  /** Pre-selects a division when adding a product from a division's list. */
+  defaultDivisionId?: string;
   packagingProfiles: { id: string; name: string }[];
 }) {
   const p = product;
@@ -89,7 +92,7 @@ export default function ProductForm({
           <FormSelect
             label="Division"
             name="divisionId"
-            defaultValue={p?.divisionId ?? ""}
+            defaultValue={p?.divisionId ?? defaultDivisionId ?? ""}
             options={[{ value: "", label: "None (not shown on a division page)" }, ...divisions.map((d) => ({ value: d.id, label: d.name }))]}
           />
           <FormSelect
