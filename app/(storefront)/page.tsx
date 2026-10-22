@@ -4,9 +4,11 @@ import {
   getBestSellers,
   getFeaturedProducts,
   getCategories,
+  getDivisions,
 } from "@/lib/queries/products";
 import Hero from "@/components/home/Hero";
 import CategoryGrid from "@/components/home/CategoryGrid";
+import DivisionGrid from "@/components/home/DivisionGrid";
 import ProductSection from "@/components/home/ProductSection";
 import StorySection from "@/components/home/StorySection";
 import WhyShop from "@/components/home/WhyShop";
@@ -18,7 +20,7 @@ import SectionHeading from "@/components/home/SectionHeading";
 import Link from "next/link";
 
 export default async function HomePage() {
-  const [homepage, settings, bestSellers, featured, categories, features, faqs, reviews] =
+  const [homepage, settings, bestSellers, featured, categories, features, faqs, reviews, divisions] =
     await Promise.all([
       getHomepageContent(),
       getSiteSettings(),
@@ -33,6 +35,7 @@ export default async function HomePage() {
         take: 6,
         include: { product: { select: { name: true, slug: true } } },
       }),
+      getDivisions(),
     ]);
 
   return (
@@ -46,6 +49,15 @@ export default async function HomePage() {
         secondaryLabel={homepage.heroCtaSecondaryLabel}
         secondaryHref={homepage.heroCtaSecondaryHref}
         supportEmail={settings.supportEmail}
+      />
+
+      <DivisionGrid
+        divisions={divisions.map((d) => ({
+          name: d.name,
+          slug: d.slug,
+          image: d.image ?? d.products[0]?.mainImage ?? null,
+          productCount: d._count.products,
+        }))}
       />
 
       <CategoryGrid

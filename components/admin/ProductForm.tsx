@@ -10,6 +10,7 @@ type ProductWithRelations = {
   status: string;
   productType: string;
   categoryId: string | null;
+  divisionId: string | null;
   shortDescription: string | null;
   description: string | null;
   price: number;
@@ -46,11 +47,13 @@ export default function ProductForm({
   action,
   product,
   categories,
+  divisions,
   packagingProfiles,
 }: {
   action: (formData: FormData) => Promise<void> | void;
   product: ProductWithRelations;
   categories: { id: string; name: string }[];
+  divisions: { id: string; name: string }[];
   packagingProfiles: { id: string; name: string }[];
 }) {
   const p = product;
@@ -82,6 +85,12 @@ export default function ProductForm({
               { value: "GIFT_SET", label: "Gift Set" },
               { value: "OTHER", label: "Other" },
             ]}
+          />
+          <FormSelect
+            label="Division"
+            name="divisionId"
+            defaultValue={p?.divisionId ?? ""}
+            options={[{ value: "", label: "None (not shown on a division page)" }, ...divisions.map((d) => ({ value: d.id, label: d.name }))]}
           />
           <FormSelect
             label="Category"

@@ -70,6 +70,7 @@ function extraFields(formData: FormData) {
     seoTitle: str("seoTitle"),
     metaDescription: str("metaDescription"),
     packagingProfileId: str("packagingProfileId"),
+    divisionId: str("divisionId"),
   };
 }
 

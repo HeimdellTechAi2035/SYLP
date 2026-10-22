@@ -21,7 +21,7 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [product, categories, otherProducts, allOtherProducts, packagingProfiles] = await Promise.all([
+  const [product, categories, otherProducts, allOtherProducts, packagingProfiles, divisions] = await Promise.all([
     prisma.product.findUnique({
       where: { id },
       include: {
@@ -43,6 +43,7 @@ export default async function EditProductPage({
       orderBy: { name: "asc" },
     }),
     prisma.packagingProfile.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" } }),
+    prisma.division.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true } }),
   ]);
 
   if (!product) notFound();
@@ -57,7 +58,7 @@ export default async function EditProductPage({
   return (
     <div>
       <AdminPageHeader title={`Edit: ${product.name}`} />
-      <ProductForm action={boundUpdate} product={product} categories={categories} packagingProfiles={packagingProfiles} />
+      <ProductForm action={boundUpdate} product={product} categories={categories} divisions={divisions} packagingProfiles={packagingProfiles} />
 
       <div className="max-w-3xl mt-12 border-t border-ink/10 pt-6">
         <h2 className="font-semibold text-lg mb-4">Stripe</h2>
