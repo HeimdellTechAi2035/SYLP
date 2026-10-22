@@ -10,7 +10,7 @@ export async function updateSiteSettings(formData: FormData) {
   const str = (key: string) => String(formData.get(key) || "") || null;
 
   const data = {
-    businessName: String(formData.get("businessName") || "Support Your Local Patriot"),
+    businessName: String(formData.get("businessName") || "NorthWest Patriots"),
     supportEmail: str("supportEmail"),
     supportPhone: str("supportPhone"),
     freeDeliveryThreshold: formData.get("freeDeliveryThreshold") ? Math.round(Number(formData.get("freeDeliveryThreshold")) * 100) : null,

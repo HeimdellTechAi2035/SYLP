@@ -6,9 +6,9 @@ import type { MetadataRoute } from "next";
 // sizes that don't exist yet; replace with proper 192/512 PNGs when available.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Support Your Local Patriot Admin",
+    name: "NorthWest Patriots Admin",
     short_name: "HbM Admin",
-    description: "Order management for Support Your Local Patriot",
+    description: "Order management for NorthWest Patriots",
     start_url: "/admin",
     scope: "/admin",
     display: "standalone",

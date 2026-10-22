@@ -28,7 +28,7 @@ const { PrismaClient } = pkg;
 // Facts used throughout, kept consistent with what's actually configured
 // elsewhere in the app (SiteSettings, DeliveryZone, the seeded product
 // catalogue) rather than invented figures:
-// - Trading name: Support Your Local Patriot ("SYLP")
+// - Trading name: NorthWest Patriots
 // - Legal entity: Heimdell Tech Ai Ltd, registered in England & Wales,
 //   Company No. 16478408, Preston, PR1 9DJ
 // - ICO registration: ZC079121
@@ -39,7 +39,7 @@ const { PrismaClient } = pkg;
 // - The engraved wallet is made to order (personalised) — legally distinct
 //   from the rest of the catalogue for cancellation-right purposes
 const COMPANY_LINE =
-  "Support Your Local Patriot is operated by Heimdell Tech Ai Ltd, a company registered in England & Wales (Company No. 16478408), registered office Preston, PR1 9DJ (\"we\", \"us\", \"our\").";
+  "NorthWest Patriots is operated by Heimdell Tech Ai Ltd, a company registered in England & Wales (Company No. 16478408), registered office Preston, PR1 9DJ (\"we\", \"us\", \"our\").";
 
 const POLICY_BODIES: Record<string, string> = {
   terms: `${COMPANY_LINE}
@@ -116,7 +116,7 @@ Our products and services are not directed at, or intended for purchase by, chil
 10. Complaints
 If you're unhappy with how we've handled your personal data, please contact us first at support@support-your-local-patriot.online. You also have the right to complain to the Information Commissioner's Office (ICO) at ico.org.uk or on 0303 123 1113.`,
 
-  cookies: `This Cookie Policy explains how Support Your Local Patriot ("we", "us") uses cookies and similar technologies on this website.
+  cookies: `This Cookie Policy explains how NorthWest Patriots ("we", "us") uses cookies and similar technologies on this website.
 
 1. What are cookies
 Cookies are small text files stored on your device when you visit a website. They help the site function correctly and can also be used to remember your preferences or gather anonymous usage statistics.
@@ -274,7 +274,7 @@ async function main() {
     update: {},
     create: {
       id: 1,
-      businessName: "Support Your Local Patriot",
+      businessName: "NorthWest Patriots",
       supportEmail: "support@support-your-local-patriot.online",
       freeDeliveryThreshold: 3500,
       standardDeliveryPrice: 295,
@@ -292,17 +292,17 @@ async function main() {
     create: {
       id: 1,
       announcementBarText: "New drop just landed · UK delivery available · Free delivery over £35",
-      heroTitle: "Support Your Local Patriot",
+      heroTitle: "NorthWest Patriots",
       heroSubtitle:
-        "Support Your Local Patriot started with a simple idea: give people who are proud of where they're from something real to wear it with. Our hoodies and t-shirts are printed and packed to order right here in the UK. We're working on bringing the rest of the range home too — for now, some items are sourced from trusted suppliers abroad while we find the right UK partners — but every order is still checked by hand before it reaches you.",
+        "NorthWest Patriots started with a simple idea: give people who are proud of where they're from something real to wear it with. Our hoodies and t-shirts are printed and packed to order right here in the UK. We're working on bringing the rest of the range home too — for now, some items are sourced from trusted suppliers abroad while we find the right UK partners — but every order is still checked by hand before it reaches you.",
       heroCtaPrimaryLabel: "Shop Hoodies",
       heroCtaPrimaryHref: "/collections/hoodies",
       heroCtaSecondaryLabel: "Shop All",
       heroCtaSecondaryHref: "/shop",
       heroImage: "/products/hoodie-front.jpg",
-      storyTitle: "Support Your Local Patriot",
+      storyTitle: "NorthWest Patriots",
       storyBody:
-        "Support Your Local Patriot started with a simple idea: give people who are proud of where they're from something real to wear it with. Our hoodies and t-shirts are printed and packed to order right here in the UK. We're working on bringing the rest of the range home too — for now, some items are sourced from trusted suppliers abroad while we find the right UK partners — but every order is still checked by hand before it reaches you.",
+        "NorthWest Patriots started with a simple idea: give people who are proud of where they're from something real to wear it with. Our hoodies and t-shirts are printed and packed to order right here in the UK. We're working on bringing the rest of the range home too — for now, some items are sourced from trusted suppliers abroad while we find the right UK partners — but every order is still checked by hand before it reaches you.",
       giftSectionTitle: "The perfect gift, ready to give",
       giftSectionBody:
         "Giftable sets and accessories for birthdays, thank-yous and every occasion in between — each one packed with the same care as if we were keeping it for ourselves.",
@@ -360,7 +360,7 @@ async function main() {
     {
       slug: "sylp-hoodie",
       sku: "HD-100",
-      name: "Support Your Local Patriot Hoodie",
+      name: "NorthWest Patriots Hoodie",
       category: "hoodies",
       productType: "APPAREL",
       price: 5500,
@@ -374,14 +374,14 @@ async function main() {
       featured: true,
       mainImage: "/products/hoodie-front.jpg",
       images: [
-        { url: "/products/hoodie-front.jpg", altText: "Support Your Local Patriot Hoodie, front view" },
-        { url: "/products/hoodie-back.jpg", altText: "Support Your Local Patriot Hoodie, back print detail" },
+        { url: "/products/hoodie-front.jpg", altText: "NorthWest Patriots Hoodie, front view" },
+        { url: "/products/hoodie-back.jpg", altText: "NorthWest Patriots Hoodie, back print detail" },
       ],
     },
     {
       slug: "sylp-t-shirt",
       sku: "TS-200",
-      name: "Support Your Local Patriot T-Shirt",
+      name: "NorthWest Patriots T-Shirt",
       category: "t-shirts",
       productType: "APPAREL",
       price: 2499,
@@ -394,14 +394,14 @@ async function main() {
       isNew: true,
       mainImage: "/products/tshirt-front.jpg",
       images: [
-        { url: "/products/tshirt-front.jpg", altText: "Support Your Local Patriot T-Shirt, front view" },
-        { url: "/products/tshirt-back.jpg", altText: "Support Your Local Patriot T-Shirt, back print detail" },
+        { url: "/products/tshirt-front.jpg", altText: "NorthWest Patriots T-Shirt, front view" },
+        { url: "/products/tshirt-back.jpg", altText: "NorthWest Patriots T-Shirt, back print detail" },
       ],
     },
     {
       slug: "sylp-keyring",
       sku: "KR-300",
-      name: "Support Your Local Patriot Keyring",
+      name: "NorthWest Patriots Keyring",
       category: "keyrings",
       productType: "ACCESSORY",
       price: 600,
@@ -414,7 +414,7 @@ async function main() {
     {
       slug: "sylp-enamel-mug",
       sku: "CP-500",
-      name: "Support Your Local Patriot Enamel Mug",
+      name: "NorthWest Patriots Enamel Mug",
       category: "cups",
       productType: "DRINKWARE",
       price: 1200,
@@ -429,7 +429,7 @@ async function main() {
     {
       slug: "sylp-phone-case",
       sku: "PC-700",
-      name: "Support Your Local Patriot Phone Case",
+      name: "NorthWest Patriots Phone Case",
       category: "phone-cases",
       productType: "ACCESSORY",
       price: 1500,
@@ -442,7 +442,7 @@ async function main() {
     {
       slug: "sylp-engraved-wallet",
       sku: "WL-900",
-      name: "Support Your Local Patriot Engraved Wallet",
+      name: "NorthWest Patriots Engraved Wallet",
       category: "wallets",
       productType: "ACCESSORY",
       price: 2800,

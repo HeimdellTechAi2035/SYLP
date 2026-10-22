@@ -50,17 +50,17 @@ export default async function Header() {
           <MobileMenu links={navLinks} categoryLinks={categoryLinks} />
         </div>
 
-        <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="Support Your Local Patriot — home">
+        <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="NorthWest Patriots — home">
           <Image
             src="/brand/logo.jpg"
-            alt="Support Your Local Patriot"
+            alt="NorthWest Patriots"
             width={44}
             height={44}
             className="rounded-full object-cover"
             priority
           />
           <span className="hidden sm:block font-display text-lg text-ink leading-tight">
-            Support Your Local Patriot
+            NorthWest Patriots
           </span>
         </Link>
 

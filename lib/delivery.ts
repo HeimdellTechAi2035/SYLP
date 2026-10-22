@@ -26,7 +26,7 @@ export type DeliveryResolution = {
   /** Zone/method name, snapshotted onto the Order for admin/email display. */
   methodName: string | null;
   /**
-   * What Support Your Local Patriot expects to pay the carrier for this zone's method —
+   * What NorthWest Patriots expects to pay the carrier for this zone's method —
    * independent of `amount`, and still present even when `amount` is 0
    * (free delivery is a pricing decision, not free fulfilment).
    */

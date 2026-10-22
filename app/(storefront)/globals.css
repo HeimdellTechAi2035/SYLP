@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Preston Patriot heraldic palette — black, crimson, antique gold and
+  /* NorthWest Patriots heraldic palette — black, crimson, antique gold and
      navy, drawn from the crest logo (knight, St George's cross, Union Jack).
      All tokens below are aliases onto this family — repointing them here
      re-themes every existing bg-cream/text-ink/etc. utility class across the

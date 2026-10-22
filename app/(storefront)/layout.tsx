@@ -23,8 +23,8 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "Support Your Local Patriot | Hoodies, Apparel & Gifts",
-    template: "%s | Support Your Local Patriot",
+    default: "NorthWest Patriots | Hoodies, Apparel & Gifts",
+    template: "%s | NorthWest Patriots",
   },
   description:
     "Hoodies, t-shirts, keyrings, stickers, cups, phone cases and wallets — UK-printed apparel and everyday essentials.",
