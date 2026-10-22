@@ -52,11 +52,11 @@ export default async function Header() {
 
         <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="NorthWest Patriots — home">
           <Image
-            src="/brand/logo.jpg"
+            src="/brand/logo.png"
             alt="NorthWest Patriots"
-            width={44}
-            height={44}
-            className="rounded-full object-cover"
+            width={56}
+            height={56}
+            className="h-12 w-12 sm:h-14 sm:w-14 rounded-full"
             priority
           />
           <span className="hidden sm:block font-display text-lg text-ink leading-tight">

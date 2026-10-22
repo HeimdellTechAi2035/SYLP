@@ -75,6 +75,6 @@ next-env.d.ts
 /.claude/
 
 # Raw source images kept only for reference while producing a processed
-# asset elsewhere (e.g. public/brand/logo.jpg) — not used by the app itself.
+# asset elsewhere (e.g. public/brand/logo.png) — not used by the app itself.
 /Screenshot_20260906_121245_Instagram.jpg
 /962426440_1788868617218499.jpg
