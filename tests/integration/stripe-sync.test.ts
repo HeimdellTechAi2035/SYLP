@@ -210,7 +210,7 @@ describe("syncProductToStripe", () => {
 
   it("never sends a localhost image URL to Stripe", async () => {
     const product = await createActiveProduct();
-    await prisma.product.update({ where: { id: product.id }, data: { mainImage: "http://localhost:3000/brand/logo.jpg" } });
+    await prisma.product.update({ where: { id: product.id }, data: { mainImage: "http://localhost:3000/brand/logo.png" } });
     await syncProductToStripe(product.id, { priceChanged: true, detailsChanged: true });
 
     const [args] = vi.mocked(stripe.products.create).mock.calls[0];

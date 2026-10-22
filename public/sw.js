@@ -24,8 +24,8 @@ self.addEventListener("push", (event) => {
   const options = {
     body: payload.body || "",
     data: { url: payload.url || "/admin/orders" },
-    icon: "/brand/logo.jpg",
-    badge: "/brand/logo.jpg",
+    icon: "/brand/icon-192.png",
+    badge: "/brand/badge-96.png",
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
