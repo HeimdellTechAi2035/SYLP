@@ -1,0 +1,9 @@
+[Unit]
+Description=Deploy NorthWest Patriots from GitHub if main has changed
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/deploy-sylp
+TimeoutStartSec=1200

@@ -1,4 +1,4 @@
-# Security — Support Your Local Patriot
+# Security — NorthWest Patriots
 
 ## Environment variables
 

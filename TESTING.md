@@ -1,4 +1,4 @@
-# Testing — Support Your Local Patriot
+# Testing — NorthWest Patriots
 
 ## Stack
 

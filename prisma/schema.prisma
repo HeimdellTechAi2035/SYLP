@@ -1,4 +1,4 @@
-// Preston Patriot — data model
+// NorthWest Patriots — data model
 //
 // Postgres (Neon) — see lib/prisma.ts; the connection string comes from
 // DATABASE_URL.
@@ -195,7 +195,7 @@ model ProductVariant {
   id            String   @id @default(cuid())
   productId     String
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  name          String   // display label, e.g. "Preston Patriot Hoodie — Large / Black"
+  name          String   // display label, e.g. "NorthWest Patriots Hoodie — Large / Black"
   size          String?
   colour        String?
   packSize      String?

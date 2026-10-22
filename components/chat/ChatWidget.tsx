@@ -21,7 +21,7 @@ const QUICK_ACTIONS = [
 ];
 
 const GREETING =
-  "Hi 👋 I'm the Support Your Local Patriot assistant. I can help with products, delivery, orders, returns and general questions.";
+  "Hi 👋 I'm the NorthWest Patriots assistant. I can help with products, delivery, orders, returns and general questions.";
 
 export default function ChatWidget() {
   const pathname = usePathname();
@@ -114,11 +114,11 @@ export default function ChatWidget() {
           ref={panelRef}
           role="dialog"
           aria-modal="true"
-          aria-label="Support Your Local Patriot chat assistant"
+          aria-label="NorthWest Patriots chat assistant"
           className="mb-3 w-[calc(100vw-2rem)] max-w-sm h-[28rem] max-h-[70vh] bg-cream rounded-2xl shadow-xl flex flex-col overflow-hidden border border-ink/20"
         >
           <div className="flex items-center justify-between px-4 py-3 bg-rose-dark text-ink">
-            <span className="font-display text-sm">Support Your Local Patriot Assistant</span>
+            <span className="font-display text-sm">NorthWest Patriots Assistant</span>
             <button
               type="button"
               onClick={() => {

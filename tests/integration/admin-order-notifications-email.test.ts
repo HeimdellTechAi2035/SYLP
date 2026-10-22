@@ -61,7 +61,7 @@ async function orderIn(status: string, overrides: Record<string, unknown> = {}) 
       items: {
         create: [
           {
-            productName: "Support Your Local Patriot Hoodie",
+            productName: "NorthWest Patriots Hoodie",
             variantLabel: "Large / Black",
             sku: "APP-100",
             unitPrice: 450,
@@ -69,7 +69,7 @@ async function orderIn(status: string, overrides: Record<string, unknown> = {}) 
             lineTotal: 900,
           },
           {
-            productName: "Support Your Local Patriot Enamel Mug",
+            productName: "NorthWest Patriots Enamel Mug",
             unitPrice: 1300,
             quantity: 1,
             lineTotal: 1300,
@@ -153,7 +153,7 @@ describe("admin order email: content", () => {
 
     const call = vi.mocked(sendEmail).mock.calls[0][0];
     expect(call.to).toBe(RECIPIENT);
-    expect(call.subject).toBe(`New Support Your Local Patriot Order — ${order.orderNumber}`);
+    expect(call.subject).toBe(`New NorthWest Patriots Order — ${order.orderNumber}`);
 
     // 7. order number
     expect(call.text).toContain(order.orderNumber);
@@ -162,13 +162,13 @@ describe("admin order email: content", () => {
     expect(call.text).toContain("sarah@example.com");
     expect(call.text).toContain("07123 456789");
     // 9. products
-    expect(call.text).toContain("Support Your Local Patriot Hoodie");
-    expect(call.text).toContain("Support Your Local Patriot Enamel Mug");
+    expect(call.text).toContain("NorthWest Patriots Hoodie");
+    expect(call.text).toContain("NorthWest Patriots Enamel Mug");
     // 10. variant
     expect(call.text).toContain("Large / Black");
     // 11. quantities
-    expect(call.text).toContain("2 x Support Your Local Patriot Hoodie");
-    expect(call.text).toContain("1 x Support Your Local Patriot Enamel Mug");
+    expect(call.text).toContain("2 x NorthWest Patriots Hoodie");
+    expect(call.text).toContain("1 x NorthWest Patriots Enamel Mug");
     // 12. complete delivery address
     expect(call.text).toContain("10 Example Street");
     expect(call.text).toContain("Preston");

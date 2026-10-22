@@ -30,7 +30,7 @@ export default function Hero({
             Printed in the UK
           </p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-[1.1] text-ink">
-            {title ?? "Support Your Local Patriot — wear your colours"}
+            {title ?? "NorthWest Patriots — wear your colours"}
           </h1>
           <p className="mt-5 text-ink-soft text-lg max-w-xl mx-auto lg:mx-0">
             {subtitle ?? "Hoodies, tees and everyday gear, printed and packed to order in the UK."}

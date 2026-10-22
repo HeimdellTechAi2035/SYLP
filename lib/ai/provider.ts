@@ -12,9 +12,9 @@ export function aiProviderConfigured(): boolean {
 }
 
 const GROUNDING_INSTRUCTIONS =
-  "Answer using only the Support Your Local Patriot knowledge supplied below. " +
+  "Answer using only the NorthWest Patriots knowledge supplied below. " +
   "If the answer is not supported by this knowledge, say you do not have " +
-  "confirmed information about that and suggest contacting Support Your Local Patriot. " +
+  "confirmed information about that and suggest contacting NorthWest Patriots. " +
   "Never invent prices, availability, ingredients, safety claims, delivery " +
   "promises, discounts, tracking numbers or order statuses.";
 
