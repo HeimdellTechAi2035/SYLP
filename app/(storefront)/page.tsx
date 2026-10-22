@@ -45,7 +45,8 @@ export default async function HomePage() {
         divisions={divisions.map((d) => ({
           name: d.name,
           slug: d.slug,
-          image: d.image ?? d.products[0]?.mainImage ?? null,
+          logo: d.image,
+          photo: d.products[0]?.mainImage ?? null,
           productCount: d._count.products,
         }))}
       />

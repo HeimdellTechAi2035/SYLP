@@ -51,12 +51,8 @@ export default async function DivisionPage({
   return (
     <div>
       <section className="relative overflow-hidden bg-blush">
-        {division.image ? (
-          <Image src={division.image} alt="" fill priority sizes="100vw" className="object-cover opacity-40" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-rose-dark/70 via-blush to-cloud" aria-hidden />
-        )}
-        <div className="relative container-page py-6 sm:py-14">
+        <div className="absolute inset-0 bg-gradient-to-br from-rose-dark/60 via-blush to-cloud" aria-hidden />
+        <div className="relative container-page py-5 sm:py-12">
           <nav aria-label="Breadcrumb" className="text-xs sm:text-sm text-ink-soft mb-3">
             <Link href="/" className="hover:text-ink">Home</Link>
             <span className="mx-2" aria-hidden>/</span>
@@ -64,13 +60,26 @@ export default async function DivisionPage({
             <span className="mx-2" aria-hidden>/</span>
             <span className="text-ink">{division.name}</span>
           </nav>
-          <div className="flex items-center gap-3">
-            <Shield className="h-7 w-7 sm:h-9 sm:w-9 text-rose shrink-0" aria-hidden />
-            <h1 className="font-display text-3xl sm:text-5xl leading-tight">{division.name}</h1>
+          <div className="flex items-center gap-4 sm:gap-6">
+            {division.image ? (
+              <Image
+                src={division.image}
+                alt={`${division.name} logo`}
+                width={160}
+                height={160}
+                priority
+                className="h-24 w-24 sm:h-40 sm:w-40 shrink-0 rounded-2xl object-contain drop-shadow-lg"
+              />
+            ) : (
+              <Shield className="h-12 w-12 sm:h-16 sm:w-16 text-rose shrink-0" aria-hidden />
+            )}
+            <div className="min-w-0">
+              <h1 className="font-display text-2xl sm:text-5xl leading-tight">{division.name}</h1>
+              {division.description && (
+                <p className="mt-1.5 max-w-2xl text-sm sm:text-base text-ink-soft">{division.description}</p>
+              )}
+            </div>
           </div>
-          {division.description && (
-            <p className="mt-2 max-w-2xl text-sm sm:text-base text-ink-soft">{division.description}</p>
-          )}
         </div>
       </section>
 
