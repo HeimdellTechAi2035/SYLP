@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/SocialIcons";
 import { getSiteSettings } from "@/lib/settings";
+import { prisma } from "@/lib/prisma";
 import NewsletterForm from "@/components/marketing/NewsletterForm";
 
 export default async function Footer() {
-  const settings = await getSiteSettings();
+  const [settings, divisions] = await Promise.all([
+    getSiteSettings(),
+    prisma.division.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" }, select: { name: true, slug: true } }),
+  ]);
+  const divisionLinks = divisions.map((d) => ({ label: d.name, href: `/divisions/${d.slug}` }));
 
   const shopLinks = [
     { label: "Hoodies", href: "/collections/hoodies" },
@@ -57,6 +62,7 @@ export default async function Footer() {
           </div>
         </div>
 
+        {divisionLinks.length > 0 && <FooterColumn title="Divisions" links={divisionLinks} />}
         <FooterColumn title="Shop" links={shopLinks} />
         <FooterColumn title="Help" links={helpLinks} />
         <FooterColumn title="Policies" links={legalLinks} />

@@ -13,6 +13,8 @@ export type PublicProductKnowledge = {
   name: string;
   productType: string;
   category: string | null;
+  division: string | null;
+  divisionSlug: string | null;
   shortDescription: string | null;
   description: string | null;
   price: number;
@@ -45,6 +47,8 @@ function toPublicKnowledge(
     name: product.name,
     productType: product.productType,
     category: product.category?.name ?? null,
+    division: product.division?.name ?? null,
+    divisionSlug: product.division?.slug ?? null,
     shortDescription: product.shortDescription,
     description: product.description,
     price: product.price,
@@ -73,7 +77,7 @@ function fetchPublishedProducts() {
   // products never reach this query at all, let alone the knowledge layer.
   return prisma.product.findMany({
     where: { status: "ACTIVE" },
-    include: { category: true, variants: true },
+    include: { category: true, division: { select: { name: true, slug: true } }, variants: true },
   });
 }
 
@@ -86,7 +90,7 @@ export async function getProductKnowledge(): Promise<PublicProductKnowledge[]> {
 export async function getProductKnowledgeBySlug(slug: string): Promise<PublicProductKnowledge | null> {
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { category: true, variants: true },
+    include: { category: true, division: { select: { name: true, slug: true } }, variants: true },
   });
   if (!product || product.status !== "ACTIVE") return null;
   return toPublicKnowledge(product);

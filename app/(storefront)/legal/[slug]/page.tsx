@@ -14,7 +14,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const policy = await prisma.policy.findUnique({ where: { slug } });
-  return { title: policy?.title ?? "Policy" };
+  return {
+    title: policy?.title ?? "Policy",
+    description: policy ? `${policy.title} for NorthWest Patriots, the online merch shop run by Heimdell Tech Ai Ltd.` : undefined,
+    alternates: { canonical: `/legal/${slug}` },
+  };
 }
 
 export default async function PolicyPage({

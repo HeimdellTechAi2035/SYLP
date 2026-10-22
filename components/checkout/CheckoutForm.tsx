@@ -17,7 +17,7 @@ export default function CheckoutForm({ giftMessageEnabled }: { giftMessageEnable
       <fieldset className="space-y-4">
         <legend className="font-semibold text-lg mb-2">Contact</legend>
         <Field label="Email" name="email" type="email" required />
-        <Field label="Phone (optional)" name="phone" type="tel" />
+        <Field label="Phone" name="phone" type="tel" required />
       </fieldset>
 
       <fieldset className="space-y-4">

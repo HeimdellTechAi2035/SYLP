@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      // A2A agent discovery: current spec path plus the older one some clients still use.
+      { source: "/.well-known/agent-card.json", destination: "/api/a2a" },
+      { source: "/.well-known/agent.json", destination: "/api/a2a" },
+    ];
+  },
   async headers() {
     return [
       {

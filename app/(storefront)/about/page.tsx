@@ -4,7 +4,7 @@ import StorySection from "@/components/home/StorySection";
 import WhyShop from "@/components/home/WhyShop";
 import { getHomepageFeatures } from "@/lib/settings";
 
-export const metadata: Metadata = { title: "About", description: "The story behind NorthWest Patriots." };
+export const metadata: Metadata = { title: "About", description: "The story behind NorthWest Patriots and its divisions across the North West.", alternates: { canonical: "/about" } };
 
 export default async function AboutPage() {
   const [homepage, features] = await Promise.all([getHomepageContent(), getHomepageFeatures("WHY_SHOP")]);

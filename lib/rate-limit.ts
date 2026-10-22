@@ -7,7 +7,7 @@ const attempts = new Map<string, number[]>();
 
 export async function getClientIp(): Promise<string> {
   const headerList = await headers();
-  return headerList.get("x-forwarded-for")?.split(",")[0].trim() || headerList.get("x-real-ip") || "unknown";
+  return clientIpFrom(headerList);
 }
 
 /**
@@ -30,4 +30,15 @@ export function recordFailedAttempt(key: string, windowMs: number): void {
   const recent = (attempts.get(key) ?? []).filter((t) => t > windowStart);
   recent.push(now);
   attempts.set(key, recent);
+}
+
+/**
+ * The visitor's IP as seen by our own reverse proxy (nginx), which appends it
+ * as the LAST entry of X-Forwarded-For. Earlier entries can be typed in by
+ * the visitor themselves, so trusting the first one would let anyone dodge
+ * the login rate limit by sending a fake header.
+ */
+export function clientIpFrom(h: { get(name: string): string | null }): string {
+  const chain = (h.get("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return chain[chain.length - 1] || h.get("x-real-ip") || "unknown";
 }

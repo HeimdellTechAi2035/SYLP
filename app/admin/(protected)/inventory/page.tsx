@@ -5,7 +5,8 @@ import { updateProductStock, updateVariantStock } from "@/lib/actions/admin/inve
 
 export default async function AdminInventoryPage() {
   const products = await prisma.product.findMany({
-    where: { status: { not: "ARCHIVED" } },
+    // Only stock-tracked items: made-to-order products have nothing to count.
+    where: { status: { not: "ARCHIVED" }, madeToOrder: false },
     orderBy: { name: "asc" },
     include: { variants: true },
   });
@@ -13,6 +14,9 @@ export default async function AdminInventoryPage() {
   return (
     <div>
       <AdminPageHeader title="Inventory" />
+      <p className="text-sm text-ink-soft -mt-3 mb-5">
+        Stock-tracked items only. Made-to-order products are made as orders come in, so they never run out and aren&apos;t listed here.
+      </p>
       <div className="bg-blush rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
