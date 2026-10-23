@@ -1,0 +1,47 @@
+import {
+  LayoutDashboard,
+  Package,
+  Layers,
+  Shield,
+  Boxes,
+  ShoppingBag,
+  ClipboardList,
+  Users,
+  Gift,
+  Tag,
+  Star,
+  RotateCcw,
+  Mail,
+  FileText,
+  Home,
+  Truck,
+  Settings,
+  BarChart3,
+  MessageCircle,
+} from "lucide-react";
+
+/** Every admin page, used by the desktop sidebar and the phone menu. */
+export const adminNav = [
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/divisions", label: "Divisions", icon: Shield },
+  { href: "/admin/categories", label: "Categories", icon: Layers },
+  { href: "/admin/inventory", label: "Inventory", icon: Boxes },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/admin/production", label: "Production", icon: ClipboardList },
+  { href: "/admin/customers", label: "Buyers", icon: Users },
+  { href: "/admin/gift-sets", label: "Gift Sets", icon: Gift },
+  { href: "/admin/discounts", label: "Discounts", icon: Tag },
+  { href: "/admin/reviews", label: "Reviews", icon: Star },
+  { href: "/admin/returns", label: "Returns", icon: RotateCcw },
+  { href: "/admin/messages", label: "Contact Messages", icon: Mail },
+  { href: "/admin/policies", label: "Policies", icon: FileText },
+  { href: "/admin/faqs", label: "FAQs & Chatbot", icon: MessageCircle },
+  { href: "/admin/homepage", label: "Homepage", icon: Home },
+  { href: "/admin/delivery", label: "Delivery", icon: Truck },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/settings", label: "Site Settings", icon: Settings },
+];
+
+/** The four pages on the phone's bottom bar. */
+export const adminQuickNav = ["/admin", "/admin/orders", "/admin/products", "/admin/customers"];
