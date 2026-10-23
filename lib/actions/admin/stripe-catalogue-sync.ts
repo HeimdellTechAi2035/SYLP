@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth";
 import { syncProductToStripe } from "@/lib/stripe-sync";
+import { checkStripeCatalogue, fixStripeProduct } from "@/lib/stripe-reconcile";
 
 export type StripeCatalogueSummary = {
   totalSellable: number;
@@ -61,4 +62,30 @@ export async function bulkSyncCatalogueToStripe(): Promise<BulkSyncResult> {
   revalidatePath("/admin/products");
 
   return { attempted: pending.length, synced, failed: failedProductNames.length, failedProductNames };
+}
+
+/** Compare every product in the shop with what Stripe holds. Read-only. */
+export async function checkStripeCatalogueAction() {
+  await requireAdminSession();
+  return checkStripeCatalogue();
+}
+
+/**
+ * Fix a few products at a time (the panel calls this repeatedly), so no
+ * single request runs long. Each product is re-read from the database, so
+ * the client only chooses which products, never what gets written.
+ */
+export async function fixStripeCatalogueBatch(
+  items: { productId: string; priceProblem: boolean }[]
+): Promise<{ fixed: string[]; failed: { productId: string; error: string }[] }> {
+  await requireAdminSession();
+  const fixed: string[] = [];
+  const failed: { productId: string; error: string }[] = [];
+  for (const item of items.slice(0, 5)) {
+    const error = await fixStripeProduct(String(item.productId), Boolean(item.priceProblem));
+    if (error) failed.push({ productId: item.productId, error });
+    else fixed.push(item.productId);
+  }
+  revalidatePath("/admin/products");
+  return { fixed, failed };
 }

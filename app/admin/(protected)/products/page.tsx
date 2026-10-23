@@ -65,6 +65,8 @@ export default async function AdminProductsPage({
         }
       />
 
+      <StripeCatalogueSyncPanel totalSellable={stripeSummary.totalSellable} needsSync={stripeSummary.needsSync} />
+
       <div className="-mx-4 px-4 flex gap-2 overflow-x-auto mb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link href={`/admin/products${qs({ division: undefined })}`} className={tab(!division)}>All</Link>
         {divisions.map((d) => (
@@ -145,9 +147,6 @@ export default async function AdminProductsPage({
         )}
       </ul>
 
-      <div className="mt-8">
-        <StripeCatalogueSyncPanel totalSellable={stripeSummary.totalSellable} needsSync={stripeSummary.needsSync} />
-      </div>
     </div>
   );
 }

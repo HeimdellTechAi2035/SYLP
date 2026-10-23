@@ -10,6 +10,15 @@ import { resolveOrderPackagingCost } from "@/lib/packaging";
 import { createOrderWithUniqueNumber } from "@/lib/order-number";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { getCustomerSession } from "@/lib/customer-auth";
+import type Stripe from "stripe";
+import { absUrl } from "@/lib/seo/site";
+import { isPubliclyReachableImageUrl } from "@/lib/stripe-sync";
+
+/** Product photo for the Stripe payment page, only when Stripe can actually fetch it. */
+function checkoutImage(path: string | null): string[] | undefined {
+  const url = absUrl(path);
+  return isPubliclyReachableImageUrl(url) ? [url] : undefined;
+}
 
 export type CheckoutState = { status: "idle" | "error"; message?: string };
 
@@ -128,10 +137,21 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
     })
   );
 
-  const lineItems = cart.items.map((item) => ({
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cart.items.map((item) => ({
     price_data: {
       currency: "gbp",
-      product_data: { name: item.variant ? `${item.product.name} — ${item.variant.name}` : item.product.name },
+      product_data: {
+        name: item.variant ? `${item.product.name} — ${item.variant.name}` : item.product.name,
+        images: checkoutImage(item.product.mainImage),
+        // Ties each payment line back to the shop product and its Stripe
+        // catalogue entry, so Stripe's payment records can be matched up.
+        metadata: {
+          productId: item.productId,
+          variantId: item.variantId ?? "",
+          sku: item.variant?.sku ?? item.product.sku ?? "",
+          stripeProductId: item.product.stripeProductId ?? "",
+        },
+      },
       unit_amount: Math.round(priceForCartItem(item) / item.quantity),
     },
     quantity: item.quantity,
