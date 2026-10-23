@@ -30,6 +30,7 @@
 import { prisma } from "@/lib/prisma";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import type { Product } from "@prisma/client";
+import { absUrl } from "@/lib/seo/site";
 
 export type StripeSyncResult = { status: "SYNCED" | "FAILED" | "NOT_SYNCED"; error?: string };
 
@@ -143,9 +144,20 @@ export async function syncProductToStripe(
   }
 }
 
+/** What Stripe should hold for a product's photo and description (shared with lib/stripe-reconcile.ts). */
+export function stripeProductDetails(product: Pick<Product, "mainImage" | "shortDescription" | "description">) {
+  // Product photos are stored as site-relative paths (/media/x.jpg), so make
+  // them full URLs on the live domain - otherwise Stripe never gets a photo.
+  const url = absUrl(product.mainImage);
+  const image = isPubliclyReachableImageUrl(url) ? url : null;
+  const description = (product.shortDescription || product.description || "").slice(0, 500) || null;
+  return { image, description };
+}
+
 async function ensureStripeProduct(product: Product): Promise<string> {
-  const image = isPubliclyReachableImageUrl(product.mainImage) ? [product.mainImage] : undefined;
-  const description = (product.shortDescription || product.description || undefined)?.slice(0, 500);
+  const details = stripeProductDetails(product);
+  const image = details.image ? [details.image] : undefined;
+  const description = details.description ?? undefined;
 
   if (!product.stripeProductId) {
     const created = await stripe.products.create({
@@ -163,6 +175,7 @@ async function ensureStripeProduct(product: Product): Promise<string> {
     name: product.name,
     description,
     images: image,
+    active: true,
   });
   return product.stripeProductId;
 }
