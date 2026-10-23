@@ -41,7 +41,7 @@ export async function getCartWithItems(token: string | null) {
     include: {
       items: {
         include: {
-          product: { include: { images: true, packagingProfile: true } },
+          product: { include: { images: true, packagingProfile: true, division: { select: { id: true, slug: true, name: true } } } },
           variant: { include: { packagingProfile: true } },
         },
         orderBy: { createdAt: "asc" },

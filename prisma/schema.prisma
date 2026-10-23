@@ -426,6 +426,14 @@ model OrderItem {
   quantity      Int
   lineTotal     Int
   giftMessage   String?
+
+  // Which division this item was sold for, captured at checkout so each
+  // division's sales stay separate even if the product is later moved,
+  // renamed or deleted. Not a foreign key on purpose: history never changes.
+  divisionId    String?
+  divisionName  String?
+
+  @@index([divisionId])
 }
 
 // ---------------------------------------------------------------------------

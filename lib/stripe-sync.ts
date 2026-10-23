@@ -154,6 +154,13 @@ export function stripeProductDetails(product: Pick<Product, "mainImage" | "short
   return { image, description };
 }
 
+/** Tag each Stripe product with its division, so Stripe's own reports can be split by division too. */
+async function divisionSlugFor(product: Product): Promise<string> {
+  if (!product.divisionId) return "";
+  const d = await prisma.division.findUnique({ where: { id: product.divisionId }, select: { slug: true } });
+  return d?.slug ?? "";
+}
+
 async function ensureStripeProduct(product: Product): Promise<string> {
   const details = stripeProductDetails(product);
   const image = details.image ? [details.image] : undefined;
@@ -164,7 +171,7 @@ async function ensureStripeProduct(product: Product): Promise<string> {
       name: product.name,
       description,
       images: image,
-      metadata: { localProductId: product.id, sku: product.sku },
+      metadata: { localProductId: product.id, sku: product.sku, division: await divisionSlugFor(product) },
     });
     return created.id;
   }
@@ -176,6 +183,7 @@ async function ensureStripeProduct(product: Product): Promise<string> {
     description,
     images: image,
     active: true,
+    metadata: { division: await divisionSlugFor(product) },
   });
   return product.stripeProductId;
 }
