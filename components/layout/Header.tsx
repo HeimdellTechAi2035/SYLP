@@ -8,8 +8,13 @@ import MobileMenu from "@/components/layout/MobileMenu";
 import ShopDropdown from "@/components/layout/ShopDropdown";
 
 export default async function Header() {
-  const [categories, homepage, cartToken] = await Promise.all([
+  const [categories, divisions, homepage, cartToken] = await Promise.all([
     prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+      select: { name: true, slug: true },
+    }),
+    prisma.division.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: "asc" },
       select: { name: true, slug: true },
@@ -25,6 +30,8 @@ export default async function Header() {
     label: c.name,
     href: `/collections/${c.slug}`,
   }));
+
+  const divisionLinks = divisions.map((d) => ({ label: d.name, href: `/divisions/${d.slug}` }));
 
   // Top-level links for the mobile drawer — categoryLinks are passed
   // separately and rendered under a collapsible "Shop" section there, same
@@ -47,10 +54,10 @@ export default async function Header() {
 
       <div className="container-page flex items-center justify-between gap-4 py-3">
         <div className="flex items-center gap-2 lg:hidden">
-          <MobileMenu links={navLinks} categoryLinks={categoryLinks} />
+          <MobileMenu links={navLinks} categoryLinks={categoryLinks} divisionLinks={divisionLinks} />
         </div>
 
-        <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="NorthWest Patriots — home">
+        <Link href="/" className="flex items-center gap-2 min-w-0" aria-label="NorthWest Patriots Merch — home">
           <Image
             src="/brand/logo.png"
             alt="NorthWest Patriots"
@@ -59,13 +66,14 @@ export default async function Header() {
             className="h-12 w-12 sm:h-14 sm:w-14 rounded-full"
             priority
           />
-          <span className="hidden sm:block font-display text-lg text-ink leading-tight">
-            NorthWest Patriots
+          {/* Shown on phones too: two short lines there, one line on wider screens. */}
+          <span className="font-display text-sm sm:text-lg text-ink leading-tight">
+            NorthWest Patriots <span className="block sm:inline">Merch</span>
           </span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6 font-medium text-sm">
-          <ShopDropdown categories={categoryLinks} />
+          <ShopDropdown categories={categoryLinks} divisions={divisionLinks} />
           <Link href="/collections/new" className="text-ink-soft hover:text-rose-dark transition-colors">
             New
           </Link>

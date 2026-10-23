@@ -168,7 +168,17 @@ function distinctiveWords(product: PublicProductKnowledge): string[] {
 
 function findMatchingProducts(message: string, products: PublicProductKnowledge[]): PublicProductKnowledge[] {
   const messageWords = message.split(/\W+/).filter((w) => w.length > 2 && !STOPWORDS.has(w));
-  return products.filter((p) => distinctiveWords(p).some((kw) => messageWords.some((mw) => wordsMatch(mw, kw))));
+  // Score each product by how many of the customer's words it matches and
+  // keep only the best: "preston hoodie" means the Preston hoodie, not every
+  // Preston item plus every hoodie from the other divisions.
+  const scored = products
+    .map((p) => {
+      const kws = distinctiveWords(p);
+      return { p, score: messageWords.filter((mw) => kws.some((kw) => wordsMatch(mw, kw))).length };
+    })
+    .filter((s) => s.score > 0);
+  const best = Math.max(0, ...scored.map((s) => s.score));
+  return scored.filter((s) => s.score === best).map((s) => s.p);
 }
 
 function extractQuantity(message: string): number | null {
@@ -277,7 +287,10 @@ async function answerPolicy(message: string, store: StoreKnowledge): Promise<Cha
   const slug = wantsCancellation ? "cancellation" : "returns-refunds";
   const policy = policies.find((p) => p.slug === slug) ?? policies.find((p) => p.slug.includes("return"));
 
-  if (!policy) return unresolved(message, store);
+  if (!policy) {
+    // Policies still in draft aren't quoted, but the published FAQ answer is.
+    return (await answerFromFaq(message)) ?? unresolved(message, store);
+  }
 
   const summary = policy.body.replace(/\s+/g, " ").trim().slice(0, 300);
   return {
@@ -401,7 +414,7 @@ async function answerProductQuestion(message: string, context: ChatContext, stor
       if (product) return answerAboutProduct(message, product, store);
     }
     return {
-      text: "Which product would you like to know about? You can tell me its name, e.g. \"Vanilla Dream\".",
+      text: "Which product would you like to know about? You can tell me its name, e.g. \"Preston Patriots Hoodie\".",
       links: [{ label: "Shop all", href: "/shop" }],
       resolved: true,
     };
@@ -450,6 +463,40 @@ async function answerFromFaq(message: string): Promise<ChatResponse | null> {
   return { text: match.answer, links: [{ label: "See all FAQs", href: "/faq" }], resolved: true };
 }
 
+/** "What does Southport sell?" / "show me Preston stuff" - a division named with no specific product. */
+async function answerDivisionRange(message: string): Promise<ChatResponse | null> {
+  const products = await getProductKnowledge();
+  const divisions = [...new Map(products.filter((p) => p.division && p.divisionSlug).map((p) => [p.divisionSlug!, p.division!])).entries()];
+  const named = divisions.find(([, name]) => {
+    const place = name.toLowerCase().replace(/ patriots$/, "");
+    return message.includes(place) || (place.includes(" ") && message.includes(place.split(" ").pop()!));
+  });
+  if (!named) return null;
+  const [slug, name] = named;
+  const items = products.filter((p) => p.divisionSlug === slug);
+  return {
+    text: `${name} has ${items.length} items: ${items.map((p) => `${p.name.replace(`${name} `, "")} (${formatPence(p.currentPrice)})`).join(", ")}.`,
+    links: [{ label: `Shop ${name}`, href: `/divisions/${slug}` }],
+    resolved: true,
+  };
+}
+
+async function answerDivisions(): Promise<ChatResponse> {
+  const divisions = await prisma.division.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+    select: { name: true, slug: true },
+  });
+  if (divisions.length === 0) {
+    return { text: "Our division ranges are coming soon.", links: [{ label: "Shop all", href: "/shop" }], resolved: true };
+  }
+  return {
+    text: `Each division has its own merch with its own crest: ${divisions.map((d) => d.name).join(", ")}. Pick yours to see its range.`,
+    links: divisions.map((d) => ({ label: d.name, href: `/divisions/${d.slug}` })),
+    resolved: true,
+  };
+}
+
 /**
  * The chatbot's single entry point. Tries deterministic, database-grounded
  * answers first (see module functions above) — an AI layer, if one is ever
@@ -487,6 +534,9 @@ export async function askChatbot(rawMessage: string, context: ChatContext = {}):
   if (/\b(returns?|refund|cancel|send it back)\b/.test(message)) {
     return answerPolicy(message, store);
   }
+  if (/\b(divisions?|branch(es)?|chapters?|which areas?|what areas?|which towns?|my area)\b/.test(message)) {
+    return answerDivisions();
+  }
   if (/\bwhat (categories|ranges|collections) do you\b|\bwhat do you sell\b/.test(message)) {
     return answerCategoryList(store);
   }
@@ -496,6 +546,9 @@ export async function askChatbot(rawMessage: string, context: ChatContext = {}):
 
   const productAnswer = await answerProductQuestion(message, context, store);
   if (productAnswer) return productAnswer;
+
+  const divisionAnswer = await answerDivisionRange(message);
+  if (divisionAnswer) return divisionAnswer;
 
   const discoveryAnswer = await answerProductDiscovery(message);
   if (discoveryAnswer) return discoveryAnswer;

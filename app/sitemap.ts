@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
+// Rebuilt hourly so new products and divisions appear without a redeploy.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -11,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prisma.division.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
   ]);
 
-  const staticRoutes = ["", "/shop", "/about", "/faq", "/contact", "/track-order"].map((path) => ({
+  const staticRoutes = ["", "/shop", "/about", "/faq", "/contact", "/track-order", "/llms.txt"].map((path) => ({
     url: `${siteUrl}${path}`,
     lastModified: new Date(),
   }));

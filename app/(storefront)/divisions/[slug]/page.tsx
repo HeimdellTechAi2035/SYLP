@@ -9,6 +9,7 @@ import {
   getCategoriesForDivision,
 } from "@/lib/queries/products";
 import ProductGrid from "@/components/product/ProductGrid";
+import { absUrl, breadcrumbLd, jsonLd, penceToPrice, siteUrl } from "@/lib/seo/site";
 
 export async function generateMetadata({
   params,
@@ -18,9 +19,20 @@ export async function generateMetadata({
   const { slug } = await params;
   const division = await getDivisionBySlug(slug);
   if (!division) return {};
+  const description =
+    division.description && division.description.length > 60
+      ? division.description
+      : `Official ${division.name} merch: hoodies, t-shirts, tracksuits, mugs, keyrings, phone cases, wallets and gift sets with the ${division.name} crest. UK delivery.`;
   return {
     title: `${division.name} Merch`,
-    description: division.description ?? `Official ${division.name} hoodies, tees and gear.`,
+    description,
+    alternates: { canonical: `/divisions/${division.slug}` },
+    openGraph: {
+      title: `${division.name} Merch | NorthWest Patriots`,
+      description,
+      url: `/divisions/${division.slug}`,
+      images: division.image ? [{ url: division.image, alt: `${division.name} crest` }] : undefined,
+    },
   };
 }
 
@@ -48,8 +60,29 @@ export default async function DivisionPage({
       active ? "bg-rose text-white" : "bg-blush text-ink hover:bg-rose-dark hover:text-white"
     }`;
 
+  const listLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${division.name} Merch`,
+    url: `${siteUrl()}/divisions/${division.slug}`,
+    about: { "@type": "Organization", name: division.name, logo: absUrl(division.image), parentOrganization: { "@id": `${siteUrl()}/#organization` } },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: products.length,
+      itemListElement: products.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${siteUrl()}/products/${p.slug}`,
+        name: p.name,
+        image: absUrl(p.mainImage),
+        offers: { "@type": "Offer", priceCurrency: "GBP", price: penceToPrice(p.saleActive && p.salePrice ? p.salePrice : p.price) },
+      })),
+    },
+  };
+
   return (
     <div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd([listLd, breadcrumbLd([{ name: "Home", path: "/" }, { name: division.name, path: `/divisions/${division.slug}` }])]) }} />
       <section className="relative overflow-hidden bg-blush">
         <div className="absolute inset-0 bg-gradient-to-br from-rose-dark/60 via-blush to-cloud" aria-hidden />
         <div className="relative container-page py-5 sm:py-12">

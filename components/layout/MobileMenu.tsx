@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Search, Shield } from "lucide-react";
 
 const noopSubscribe = () => () => {};
 
@@ -19,9 +19,11 @@ function useMounted() {
 export default function MobileMenu({
   links,
   categoryLinks,
+  divisionLinks,
 }: {
   links: { label: string; href: string }[];
   categoryLinks?: { label: string; href: string }[];
+  divisionLinks?: { label: string; href: string }[];
 }) {
   const [open, setOpen] = useState(false);
   const mounted = useMounted();
@@ -96,6 +98,32 @@ export default function MobileMenu({
                   <X className="h-5 w-5 text-ink" />
                 </button>
               </div>
+              <form action="/shop" className="relative mb-3" onSubmit={() => setOpen(false)}>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-soft" aria-hidden />
+                <input
+                  type="search"
+                  name="q"
+                  placeholder="Search products..."
+                  aria-label="Search products"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-full bg-blush border border-ink/20 text-ink placeholder:text-ink/50 text-sm outline-none focus:ring-2 focus:ring-rose"
+                />
+              </form>
+              {divisionLinks && divisionLinks.length > 0 && (
+                <div className="mb-2">
+                  <p className="text-[11px] uppercase tracking-wide text-ink-soft pt-1 pb-1">Divisions</p>
+                  {divisionLinks.map((d) => (
+                    <Link
+                      key={d.href}
+                      href={d.href}
+                      onClick={close}
+                      className="flex items-center gap-2 py-2.5 border-b border-ink/10 text-ink font-medium"
+                    >
+                      <Shield className="h-4 w-4 text-rose shrink-0" aria-hidden />
+                      {d.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
               {links.map((link, i) => (
                 <div key={link.href}>
                   <Link

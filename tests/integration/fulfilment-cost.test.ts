@@ -29,6 +29,7 @@ function checkoutFormData(overrides: Record<string, string> = {}) {
     email: `fulfilment-${randomUUID().slice(0, 8)}@example.com`,
     firstName: "Fulfilment",
     lastName: "Test",
+    phone: "07700 900000",
     shippingLine1: "1 Test Street",
     shippingCity: "London",
     shippingPostcode: "SW1A 1AA",

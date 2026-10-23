@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getProductBySlug } from "@/lib/queries/products";
+import { notFound, permanentRedirect } from "next/navigation";
+import { getProductBySlug, getMoreFromDivision } from "@/lib/queries/products";
+import { absUrl, breadcrumbLd, jsonLd, penceToPrice, SITE_NAME, siteUrl } from "@/lib/seo/site";
 import { getSiteSettings } from "@/lib/settings";
 import ProductGallery from "@/components/product/ProductGallery";
 import AddToCartForm from "@/components/product/AddToCartForm";
@@ -18,11 +19,35 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product) return {};
+  if (!product || product.status !== "ACTIVE") return {};
+  // Search results show ~155 characters: lead with what it is, then who it's
+  // for, the price and delivery, so a short admin blurb still reads well.
+  const priceText = formatPence(product.saleActive && product.salePrice ? product.salePrice : product.price);
+  const base = (product.metaDescription || product.shortDescription || "").trim();
+  const description =
+    product.metaDescription && product.metaDescription.length >= 100
+      ? product.metaDescription
+      : [
+          base || product.name,
+          `Official ${product.division?.name ?? SITE_NAME} merch${product.variants.length ? `, sizes ${product.variants[0].size ?? product.variants[0].name}–${product.variants[product.variants.length - 1].size ?? product.variants[product.variants.length - 1].name}` : ""}.`,
+          `${priceText} with UK delivery.`,
+        ]
+          .join(" ")
+          .replace(/\.\s*\./g, ".")
+          .slice(0, 300);
+  const image = product.socialImage || product.mainImage;
   return {
     title: product.seoTitle || product.name,
-    description: product.metaDescription || product.shortDescription || undefined,
-    openGraph: product.socialImage || product.mainImage ? { images: [product.socialImage || product.mainImage!] } : undefined,
+    description,
+    alternates: { canonical: `/products/${product.slug}` },
+    openGraph: {
+      type: "website",
+      title: product.seoTitle || product.name,
+      description,
+      url: `/products/${product.slug}`,
+      images: image ? [{ url: image, alt: product.name }] : undefined,
+    },
+    twitter: { card: "summary_large_image", title: product.name, description, images: image ? [image] : undefined },
   };
 }
 
@@ -34,12 +59,18 @@ export default async function ProductPage({
   const { slug } = await params;
   const [product, settings] = await Promise.all([getProductBySlug(slug), getSiteSettings()]);
 
-  if (!product || product.status !== "ACTIVE") notFound();
+  if (!product) notFound();
+  // A retired product's old link (shared, bookmarked or indexed by Google)
+  // goes to its category instead of a dead end, keeping its search ranking.
+  if (product.status === "ARCHIVED") permanentRedirect(product.category ? `/collections/${product.category.slug}` : "/shop");
+  if (product.status !== "ACTIVE") notFound();
 
-  const images = [
-    ...(product.mainImage ? [product.mainImage] : []),
-    ...product.images.map((i) => i.url),
-  ];
+  // Main photo first, then the gallery - without showing the same photo twice.
+  const images = [...new Set([...(product.mainImage ? [product.mainImage] : []), ...product.images.map((i) => i.url)])];
+  const moreFromDivision =
+    product.division && product.relatedFrom.length === 0
+      ? await getMoreFromDivision(product.division.slug, product.slug)
+      : [];
 
   const avgRating =
     product.reviews.length > 0
@@ -48,31 +79,101 @@ export default async function ProductPage({
 
   const isGiftSet = product.productType === "GIFT_SET";
 
-  const jsonLd = {
+  const price = product.saleActive && product.salePrice ? product.salePrice : product.price;
+  const inStock = product.stockQuantity > 0 || product.continueSellingOOS || product.madeToOrder;
+  const url = `${siteUrl()}/products/${product.slug}`;
+  const dayRange = (s: string | null | undefined) => {
+    const m = (s ?? "").match(/(\d+)\D+(\d+)/);
+    return m ? { "@type": "QuantitativeValue", minValue: Number(m[1]), maxValue: Number(m[2]), unitCode: "DAY" } : undefined;
+  };
+  const offer = (p: number, sku: string | null, name?: string) => ({
+    "@type": "Offer",
+    name,
+    sku: sku || undefined,
+    url,
+    priceCurrency: "GBP",
+    price: penceToPrice(p),
+    availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    itemCondition: "https://schema.org/NewCondition",
+    seller: { "@id": `${siteUrl()}/#organization` },
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: "GB" },
+      shippingRate: {
+        "@type": "MonetaryAmount",
+        currency: "GBP",
+        value: penceToPrice(
+          settings.freeDeliveryThreshold != null && p >= settings.freeDeliveryThreshold ? 0 : settings.standardDeliveryPrice ?? 0
+        ),
+      },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        handlingTime: dayRange(settings.estimatedDispatchDays),
+        transitTime: dayRange(settings.estimatedDeliveryDays),
+      },
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "GB",
+      returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+      merchantReturnDays: 14,
+      returnMethod: "https://schema.org/ReturnByMail",
+      returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
+      merchantReturnLink: `${siteUrl()}/legal/returns-refunds`,
+    },
+  });
+  const productLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${url}#product`,
     name: product.name,
-    description: product.shortDescription || undefined,
-    image: images,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "GBP",
-      price: ((product.saleActive && product.salePrice ? product.salePrice : product.price) / 100).toFixed(2),
-      availability:
-        product.stockQuantity > 0 || product.continueSellingOOS || product.madeToOrder
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/products/${product.slug}`,
-    },
+    description: product.description || product.shortDescription || undefined,
+    sku: product.sku,
+    url,
+    image: images.map(absUrl),
+    brand: { "@type": "Brand", name: product.division?.name ?? SITE_NAME },
+    category: product.category?.name,
+    material: product.material || undefined,
+    aggregateRating:
+      product.reviews.length > 0
+        ? { "@type": "AggregateRating", ratingValue: avgRating.toFixed(1), reviewCount: product.reviews.length }
+        : undefined,
+    offers:
+      product.variants.length > 0
+        ? {
+            "@type": "AggregateOffer",
+            priceCurrency: "GBP",
+            lowPrice: penceToPrice(Math.min(...product.variants.map((v) => v.priceOverride ?? price))),
+            highPrice: penceToPrice(Math.max(...product.variants.map((v) => v.priceOverride ?? price))),
+            offerCount: product.variants.length,
+            availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            offers: product.variants.map((v) => offer(v.priceOverride ?? price, v.sku, v.name)),
+          }
+        : offer(price, product.sku),
   };
+  const crumbs = breadcrumbLd([
+    { name: "Home", path: "/" },
+    ...(product.division
+      ? [{ name: product.division.name, path: `/divisions/${product.division.slug}` }]
+      : product.category
+        ? [{ name: product.category.name, path: `/collections/${product.category.slug}` }]
+        : [{ name: "Shop", path: "/shop" }]),
+    { name: product.name, path: `/products/${product.slug}` },
+  ]);
 
   return (
     <div className="container-page py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(productLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(crumbs) }} />
 
       <nav className="text-xs text-ink-soft mb-6" aria-label="Breadcrumb">
-        <Link href="/shop" className="hover:text-ink">Shop</Link>
-        {product.category && (
+        <Link href="/" className="hover:text-ink">Home</Link>
+        {product.division ? (
+          <>
+            {" / "}
+            <Link href={`/divisions/${product.division.slug}`} className="hover:text-ink">{product.division.name}</Link>
+          </>
+        ) : product.category && (
           <>
             {" / "}
             <Link href={`/collections/${product.category.slug}`} className="hover:text-ink">{product.category.name}</Link>
@@ -215,6 +316,18 @@ export default async function ProductPage({
           <ReviewForm productId={product.id} />
         </DetailSection>
       </div>
+
+      {moreFromDivision.length > 0 && product.division && (
+        <div className="mt-16">
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <h2 className="font-display text-2xl">More from {product.division.name}</h2>
+            <Link href={`/divisions/${product.division.slug}`} className="text-sm font-semibold text-rose shrink-0">
+              See all &rarr;
+            </Link>
+          </div>
+          <ProductGrid products={moreFromDivision} />
+        </div>
+      )}
 
       {product.relatedFrom.length > 0 && (
         <div className="mt-16">

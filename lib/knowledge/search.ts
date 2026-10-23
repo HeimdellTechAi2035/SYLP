@@ -21,7 +21,7 @@ export async function searchKnowledge(query: string): Promise<KnowledgeSearchRes
   const [products, faqs] = await Promise.all([getProductKnowledge(), getFaqKnowledge()]);
 
   const matchedProducts = products.filter((p) =>
-    [p.name, p.shortDescription, p.description, p.category, p.productType]
+    [p.name, p.shortDescription, p.description, p.category, p.division, p.productType]
       .filter(Boolean)
       .some((field) => field!.toLowerCase().includes(q))
   );

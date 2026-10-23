@@ -35,6 +35,7 @@ function checkoutFormData(overrides: Record<string, string> = {}) {
     email: "checkout-test@example.com",
     firstName: "Check",
     lastName: "Out",
+    phone: "07700 900000",
     shippingLine1: "1 Test Street",
     shippingCity: "London",
     shippingPostcode: "SW1A 1AA",

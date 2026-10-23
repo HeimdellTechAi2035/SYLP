@@ -21,7 +21,7 @@ const CONTENT_TYPE_BY_EXT: Record<string, string> = Object.fromEntries(
 const KEY_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp|gif)$/;
 
 function mediaDir() {
-  return path.resolve(process.env.MEDIA_DIR || "media-data");
+  return path.resolve(/*turbopackIgnore: true*/ process.env.MEDIA_DIR || "media-data");
 }
 
 export function isValidMediaKey(key: string) {

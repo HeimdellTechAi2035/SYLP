@@ -27,7 +27,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const collection = await resolveCollection(slug);
   if (!collection) return {};
-  return { title: collection.title, description: collection.description };
+  return {
+    title: collection.title,
+    description: `${collection.description ? `${collection.description.replace(/\.?$/, ".")} ` : ""}${collection.title} for every NorthWest Patriots division: Preston, Merseyside, Greater Manchester, Blackpool and Southport. UK delivery.`,
+    alternates: { canonical: `/collections/${slug}` },
+  };
 }
 
 export default async function CollectionPage({

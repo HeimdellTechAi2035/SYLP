@@ -5,7 +5,8 @@ import ShopFilters from "@/components/product/ShopFilters";
 
 export const metadata: Metadata = {
   title: "Shop All",
-  description: "Browse all hoodies, t-shirts, keyrings, stickers, cups, phone cases and engraved wallets from NorthWest Patriots.",
+  description: "Browse every NorthWest Patriots product across all five divisions: hoodies, t-shirts, tracksuits, mugs, keyrings, phone cases, engraved wallets and gift sets.",
+  alternates: { canonical: "/shop" },
 };
 
 export default async function ShopPage({

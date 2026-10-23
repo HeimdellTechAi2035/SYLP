@@ -28,7 +28,11 @@ export const checkoutSchema = z.object({
   email: z.string().email(),
   firstName: z.string().min(1).max(80),
   lastName: z.string().min(1).max(80),
-  phone: z.string().max(40).optional().or(z.literal("")),
+  phone: z
+    .string()
+    .trim()
+    .max(40)
+    .regex(/^\+?[\d\s()-]{10,}$/, "Please enter a phone number so we can contact you about your order."),
   shippingLine1: z.string().min(1).max(160),
   shippingLine2: z.string().max(160).optional().or(z.literal("")),
   shippingCity: z.string().min(1).max(80),

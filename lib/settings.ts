@@ -36,8 +36,8 @@ export async function getHomepageContent() {
       heroSubtitle:
         "Hoodies, tees and everyday gear, printed and packed to order in the UK.",
       heroImage: null,
-      heroCtaPrimaryLabel: "Shop Hoodies",
-      heroCtaPrimaryHref: "/collections/hoodies",
+      heroCtaPrimaryLabel: "Choose your division",
+      heroCtaPrimaryHref: "/#divisions",
       heroCtaSecondaryLabel: "Shop All",
       heroCtaSecondaryHref: "/shop",
       storyTitle: "NorthWest Patriots",

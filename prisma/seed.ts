@@ -295,8 +295,8 @@ async function main() {
       heroTitle: "NorthWest Patriots",
       heroSubtitle:
         "NorthWest Patriots started with a simple idea: give people who are proud of where they're from something real to wear it with. Our hoodies and t-shirts are printed and packed to order right here in the UK. We're working on bringing the rest of the range home too — for now, some items are sourced from trusted suppliers abroad while we find the right UK partners — but every order is still checked by hand before it reaches you.",
-      heroCtaPrimaryLabel: "Shop Hoodies",
-      heroCtaPrimaryHref: "/collections/hoodies",
+      heroCtaPrimaryLabel: "Choose your division",
+      heroCtaPrimaryHref: "/#divisions",
       heroCtaSecondaryLabel: "Shop All",
       heroCtaSecondaryHref: "/shop",
       heroImage: "/products/hoodie-front.jpg",

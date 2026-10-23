@@ -18,6 +18,10 @@ import HowToSection from "@/components/home/HowToSection";
 import FaqAccordion from "@/components/marketing/FaqAccordion";
 import SectionHeading from "@/components/home/SectionHeading";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { absUrl, jsonLd, siteUrl } from "@/lib/seo/site";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function HomePage() {
   const [homepage, settings, bestSellers, featured, categories, features, faqs, reviews, divisions] =
@@ -40,6 +44,23 @@ export default async function HomePage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "NorthWest Patriots divisions",
+            itemListElement: divisions.map((d, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: d.name,
+              url: `${siteUrl()}/divisions/${d.slug}`,
+              image: absUrl(d.image),
+            })),
+          }),
+        }}
+      />
       {/* Divisions first: on a phone this is the first thing customers see. */}
       <DivisionGrid
         divisions={divisions.map((d) => ({

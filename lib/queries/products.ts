@@ -81,10 +81,17 @@ export async function getShopProducts(params: {
   if (params.smartCollection === "best-sellers") where.bestSeller = true;
   if (params.smartCollection === "seasonal") where.seasonal = true;
   if (params.q) {
-    where.OR = [
-      { name: { contains: params.q } },
-      { shortDescription: { contains: params.q } },
-    ];
+    // Case-insensitive, and every word must match somewhere (name, description
+    // or division), so "preston hoodie" finds "Preston Patriots Hoodie".
+    const words = params.q.trim().split(/\s+/).filter(Boolean).slice(0, 6);
+    where.AND = words.map((w) => ({
+      OR: [
+        { name: { contains: w, mode: "insensitive" } },
+        { shortDescription: { contains: w, mode: "insensitive" } },
+        { division: { name: { contains: w, mode: "insensitive" } } },
+        { category: { name: { contains: w, mode: "insensitive" } } },
+      ],
+    }));
   }
 
   const orderBy =
@@ -92,7 +99,9 @@ export async function getShopProducts(params: {
       ? { price: "asc" as const }
       : params.sort === "price-desc"
         ? { price: "desc" as const }
-        : { createdAt: "desc" as const };
+        : params.divisionSlug || params.categorySlug
+          ? [{ category: { sortOrder: "asc" as const } }, { name: "asc" as const }]
+          : { createdAt: "desc" as const };
 
   return prisma.product.findMany({ where, select: cardSelect, orderBy });
 }
@@ -102,6 +111,7 @@ export async function getProductBySlug(slug: string) {
     where: { slug },
     include: {
       category: true,
+      division: { select: { name: true, slug: true, image: true } },
       images: { orderBy: { sortOrder: "asc" } },
       variants: { orderBy: { sortOrder: "asc" } },
       giftSetItems: { include: { component: { select: cardSelect } } },
@@ -163,5 +173,15 @@ export async function getCategoriesForDivision(divisionSlug: string) {
     },
     orderBy: { sortOrder: "asc" },
     select: { name: true, slug: true },
+  });
+}
+
+/** Other live products from the same division, for "More from ..." on a product page. */
+export async function getMoreFromDivision(divisionSlug: string, excludeSlug: string, limit = 8): Promise<ProductCardData[]> {
+  return prisma.product.findMany({
+    where: { ...activeFilter, division: { slug: divisionSlug }, slug: { not: excludeSlug } },
+    select: cardSelect,
+    take: limit,
+    orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
   });
 }

@@ -7,7 +7,8 @@ export default async function AdminDashboardPage() {
   const [recentOrders, lowStockProducts, pendingReviews, newMessages, totalRevenue, paidOrderItems] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.product.findMany({
-      where: { status: "ACTIVE" },
+      // Made-to-order items have no stock to run out of, so never flag them.
+      where: { status: "ACTIVE", madeToOrder: false },
       select: { id: true, name: true, stockQuantity: true, lowStockThreshold: true },
     }).then((products) => products.filter((p) => p.stockQuantity <= p.lowStockThreshold)),
     prisma.review.count({ where: { status: "PENDING" } }),

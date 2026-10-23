@@ -6,8 +6,10 @@ import { ChevronDown } from "lucide-react";
 
 export default function ShopDropdown({
   categories,
+  divisions = [],
 }: {
   categories: { label: string; href: string }[];
+  divisions?: { label: string; href: string }[];
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,24 @@ export default function ShopDropdown({
             >
               Shop All
             </Link>
+            {divisions.length > 0 && (
+              <>
+                <div className="my-1 border-t border-ink/10" />
+                <p className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wide text-ink-soft">Divisions</p>
+                {divisions.map((d) => (
+                  <Link
+                    key={d.href}
+                    href={d.href}
+                    onClick={() => setOpen(false)}
+                    className="block px-3 py-2 rounded-lg text-sm text-ink hover:bg-blush transition-colors"
+                  >
+                    {d.label}
+                  </Link>
+                ))}
+              </>
+            )}
             <div className="my-1 border-t border-ink/10" />
+            <p className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wide text-ink-soft">Categories</p>
             {categories.map((c) => (
               <Link
                 key={c.href}
