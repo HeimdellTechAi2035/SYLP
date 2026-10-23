@@ -1,50 +1,10 @@
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  Package,
-  Layers,
-  Shield,
-  Boxes,
-  ShoppingBag,
-  ClipboardList,
-  Users,
-  Gift,
-  Tag,
-  Star,
-  RotateCcw,
-  Mail,
-  FileText,
-  Home,
-  Truck,
-  Settings,
-  BarChart3,
-  MessageCircle,
-} from "lucide-react";
 import LogoutButton from "@/components/admin/LogoutButton";
 import ServiceWorkerRegister from "@/components/admin/ServiceWorkerRegister";
 import type { AdminSessionPayload } from "@/lib/auth";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
+import { adminNav as nav } from "@/components/admin/admin-nav";
 
-const nav = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: Package },
-  { href: "/admin/divisions", label: "Divisions", icon: Shield },
-  { href: "/admin/categories", label: "Categories", icon: Layers },
-  { href: "/admin/inventory", label: "Inventory", icon: Boxes },
-  { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
-  { href: "/admin/production", label: "Production", icon: ClipboardList },
-  { href: "/admin/customers", label: "Buyers", icon: Users },
-  { href: "/admin/gift-sets", label: "Gift Sets", icon: Gift },
-  { href: "/admin/discounts", label: "Discounts", icon: Tag },
-  { href: "/admin/reviews", label: "Reviews", icon: Star },
-  { href: "/admin/returns", label: "Returns", icon: RotateCcw },
-  { href: "/admin/messages", label: "Contact Messages", icon: Mail },
-  { href: "/admin/policies", label: "Policies", icon: FileText },
-  { href: "/admin/faqs", label: "FAQs & Chatbot", icon: MessageCircle },
-  { href: "/admin/homepage", label: "Homepage", icon: Home },
-  { href: "/admin/delivery", label: "Delivery", icon: Truck },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/admin/settings", label: "Site Settings", icon: Settings },
-];
 
 export default function AdminShell({
   children,
@@ -84,8 +44,9 @@ export default function AdminShell({
           <span className="font-display text-lg">NorthWest Patriots — Admin</span>
           <LogoutButton />
         </header>
-        <main className="p-6 sm:p-8 max-w-6xl mx-auto">{children}</main>
+        <main className="p-4 pb-28 sm:p-8 lg:pb-8 max-w-6xl mx-auto">{children}</main>
       </div>
+      <AdminMobileNav />
     </div>
   );
 }
