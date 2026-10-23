@@ -57,7 +57,7 @@ export default async function Header() {
           <MobileMenu links={navLinks} categoryLinks={categoryLinks} divisionLinks={divisionLinks} />
         </div>
 
-        <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="NorthWest Patriots — home">
+        <Link href="/" className="flex items-center gap-2 min-w-0" aria-label="NorthWest Patriots Merch — home">
           <Image
             src="/brand/logo.png"
             alt="NorthWest Patriots"
@@ -66,8 +66,9 @@ export default async function Header() {
             className="h-12 w-12 sm:h-14 sm:w-14 rounded-full"
             priority
           />
-          <span className="hidden sm:block font-display text-lg text-ink leading-tight">
-            NorthWest Patriots
+          {/* Shown on phones too: two short lines there, one line on wider screens. */}
+          <span className="font-display text-sm sm:text-lg text-ink leading-tight">
+            NorthWest Patriots <span className="block sm:inline">Merch</span>
           </span>
         </Link>
 

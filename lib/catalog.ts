@@ -85,7 +85,7 @@ export async function buildCatalog() {
     })),
     returns: {
       summary:
-        "Most items can be returned within 14 days of delivery for a refund under UK consumer law; return postage is paid by the customer unless the item is faulty. Personalised items such as engraved wallets are excepted from change-of-mind returns, but faulty items are always covered. See the policy for full terms.",
+        "Orders can be cancelled within 14 days of delivery without a reason, including made-to-order division items; the customer pays return postage unless the item is faulty, and refunds are made within 14 days of the return arriving. Faulty or misdescribed items are covered under the Consumer Rights Act 2015. See the policy for full terms.",
       policy: `${siteUrl()}/legal/returns-refunds`,
     },
     faqs: faqs.map((f) => ({ question: f.question, answer: f.answer, topic: f.category })),
