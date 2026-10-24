@@ -58,6 +58,7 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
   // orders arrive, so there's no finite number to enforce) but never bypasses
   // whether the product is still published at all.
   for (const item of cart.items) {
+    if (item.variant && item.variant.productId !== item.productId) return { status: "error", message: "Please remove the invalid size selection and add your item again." };
     if (item.product.status !== "ACTIVE") {
       return { status: "error", message: `${item.product.name} is no longer available.` };
     }
@@ -69,6 +70,7 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
     }
   }
 
+  if (parsed.data.shippingCountry.trim().toLowerCase() !== "united kingdom") return { status: "error", message: "We currently deliver to the United Kingdom only." };
   const subtotal = cartSubtotal(cart);
   const data = parsed.data;
 

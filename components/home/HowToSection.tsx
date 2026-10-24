@@ -1,10 +1,10 @@
 import SectionHeading from "@/components/home/SectionHeading";
 
 const orderingSteps = [
-  "Browse the range and pick your item, size and colour.",
+  "Browse the range and choose your hoodie or t-shirt and an available size.",
   "Add to basket and checkout securely via Stripe.",
   "We print, pack and dispatch your order.",
-  "Track your parcel from My Account until it arrives.",
+  "Check your order status using your order number and email address.",
 ];
 
 const careSteps = [

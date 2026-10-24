@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export const ADMIN_SESSION_COOKIE = "hbm_admin_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -24,6 +25,7 @@ export type AdminSessionPayload = {
 export async function createAdminSession(payload: AdminSessionPayload) {
   const token = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
+    .setAudience("sylp-admin")
     .setIssuedAt()
     .setExpirationTime(`${SESSION_TTL_SECONDS}s`)
     .sign(getSecretKey());
@@ -49,8 +51,11 @@ export async function getAdminSession(): Promise<AdminSessionPayload | null> {
   if (!token) return null;
 
   try {
-    const { payload } = await jwtVerify(token, getSecretKey());
-    return payload as unknown as AdminSessionPayload;
+    const { payload } = await jwtVerify(token, getSecretKey(), { audience: "sylp-admin", algorithms: ["HS256"] });
+    if (typeof payload.sub !== "string") return null;
+    const admin = await prisma.adminUser.findUnique({ where: { id: payload.sub } });
+    if (!admin) return null;
+    return { sub: admin.id, email: admin.email, name: admin.name, role: admin.role, mustChangePassword: admin.mustChangePassword };
   } catch {
     return null;
   }

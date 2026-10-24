@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getShopProducts } from "@/lib/queries/products";
 import ProductGrid from "@/components/product/ProductGrid";
@@ -25,6 +25,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  if (!["hoodies", "t-shirts", "new"].includes(slug)) permanentRedirect("/shop");
   const collection = await resolveCollection(slug);
   if (!collection) return {};
   return {
@@ -40,6 +41,7 @@ export default async function CollectionPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (!["hoodies", "t-shirts", "new"].includes(slug)) permanentRedirect("/shop");
   const collection = await resolveCollection(slug);
   if (!collection) notFound();
 

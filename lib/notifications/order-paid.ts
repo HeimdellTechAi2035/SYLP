@@ -19,7 +19,7 @@ const EVENT_ORDER_PAID = "ORDER_PAID";
  */
 async function claimNotification(params: {
   orderId: string;
-  channel: "EMAIL" | "PUSH";
+  channel: "EMAIL" | "PUSH" | "CUSTOMER_EMAIL";
   recipient: string;
   pushSubscriptionId?: string;
 }) {
@@ -137,6 +137,27 @@ export async function notifyAdminOfPaidOrder(orderId: string): Promise<void> {
     const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
     if (!order || order.paymentStatus !== "PAID") return;
 
+    const customerClaim = await claimNotification({ orderId, channel: "CUSTOMER_EMAIL", recipient: order.email });
+    if (customerClaim) {
+      try {
+        const policies = await prisma.policy.findMany({ where: { slug: { in: ["terms", "delivery", "returns-refunds", "cancellation"] } } });
+        const text = [
+          `Thank you for your SYLP order ${order.orderNumber}.`,
+          ...order.items.map(i => `${i.quantity} x ${i.productName}${i.variantLabel ? ` (${i.variantLabel})` : ""}: ${formatPence(i.lineTotal)}`),
+          `Discount: ${formatPence(order.discountAmount)}`,
+          `Postage: ${formatPence(order.deliveryAmount)}`,
+          `Total paid: ${formatPence(order.total)}`,
+          `Deliver to: ${order.firstName} ${order.lastName}, ${[order.shippingLine1, order.shippingLine2, order.shippingCity, order.shippingPostcode, order.shippingCountry].filter(Boolean).join(", ")}`,
+          "Keep this email. Track your order using your order number and email at " + (process.env.NEXT_PUBLIC_SITE_URL || "") + "/track-order",
+          "Questions or cancellation: support@support-your-local-patriot.online",
+          ...policies.map(p => p.title + "\n" + p.body),
+        ].join("\n\n");
+        const sent = await sendEmail({ to: order.email, subject: `SYLP order confirmation — ${order.orderNumber}`, text });
+        await prisma.orderNotification.update({ where: { id: customerClaim.id }, data: { status: "SENT", sentAt: new Date(), providerMessageId: sent.providerMessageId } });
+      } catch (err) {
+        await prisma.orderNotification.update({ where: { id: customerClaim.id }, data: { status: "FAILED", errorMessage: sanitizeErrorMessage(err) } });
+      }
+    }
     const settings = await getSiteSettings();
     if (settings.orderNotificationEmailEnabled && settings.orderNotificationEmail) {
       await sendAdminOrderEmail(order, settings.orderNotificationEmail);

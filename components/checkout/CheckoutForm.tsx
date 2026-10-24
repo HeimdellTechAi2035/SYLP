@@ -34,7 +34,7 @@ export default function CheckoutForm({ giftMessageEnabled }: { giftMessageEnable
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Postcode" name="shippingPostcode" required />
-          <Field label="Country" name="shippingCountry" required defaultValue="United Kingdom" />
+          <div><label htmlFor="shippingCountry" className="block text-sm font-medium mb-1">Country</label><select id="shippingCountry" name="shippingCountry" className="w-full rounded-lg border border-ink/15 px-3 py-2.5"><option value="United Kingdom">United Kingdom</option></select></div>
         </div>
       </fieldset>
 

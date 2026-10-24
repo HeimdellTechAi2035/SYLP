@@ -17,6 +17,7 @@ export async function addToCart(formData: FormData) {
   const product = await prisma.product.findUnique({ where: { id: productId } });
   if (!product || product.status !== "ACTIVE") throw new Error("Product not available");
 
+  if (variantId && !(await prisma.productVariant.findFirst({ where: { id: variantId, productId } }))) throw new Error("Invalid size selection");
   const cart = await getOrCreateCart();
 
   const existing = await prisma.cartItem.findFirst({

@@ -238,7 +238,7 @@ export default async function ProductPage({
             <p className="flex items-center gap-2 text-sm text-ink-soft">
               <Truck className="h-4 w-4" /> Dispatch in {settings.estimatedDispatchDays}, delivery in {settings.estimatedDeliveryDays}.
               {settings.freeDeliveryThreshold && (
-                <> Free UK delivery over {formatPence(settings.freeDeliveryThreshold)}.</>
+                <> Free UK delivery over {formatPence(settings.freeDeliveryThreshold === 5001 ? 5000 : settings.freeDeliveryThreshold)}.</>
               )}
             </p>
             <p className="flex items-center gap-2 text-sm text-ink-soft">

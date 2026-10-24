@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.orderId;
-    if (orderId) {
+    if (orderId && session.payment_status === "paid") {
       await markOrderPaid(orderId);
       // Runs on every delivery of this event, not just the first — its own
       // idempotency (OrderNotification's unique constraint) skips anything
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.orderId;
     if (orderId) {
-      await prisma.order.update({ where: { id: orderId }, data: { paymentStatus: "FAILED" } }).catch(() => {});
+      await prisma.order.updateMany({ where: { id: orderId, paymentStatus: "PENDING" }, data: { paymentStatus: "FAILED" } }).catch(() => {});
     }
   }
 
