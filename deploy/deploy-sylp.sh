@@ -46,7 +46,10 @@ rollback() {
   echo "Deploy FAILED - rolling back to $CURRENT"
   g reset -q --hard "$CURRENT"
   if [[ -d .next.prev ]]; then rm -rf .next && mv .next.prev .next; fi
+  # npm ci deletes the generated Prisma Client.  Always regenerate it
+  # for the restored revision or the rollback itself returns HTTP 500.
   npm ci --no-audit --no-fund --silent || true
+  npx prisma generate || echo "WARNING: Prisma Client regeneration failed during rollback"
   chown -R sylp:sylp .next
   systemctl restart "$SERVICE"
   exit 1
