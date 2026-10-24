@@ -4,8 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCartToken, getCartWithItems, cartSubtotal, priceForCartItem } from "@/lib/cart";
 import { checkoutSchema } from "@/lib/validation";
-import { validateDiscountCode } from "@/lib/discounts";
-import { resolveDeliveryDetails } from "@/lib/delivery";
+import { buildCheckoutQuote, type CheckoutQuote } from "@/lib/checkout-quote";
 import { resolveOrderPackagingCost } from "@/lib/packaging";
 import { createOrderWithUniqueNumber } from "@/lib/order-number";
 import { stripe, stripeConfigured } from "@/lib/stripe";
@@ -21,6 +20,22 @@ function checkoutImage(path: string | null): string[] | undefined {
 }
 
 export type CheckoutState = { status: "idle" | "error"; message?: string };
+
+/** Read-only quote: never accepts prices from the browser or creates an order. */
+export async function previewCheckout(code: string, email: string): Promise<
+  { ok: true; quote: CheckoutQuote } | { ok: false; message: string }
+> {
+  if (typeof code !== "string" || code.length > 100 || typeof email !== "string") {
+    return { ok: false, message: "Please check your discount code and email." };
+  }
+  if (code.trim() && !checkoutSchema.shape.email.safeParse(email).success) {
+    return { ok: false, message: "Enter your email before applying a discount code." };
+  }
+  const cart = await getCartWithItems(await getCartToken());
+  if (!cart || cart.items.length === 0) return { ok: false, message: "Your basket is empty." };
+  const result = await buildCheckoutQuote(cartSubtotal(cart), email, code);
+  return result.ok ? { ok: true, quote: result.quote } : result;
+}
 
 export async function startCheckout(_prev: CheckoutState, formData: FormData): Promise<CheckoutState> {
   const parsed = checkoutSchema.safeParse({
@@ -74,19 +89,9 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
   const subtotal = cartSubtotal(cart);
   const data = parsed.data;
 
-  let discountAmount = 0;
-  let discountCode: string | null = null;
-  if (data.discountCode) {
-    const result = await validateDiscountCode(data.discountCode, subtotal, data.email);
-    if (!result.valid) return { status: "error", message: result.message };
-    discountAmount = result.amount;
-    discountCode = result.code;
-  }
-
-  const chargeableSubtotal = subtotal - discountAmount;
-  const delivery = await resolveDeliveryDetails(chargeableSubtotal, data.shippingCountry);
-  const deliveryAmount = delivery.amount;
-  const total = chargeableSubtotal + deliveryAmount;
+  const pricing = await buildCheckoutQuote(subtotal, data.email, data.discountCode);
+  if (!pricing.ok) return { status: "error", message: pricing.message };
+  const { discountAmount, discountCode, deliveryAmount, deliveryMethodName, total } = pricing.quote;
 
   // Internal fulfilment cost — snapshotted below regardless of what the
   // customer paid for delivery. Free delivery is a pricing decision, not
@@ -115,8 +120,8 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
         discountCode,
         discountAmount,
         deliveryAmount,
-        deliveryMethodName: delivery.methodName,
-        estimatedPostageCost: delivery.estimatedPostageCost,
+        deliveryMethodName,
+        estimatedPostageCost: pricing.estimatedPostageCost,
         packagingCost,
         total,
         giftMessage: data.giftMessage || null,
@@ -189,6 +194,8 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
 
     session = await stripe.checkout.sessions.create({
       mode: "payment",
+      locale: "en-GB",
+      branding_settings: { display_name: "Support Your Local Patriot" },
       customer_email: data.email,
       line_items: lineItems,
       discounts,
