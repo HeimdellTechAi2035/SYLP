@@ -15,6 +15,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
+      # A successful generate is not sufficient if @prisma/client still
+      # points at a missing .prisma/client/default module (production 500).
+      - run: node -e "require('@prisma/client')"
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run test:launch
