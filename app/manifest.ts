@@ -2,12 +2,12 @@ import type { MetadataRoute } from "next";
 
 // Minimal PWA manifest — exists so the admin dashboard is installable enough
 // for Web Push (a registered service worker + manifest) on the store owner's phone.
-// Icons are the NorthWest Patriots crest, cut to a circle (public/brand/).
+// Icons are the SYLP logo, cut to a circle (public/brand/).
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "NorthWest Patriots Admin",
-    short_name: "NWP Admin",
-    description: "Order management for NorthWest Patriots",
+    name: "Support Your Local Patriot Admin",
+    short_name: "SYLP Admin",
+    description: "Order management for Support Your Local Patriot",
     start_url: "/admin",
     scope: "/admin",
     display: "standalone",

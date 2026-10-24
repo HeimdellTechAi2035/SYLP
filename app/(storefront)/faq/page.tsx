@@ -5,7 +5,7 @@ import { jsonLd } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Answers to common questions about NorthWest Patriots merch: delivery times, free delivery, sizing, washing, returns and made-to-order items.",
+  description: "Answers to common questions about Support Your Local Patriot merch: delivery times, free delivery, sizing, washing, returns and made-to-order items.",
   alternates: { canonical: "/faq" },
 };
 

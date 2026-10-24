@@ -13,7 +13,7 @@ type DivisionTile = {
 };
 
 /**
- * The homepage's main way in: one box per NorthWest Patriots division, each
+ * The homepage's main way in: one box per Support Your Local Patriot division, each
  * leading to that division's own merch page.
  *
  * Built phone-first (nearly all customers are on mobile): two tiles per row

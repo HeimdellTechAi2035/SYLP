@@ -6,7 +6,7 @@ export function agentCard() {
     protocolVersion: "0.3.0",
     name: `${SITE_NAME} Shop Assistant`,
     description:
-      "Answers questions about NorthWest Patriots merch for the Preston, Merseyside, Greater Manchester, Blackpool and Southport divisions: products, prices, sizes, availability, delivery, returns, FAQs and order status. Read-only; purchases are completed by the customer on the website.",
+      "Answers questions about Support Your Local Patriot (SYLP) merch: products, prices, sizes, availability, delivery, returns, FAQs and order status. Read-only; purchases are completed by the customer on the website.",
     url: `${siteUrl()}/api/a2a`,
     preferredTransport: "JSONRPC",
     version: "1.0.0",
@@ -27,7 +27,7 @@ export function agentCard() {
       {
         id: "divisions",
         name: "Divisions",
-        description: "List the NorthWest Patriots divisions and link to each one's range.",
+        description: "List the Support Your Local Patriot divisions and link to each one's range.",
         tags: ["divisions", "north west"],
         examples: ["Which divisions do you have?"],
       },

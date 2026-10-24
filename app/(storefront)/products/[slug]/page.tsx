@@ -307,7 +307,7 @@ export default async function ProductPage({
                 </p>
                 {review.merchantResponse && (
                   <p className="text-xs bg-blush rounded-lg p-3 mt-2">
-                    <strong>NorthWest Patriots:</strong> {review.merchantResponse}
+                    <strong>Support Your Local Patriot:</strong> {review.merchantResponse}
                   </p>
                 )}
               </div>

@@ -42,7 +42,7 @@ export default async function Footer() {
       <div className="container-page py-8 flex flex-wrap gap-x-16 gap-y-6">
         <div className="w-full sm:w-auto sm:max-w-[220px]">
           <span className="font-display text-lg">
-            NorthWest Patriots
+            Support Your Local Patriot
           </span>
           <p className="mt-2 text-sm text-ink/80">
             Hoodies, tees and everyday gear for the community, printed and packed to order.

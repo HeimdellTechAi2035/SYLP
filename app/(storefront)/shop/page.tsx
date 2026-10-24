@@ -5,7 +5,7 @@ import ShopFilters from "@/components/product/ShopFilters";
 
 export const metadata: Metadata = {
   title: "Shop All",
-  description: "Browse every NorthWest Patriots product across all five divisions: hoodies, t-shirts, tracksuits, mugs, keyrings, phone cases, engraved wallets and gift sets.",
+  description: "Browse every Support Your Local Patriot (SYLP) product: UK-printed patriotic apparel and gifts.",
   alternates: { canonical: "/shop" },
 };
 

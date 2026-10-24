@@ -112,7 +112,7 @@ export default async function EditProductPage({
           {product.variants.length === 0 && <p className="text-sm text-ink-soft">No variants — this product sells as a single option.</p>}
         </ul>
         <form action={boundAddVariant} className="grid sm:grid-cols-2 gap-3">
-          <FormField label="Variant name" name="variantName" placeholder="NorthWest Patriots Hoodie — Large / Black" required />
+          <FormField label="Variant name" name="variantName" placeholder="Support Your Local Patriot Hoodie — Large / Black" required />
           <FormField label="Variant SKU" name="variantSku" required />
           <FormField label="Size" name="variantSize" />
           <FormField label="Colour" name="variantColour" />

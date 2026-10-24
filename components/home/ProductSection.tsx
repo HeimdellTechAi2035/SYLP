@@ -16,6 +16,8 @@ export default function ProductSection({
   viewAllHref?: string;
   emptyMessage?: string;
 }) {
+  // Nothing to show and no message for customers: leave the section out.
+  if (products.length === 0 && !emptyMessage) return null;
   return (
     <section className="container-page py-16">
       <div className="flex items-end justify-between gap-4">

@@ -28,7 +28,7 @@ export async function sendEmail(message: EmailMessage): Promise<EmailSendResult>
     throw new Error("Email provider not configured — set EMAIL_API_KEY and EMAIL_FROM_ADDRESS.");
   }
 
-  const fromName = process.env.EMAIL_FROM_NAME || "NorthWest Patriots";
+  const fromName = process.env.EMAIL_FROM_NAME || "Support Your Local Patriot";
   const fromAddress = process.env.EMAIL_FROM_ADDRESS;
 
   const res = await fetch("https://api.resend.com/emails", {
