@@ -13,8 +13,10 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-      - run: npm ci
-      - run: npx prisma generate
+      # Mirror production's NODE_ENV to catch missing build-time packages.
+      - run: NODE_ENV=production npm ci --include=dev
+      - run: node -e "require.resolve('@tailwindcss/postcss')"
+      - run: npx prisma generate --no-hints
       # A successful generate is not sufficient if @prisma/client still
       # points at a missing .prisma/client/default module (production 500).
       - run: node -e "require('@prisma/client')"

@@ -48,8 +48,10 @@ rollback() {
   if [[ -d .next.prev ]]; then rm -rf .next && mv .next.prev .next; fi
   # npm ci deletes the generated Prisma Client.  Always regenerate it
   # for the restored revision or the rollback itself returns HTTP 500.
-  npm ci --no-audit --no-fund --silent || true
-  npx prisma generate || echo "WARNING: Prisma Client regeneration failed during rollback"
+  # The service environment may set NODE_ENV=production: without an
+  # explicit include npm omits build-time devDependencies on rollback.
+  npm ci --include=dev --no-audit --no-fund --silent || true
+  npx prisma generate --no-hints || echo "WARNING: Prisma Client regeneration failed during rollback"
   chown -R sylp:sylp .next
   systemctl restart "$SERVICE"
   exit 1
@@ -59,10 +61,14 @@ trap rollback ERR
 g reset -q --hard "$LATEST"
 
 set -a; . "$ENV_FILE"; set +a
-# Only reinstall packages when they actually changed - keeps deploys quick.
-if [[ ! -d node_modules ]] || ! g diff --quiet "$CURRENT" "$LATEST" -- package.json package-lock.json; then
-  npm ci --no-audit --no-fund --silent
-fi
+# A live server may have NODE_ENV=production, which makes plain npm ci
+# omit build-time devDependencies such as @tailwindcss/postcss.  Also, an
+# existing node_modules directory is not evidence that these are installed.
+# Always start a new deployment with a reproducible, complete build toolchain.
+# We need the dev dependencies to BUILD, not to run the production server.
+npm ci --include=dev --no-audit --no-fund --silent
+node -e "require.resolve('@tailwindcss/postcss')"
+node -e "require.resolve('prisma')"
 # Apply new database changes (e.g. new tables) before building.
 if ! g diff --quiet "$CURRENT" "$LATEST" -- prisma/migrations prisma/schema.prisma || [[ "${1:-}" == "--migrate" ]]; then
   echo "Applying database migrations"
