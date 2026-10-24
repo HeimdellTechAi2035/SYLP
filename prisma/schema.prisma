@@ -17,6 +17,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Keep generated files where @prisma/client/default.js resolves them.
+  // Prisma 7 otherwise reported success but left .prisma/client missing on the VPS.
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
