@@ -14,10 +14,11 @@ export async function markOrderPaid(orderId: string) {
   if (!order || order.paymentStatus === "PAID") return;
 
   await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: orderId },
+    const claimed = await tx.order.updateMany({
+      where: { id: orderId, paymentStatus: { in: ["PENDING", "FAILED"] } },
       data: { paymentStatus: "PAID", fulfilmentStatus: "PAID" },
     });
+    if (claimed.count !== 1) return;
 
     for (const item of order.items) {
       // Made-to-order products have no finite stock to track — more is made

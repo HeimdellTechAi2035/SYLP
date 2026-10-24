@@ -15,6 +15,7 @@ export type CustomerSessionPayload = { sub: string; email: string };
 export async function createCustomerSession(payload: CustomerSessionPayload) {
   const token = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
+    .setAudience("sylp-customer")
     .setIssuedAt()
     .setExpirationTime(`${SESSION_TTL_SECONDS}s`)
     .sign(getSecretKey());
@@ -39,7 +40,7 @@ export async function getCustomerSession(): Promise<CustomerSessionPayload | nul
   const token = cookieStore.get(CUSTOMER_SESSION_COOKIE)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, getSecretKey());
+    const { payload } = await jwtVerify(token, getSecretKey(), { audience: "sylp-customer", algorithms: ["HS256"] });
     return payload as unknown as CustomerSessionPayload;
   } catch {
     return null;

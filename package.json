@@ -12,7 +12,8 @@
     "db:seed:inner": "node --experimental-strip-types prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "test:launch": "vitest run --config vitest.unit.config.mts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

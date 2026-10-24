@@ -76,7 +76,7 @@ export default async function OrderConfirmationPage({
           </div>
           <p className="text-ink-soft mb-8">
             Order <strong>{order.orderNumber}</strong> is confirmed. We&apos;ve started making and packing it with care —
-            you&apos;ll receive an email once it&apos;s dispatched.
+            keep your order number and check Track Your Order for progress.
           </p>
         </>
       ) : (

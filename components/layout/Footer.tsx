@@ -14,9 +14,6 @@ export default async function Footer() {
   const shopLinks = [
     { label: "Hoodies", href: "/collections/hoodies" },
     { label: "T-Shirts", href: "/collections/t-shirts" },
-    { label: "Gift Sets", href: "/collections/gift-sets" },
-    { label: "Best Sellers", href: "/collections/best-sellers" },
-    { label: "New In", href: "/collections/new" },
   ];
 
   const helpLinks = [
@@ -45,7 +42,7 @@ export default async function Footer() {
             Support Your Local Patriot
           </span>
           <p className="mt-2 text-sm text-ink/80">
-            Hoodies, tees and everyday gear for the community, printed and packed to order.
+            The SYLP Knight Hoodie and T-Shirt. Black apparel with front and back designs.
             {settings.estimatedDispatchDays ? ` UK dispatch in ${settings.estimatedDispatchDays}.` : ""}
           </p>
           <div className="flex gap-2 mt-3">
