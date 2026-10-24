@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { Shield } from "lucide-react";
 import {
   getDivisionBySlug,
@@ -28,7 +28,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: `/divisions/${division.slug}` },
     openGraph: {
-      title: `${division.name} Merch | NorthWest Patriots`,
+      title: `${division.name} Merch | Support Your Local Patriot`,
       description,
       url: `/divisions/${division.slug}`,
       images: division.image ? [{ url: division.image, alt: `${division.name} crest` }] : undefined,
@@ -47,7 +47,8 @@ export default async function DivisionPage({
   const { type } = await searchParams;
 
   const division = await getDivisionBySlug(slug);
-  if (!division) notFound();
+  // Hidden or removed division: send people (and old links) to the shop.
+  if (!division) redirect("/shop");
 
   const types = await getCategoriesForDivision(slug);
   // Only honour a filter that matches one of this division's own types.

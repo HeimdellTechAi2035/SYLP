@@ -6,7 +6,7 @@ export async function getSiteSettings() {
   return (
     settings ?? {
       id: 1,
-      businessName: "NorthWest Patriots",
+      businessName: "Support Your Local Patriot",
       supportEmail: null,
       supportPhone: null,
       freeDeliveryThreshold: null,
@@ -32,7 +32,7 @@ export async function getHomepageContent() {
     content ?? {
       id: 1,
       announcementBarText: "New drop just landed · UK delivery available",
-      heroTitle: "NorthWest Patriots — wear your colours",
+      heroTitle: "Support Your Local Patriot — wear your colours",
       heroSubtitle:
         "Hoodies, tees and everyday gear, printed and packed to order in the UK.",
       heroImage: null,
@@ -40,7 +40,7 @@ export async function getHomepageContent() {
       heroCtaPrimaryHref: "/#divisions",
       heroCtaSecondaryLabel: "Shop All",
       heroCtaSecondaryHref: "/shop",
-      storyTitle: "NorthWest Patriots",
+      storyTitle: "Support Your Local Patriot",
       storyBody:
         "Every item is printed, packed and checked with care before it comes to you.",
       storyImage: null,

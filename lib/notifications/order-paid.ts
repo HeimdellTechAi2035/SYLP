@@ -98,7 +98,7 @@ async function sendAdminOrderPush(
 
   try {
     const payload = {
-      title: "New NorthWest Patriots Order 🎉",
+      title: "New Support Your Local Patriot Order 🎉",
       body: `${order.orderNumber} — ${formatPence(order.total)} — ${order.items.reduce((n, i) => n + i.quantity, 0)} items`,
       url: `/admin/orders/${order.id}`,
     };

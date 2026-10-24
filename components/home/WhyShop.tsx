@@ -24,7 +24,7 @@ export default function WhyShop({ features }: { features?: Feature[] }) {
 
   return (
     <section className="container-page py-16">
-      <SectionHeading eyebrow="Why NorthWest Patriots" title="Made with care, start to finish" align="center" />
+      <SectionHeading eyebrow="Why Support Your Local Patriot" title="Made with care, start to finish" align="center" />
       {/* flex-wrap + justify-center (not a grid) so a leftover last-row item
           — e.g. 5 features across 2 mobile columns — centers itself instead
           of staying pinned to the grid's first column. */}

@@ -33,7 +33,7 @@ async function main() {
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: { freeDeliveryThreshold: 3000, standardDeliveryPrice: 295 },
-    create: { id: 1, businessName: "NorthWest Patriots (Test)", freeDeliveryThreshold: 3000, standardDeliveryPrice: 295 },
+    create: { id: 1, businessName: "Support Your Local Patriot (Test)", freeDeliveryThreshold: 3000, standardDeliveryPrice: 295 },
   });
 
   await prisma.deliveryZone.deleteMany({});

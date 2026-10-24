@@ -9,7 +9,7 @@ type OrderWithItems = Order & { items: OrderItem[] };
  * payment was made (no card/CVC/Stripe details ever touch this function).
  */
 export function buildOrderNotificationEmail(order: OrderWithItems, siteUrl: string) {
-  const subject = `New NorthWest Patriots Order — ${order.orderNumber}`;
+  const subject = `New Support Your Local Patriot Order — ${order.orderNumber}`;
 
   const itemLines = order.items.map((item) => {
     const descriptors = item.variantLabel || "";

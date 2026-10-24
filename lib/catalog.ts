@@ -65,7 +65,7 @@ export async function buildCatalog() {
       deliveryTime: store.estimatedDeliveryDays,
       payment: "Card payments via Stripe Checkout",
       social: [store.instagramUrl, store.facebookUrl, store.tiktokUrl].filter(Boolean),
-      howToBuy: "Choose a division, pick a product (and size where offered), add to basket and check out. Guest checkout is available.",
+      howToBuy: `${divisions.length ? "Choose a division, pick" : "Pick"} a product (and size where offered), add to basket and check out. Guest checkout is available.`,
     },
     divisions: divisions.map((d) => ({
       id: d.slug,
@@ -85,7 +85,7 @@ export async function buildCatalog() {
     })),
     returns: {
       summary:
-        "Orders can be cancelled within 14 days of delivery without a reason, including made-to-order division items; the customer pays return postage unless the item is faulty, and refunds are made within 14 days of the return arriving. Faulty or misdescribed items are covered under the Consumer Rights Act 2015. See the policy for full terms.",
+        "Orders can be cancelled within 14 days of delivery without a reason, including made-to-order items; the customer pays return postage unless the item is faulty, and refunds are made within 14 days of the return arriving. Faulty or misdescribed items are covered under the Consumer Rights Act 2015. See the policy for full terms.",
       policy: `${siteUrl()}/legal/returns-refunds`,
     },
     faqs: faqs.map((f) => ({ question: f.question, answer: f.answer, topic: f.category })),
@@ -108,7 +108,7 @@ export function catalogToLlmsTxt(c: Catalog): string {
   const L: string[] = [];
   L.push(`# ${c.store.name}`, "");
   L.push(
-    `> Official online shop for the ${c.store.name} divisions across North West England (${c.divisions.map((d) => d.name.replace(/ Patriots$/, "")).join(", ")}). Each division has its own range of hoodies, t-shirts, tracksuits, mugs, keyrings, phone cases, wallets and gift sets carrying that division's crest. Run by ${c.store.operator} (company ${c.store.companyNumber}), ${c.store.location}. Prices in GBP, UK delivery, card payment via Stripe.`,
+    `> Official online shop for ${c.store.name} (SYLP): UK-printed patriotic apparel and gifts.${c.divisions.length ? ` Ranges for ${c.divisions.map((d) => d.name).join(", ")}.` : ""} Run by ${c.store.operator} (company ${c.store.companyNumber}), ${c.store.location}. Prices in GBP, UK delivery, card payment via Stripe.`,
     ""
   );
   L.push("Key facts:", "");
@@ -119,9 +119,11 @@ export function catalogToLlmsTxt(c: Catalog): string {
   L.push(`- Returns: ${c.returns.summary}`);
   if (c.store.email) L.push(`- Contact: ${c.store.email}`);
   L.push("");
-  L.push("## Divisions", "");
-  for (const d of c.divisions) L.push(`- [${d.name}](${d.url}): ${d.productCount} products`);
-  L.push("");
+  if (c.divisions.length) {
+    L.push("## Divisions", "");
+    for (const d of c.divisions) L.push(`- [${d.name}](${d.url}): ${d.productCount} products`);
+    L.push("");
+  }
   L.push("## Shop", "");
   L.push(`- [All products](${c.links.shop})`);
   L.push(`- [Product catalogue (JSON, prices, sizes, availability)](${siteUrl()}/catalog.json)`);
@@ -141,14 +143,14 @@ export function catalogToLlmsTxt(c: Catalog): string {
 
 /** The whole catalogue as Markdown, for assistants that read text rather than JSON. */
 export function catalogToLlmsFull(c: Catalog): string {
-  const L: string[] = [catalogToLlmsTxt(c), "", "## Products by division", ""];
+  const L: string[] = [catalogToLlmsTxt(c), "", c.divisions.length ? "## Products by division" : "## Products", ""];
   const groups = new Map<string, Catalog["products"]>();
   for (const p of c.products) {
-    const k = p.division ?? "Other";
+    const k = c.divisions.length ? p.division ?? "Other" : "";
     groups.set(k, [...(groups.get(k) ?? []), p]);
   }
   for (const [division, items] of groups) {
-    L.push(`### ${division}`, "");
+    if (division) L.push(`### ${division}`, "");
     for (const p of items) {
       const sizes = p.options.length ? ` Options: ${p.options.map((o) => o.name).join(", ")}.` : "";
       const was = p.wasPrice ? ` (was £${p.wasPrice.amount.toFixed(2)})` : "";

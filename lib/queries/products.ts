@@ -125,7 +125,8 @@ export async function getProductBySlug(slug: string) {
 
 export async function getCategories() {
   return prisma.category.findMany({
-    where: { isActive: true },
+    // Only categories with something on sale, so menus and the homepage never show empty ones.
+    where: { isActive: true, products: { some: { status: "ACTIVE" } } },
     orderBy: { sortOrder: "asc" },
     // A category's own `image` (set from Admin -> Categories) always wins
     // when present — this is only a fallback so a freshly-added product's

@@ -24,17 +24,17 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "NorthWest Patriots | Hoodies, Apparel & Gifts",
-    template: "%s | NorthWest Patriots",
+    default: "Support Your Local Patriot | Hoodies, Apparel & Gifts",
+    template: "%s | Support Your Local Patriot",
   },
   description:
-    "Official merch for the NorthWest Patriots divisions — Preston, Merseyside, Greater Manchester, Blackpool and Southport. Hoodies, t-shirts, tracksuits, mugs, keyrings, phone cases, wallets and gift sets with UK delivery.",
-  applicationName: "NorthWest Patriots",
+    "Support Your Local Patriot (SYLP): UK-printed patriotic apparel and gifts, with UK delivery.",
+  applicationName: "Support Your Local Patriot",
   openGraph: {
     type: "website",
-    siteName: "NorthWest Patriots",
+    siteName: "Support Your Local Patriot",
     locale: "en_GB",
-    images: [{ url: "/brand/icon-512.png", width: 512, height: 512, alt: "NorthWest Patriots crest" }],
+    images: [{ url: "/brand/icon-512.png", width: 512, height: 512, alt: "Support Your Local Patriot logo" }],
   },
   twitter: { card: "summary_large_image" },
   alternates: { types: { "text/plain": "/llms.txt", "application/json": "/catalog.json" } },

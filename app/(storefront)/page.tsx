@@ -5,6 +5,7 @@ import {
   getFeaturedProducts,
   getCategories,
   getDivisions,
+  getShopProducts,
 } from "@/lib/queries/products";
 import Hero from "@/components/home/Hero";
 import CategoryGrid from "@/components/home/CategoryGrid";
@@ -19,12 +20,11 @@ import FaqAccordion from "@/components/marketing/FaqAccordion";
 import SectionHeading from "@/components/home/SectionHeading";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { absUrl, jsonLd, siteUrl } from "@/lib/seo/site";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function HomePage() {
-  const [homepage, settings, bestSellers, featured, categories, features, faqs, reviews, divisions] =
+  const [homepage, settings, bestSellers, featured, categories, features, faqs, reviews, divisions, allProducts] =
     await Promise.all([
       getHomepageContent(),
       getSiteSettings(),
@@ -40,38 +40,11 @@ export default async function HomePage() {
         include: { product: { select: { name: true, slug: true } } },
       }),
       getDivisions(),
+      getShopProducts({}),
     ]);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: jsonLd({
-            "@context": "https://schema.org",
-            "@type": "ItemList",
-            name: "NorthWest Patriots divisions",
-            itemListElement: divisions.map((d, i) => ({
-              "@type": "ListItem",
-              position: i + 1,
-              name: d.name,
-              url: `${siteUrl()}/divisions/${d.slug}`,
-              image: absUrl(d.image),
-            })),
-          }),
-        }}
-      />
-      {/* Divisions first: on a phone this is the first thing customers see. */}
-      <DivisionGrid
-        divisions={divisions.map((d) => ({
-          name: d.name,
-          slug: d.slug,
-          logo: d.image,
-          photo: d.products[0]?.mainImage ?? null,
-          productCount: d._count.products,
-        }))}
-      />
-
       <Hero
         title={homepage.heroTitle}
         subtitle={homepage.heroSubtitle}
@@ -83,6 +56,28 @@ export default async function HomePage() {
         supportEmail={settings.supportEmail}
       />
 
+      {/* Division boxes only show if any divisions are switched on in Admin. */}
+      {divisions.length > 0 && (
+        <DivisionGrid
+          divisions={divisions.map((d) => ({
+            name: d.name,
+            slug: d.slug,
+            logo: d.image,
+            photo: d.products[0]?.mainImage ?? null,
+            productCount: d._count.products,
+          }))}
+        />
+      )}
+
+      {/* The whole range, straight under the hero (the shop is small for now). */}
+      <ProductSection
+        products={allProducts.slice(0, 8)}
+        eyebrow="Shop"
+        title="The range"
+        viewAllHref="/shop"
+        emptyMessage="New products are landing soon. Check back shortly."
+      />
+
       <CategoryGrid
         categories={categories.map((c) => ({ name: c.name, slug: c.slug, image: c.image ?? c.products[0]?.mainImage ?? null }))}
       />
@@ -92,7 +87,6 @@ export default async function HomePage() {
         eyebrow="Best Sellers"
         title="Loved by our customers"
         viewAllHref="/collections/best-sellers"
-        emptyMessage="Mark products as best sellers in Admin to feature them here."
       />
 
       <ProductSection
@@ -100,7 +94,6 @@ export default async function HomePage() {
         eyebrow="Featured"
         title="Featured this month"
         viewAllHref="/shop"
-        emptyMessage="Mark products as featured in Admin to feature them here."
       />
 
       <StorySection title={homepage.storyTitle} body={homepage.storyBody} image={homepage.storyImage} />

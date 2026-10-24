@@ -112,7 +112,7 @@ function productLink(product: PublicProductKnowledge): ChatLink {
 const GENERIC_PRODUCT_WORDS = new Set([
   "product", "products", "gift", "gifts", "set", "sets",
   "standard", "test", "one", "ones",
-  // Every product name shares this brand prefix (e.g. "NorthWest Patriots
+  // Every product name shares this brand prefix (e.g. "Support Your Local Patriot
   // Hoodie") — without filtering these out, a query containing
   // "patriot" alone would match all products at once, the same failure mode
   // "wax"/"candle" caused before this catalogue was renamed.

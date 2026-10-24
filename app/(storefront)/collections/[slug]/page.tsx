@@ -29,7 +29,7 @@ export async function generateMetadata({
   if (!collection) return {};
   return {
     title: collection.title,
-    description: `${collection.description ? `${collection.description.replace(/\.?$/, ".")} ` : ""}${collection.title} for every NorthWest Patriots division: Preston, Merseyside, Greater Manchester, Blackpool and Southport. UK delivery.`,
+    description: `${collection.description ? `${collection.description.replace(/\.?$/, ".")} ` : ""}${collection.title} for every Support Your Local Patriot division: Preston, Merseyside, Greater Manchester, Blackpool and Southport. UK delivery.`,
     alternates: { canonical: `/collections/${slug}` },
   };
 }

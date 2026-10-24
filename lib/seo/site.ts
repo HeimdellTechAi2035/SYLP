@@ -1,6 +1,6 @@
 // Shared bits for search-engine and AI-agent structured data.
 
-export const SITE_NAME = "NorthWest Patriots";
+export const SITE_NAME = "Support Your Local Patriot";
 export const LEGAL_NAME = "Heimdell Tech Ai Ltd";
 
 export function siteUrl(): string {

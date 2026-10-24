@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/settings";
 import ContactForm from "@/components/marketing/ContactForm";
 
-export const metadata: Metadata = { title: "Contact Us", description: "Get in touch with NorthWest Patriots about an order, sizing or member merch.", alternates: { canonical: "/contact" } };
+export const metadata: Metadata = { title: "Contact Us", description: "Get in touch with Support Your Local Patriot about an order, sizing or member merch.", alternates: { canonical: "/contact" } };
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();

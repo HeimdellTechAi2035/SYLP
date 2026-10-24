@@ -90,7 +90,7 @@ export default async function AdminDeliveryPage() {
       <section className="mb-12 border-t border-ink/10 pt-8">
         <h2 className="font-semibold text-lg mb-1">Postage Rates (internal)</h2>
         <p className="text-xs text-ink-soft mb-4">
-          What NorthWest Patriots actually expects to pay the carrier — never shown to customers. Assign one to a delivery
+          What Support Your Local Patriot actually expects to pay the carrier — never shown to customers. Assign one to a delivery
           zone above once it exists.
         </p>
 

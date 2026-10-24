@@ -18,8 +18,8 @@ export default function AdminShell({
       <ServiceWorkerRegister />
       <aside className="w-64 shrink-0 bg-rose-dark text-ink flex flex-col hidden lg:flex border-r border-ink/15">
         <div className="p-5 border-b border-ink/15">
-          <span className="font-display text-lg">NWP</span>
-          <p className="text-xs text-ink/70 mt-0.5">NorthWest Patriots — Admin Dashboard</p>
+          <span className="font-display text-lg">SYLP</span>
+          <p className="text-xs text-ink/70 mt-0.5">Support Your Local Patriot — Admin Dashboard</p>
         </div>
         <nav className="flex-1 overflow-y-auto py-3">
           {nav.map((item) => (
@@ -41,7 +41,7 @@ export default function AdminShell({
 
       <div className="flex-1 min-w-0">
         <header className="lg:hidden flex items-center justify-between p-4 bg-rose-dark text-ink border-b border-ink/15">
-          <span className="font-display text-lg">NorthWest Patriots — Admin</span>
+          <span className="font-display text-lg">Support Your Local Patriot — Admin</span>
           <LogoutButton />
         </header>
         <main className="p-4 pb-28 sm:p-8 lg:pb-8 max-w-6xl mx-auto">{children}</main>
