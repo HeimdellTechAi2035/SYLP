@@ -71,3 +71,5 @@ Choose an available size before paying. Contact us for measurements before order
 
 6. Delivery', 's') WHERE slug='terms';
 UPDATE "Policy" SET body=replace(body, 'no longer make', 'no longer supply') WHERE slug='terms';
+
+UPDATE "Product" SET "videoUrl"=NULL, "productionTimeDays"=NULL WHERE slug IN ('sylp-hoodie','sylp-t-shirt');

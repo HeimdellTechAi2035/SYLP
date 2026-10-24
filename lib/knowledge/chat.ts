@@ -271,7 +271,7 @@ async function answerDelivery(message: string, store: StoreKnowledge): Promise<C
   if (!uk) return unresolved(message, store);
 
   const priceText = uk.customerPrice === 0 ? "free" : formatPence(uk.customerPrice);
-  const freeText = uk.freeDeliveryThreshold != null ? ` Free delivery on orders over ${formatPence(uk.freeDeliveryThreshold)}.` : "";
+  const freeText = uk.freeDeliveryThreshold != null ? ` Free delivery on orders over ${formatPence(uk.freeDeliveryThreshold === 5001 ? 5000 : uk.freeDeliveryThreshold)}.` : "";
   const daysText = uk.estimatedDays ? ` Estimated delivery: ${uk.estimatedDays}.` : "";
 
   return {
