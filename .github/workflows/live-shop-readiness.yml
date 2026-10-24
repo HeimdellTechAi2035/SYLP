@@ -1,0 +1,26 @@
+name: Verify live SYLP shop
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/live-shop-readiness.mjs'
+      - '.github/workflows/live-shop-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-shop:
+    name: Public storefront smoke test (no purchases)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate readiness script
+        run: node --check scripts/live-shop-readiness.mjs
+      - name: Audit public production pages and product catalogue
+        run: node scripts/live-shop-readiness.mjs
