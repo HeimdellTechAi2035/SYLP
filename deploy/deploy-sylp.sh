@@ -68,7 +68,9 @@ set -a; . "$ENV_FILE"; set +a
 # We need the dev dependencies to BUILD, not to run the production server.
 npm ci --include=dev --no-audit --no-fund --silent
 node -e "require.resolve('@tailwindcss/postcss')"
-node -e "require.resolve('prisma')"
+# Prisma 7 is a CLI package, not a Node require() entrypoint. Verifying
+# require.resolve('prisma') can throw on its optional type export even when
+# prisma generate and migrate work correctly. The build itself runs Prisma.
 # Apply new database changes (e.g. new tables) before building.
 if ! g diff --quiet "$CURRENT" "$LATEST" -- prisma/migrations prisma/schema.prisma || [[ "${1:-}" == "--migrate" ]]; then
   echo "Applying database migrations"
