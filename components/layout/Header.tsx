@@ -74,11 +74,11 @@ export default async function Header() {
 
         <Link href="/" className="flex items-center gap-2 min-w-0" aria-label="Support Your Local Patriot — home">
           <Image
-            src="/brand/sylp-logo.png"
+            src="/brand/sylp-logo-2026.webp"
             alt="Support Your Local Patriot"
-            width={56}
-            height={56}
-            className="h-12 w-12 sm:h-14 sm:w-14 rounded-full"
+            width={774}
+            height={984}
+            className="h-14 w-11 sm:h-16 sm:w-13 object-contain shrink-0"
             priority
           />
           {/* Shown on phones too: two short lines there, one line on wider screens. */}

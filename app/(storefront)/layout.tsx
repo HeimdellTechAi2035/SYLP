@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Support Your Local Patriot",
     locale: "en_GB",
-    images: [{ url: "/brand/icon-512.png", width: 512, height: 512, alt: "Support Your Local Patriot logo" }],
+    images: [{ url: "/brand/icon-512-2026.png", width: 512, height: 512, alt: "Support Your Local Patriot logo" }],
   },
   twitter: { card: "summary_large_image" },
   alternates: { types: { "text/plain": "/llms.txt", "application/json": "/catalog.json" } },
