@@ -75,7 +75,7 @@ export default async function Footer() {
       <div className="border-t border-ink/15">
         <div className="container-page py-3 text-xs text-ink/70 space-y-0.5">
           <p>&copy; {new Date().getFullYear()} {settings.businessName}, operated by Heimdell Tech Ai Ltd. All rights reserved.</p>
-          <p>Registered in England &amp; Wales, Company No. 16478408. Registered office: 11 Lower Croft, Preston, England, PR1 9DJ. ICO Registration: ZC079121.</p>
+          <p>Registered in England &amp; Wales, Company No. 16478408. Based in the Preston area. ICO Registration: ZC079121.</p>
         </div>
       </div>
     </footer>

@@ -55,7 +55,7 @@ export async function buildCatalog() {
       operator: LEGAL_NAME,
       companyNumber: "16478408",
       registeredIn: "England & Wales",
-      location: "Preston, Lancashire, UK",
+      location: "Preston area",
       url: siteUrl(),
       email: store.supportEmail,
       phone: store.supportPhone,
