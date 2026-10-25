@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import CookieConsent from "@/components/marketing/CookieConsent";
 import Analytics from "@/components/marketing/Analytics";
 import ChatWidget from "@/components/chat/ChatWidget";
+import BackgroundMusic from "@/components/marketing/BackgroundMusic";
 import { getSiteSettings } from "@/lib/settings";
 import { jsonLd, organizationLd, siteUrl, SITE_NAME } from "@/lib/seo/site";
 import "./globals.css";
@@ -89,6 +90,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <CookieConsent />
         <Analytics gaMeasurementId={settings.gaMeasurementId} metaPixelId={settings.metaPixelId} />
         <ChatWidget />
+        <BackgroundMusic />
       </body>
     </html>
   );
