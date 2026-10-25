@@ -34,7 +34,7 @@ export function organizationLd(opts: { email?: string | null; phone?: string | n
     logo: absUrl("/brand/icon-512.png"),
     email: opts.email || undefined,
     telephone: opts.phone || undefined,
-    address: { "@type": "PostalAddress", addressLocality: "Preston", postalCode: "PR1 9DJ", addressCountry: "GB" },
+    address: { "@type": "PostalAddress", addressLocality: "Preston", addressCountry: "GB" },
     identifier: [
       { "@type": "PropertyValue", propertyID: "Companies House", value: "16478408" },
       { "@type": "PropertyValue", propertyID: "ICO", value: "ZC079121" },
