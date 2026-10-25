@@ -1,4 +1,9 @@
-@import "tailwindcss";
+/* Scan authored UI only. The server keeps a .next.prev rollback build beside
+   this app; scanning its cached/binary content can generate invalid utilities. */
+@import "tailwindcss" source(none);
+@source "../";
+@source "../../components";
+@source "../../lib";
 
 :root {
   /* Support Your Local Patriot heraldic palette — black, crimson, antique gold and
