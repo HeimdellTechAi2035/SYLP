@@ -31,6 +31,10 @@ export const metadata: Metadata = {
   description:
     "Support Your Local Patriot (SYLP): UK-printed patriotic apparel and gifts, with UK delivery.",
   applicationName: "Support Your Local Patriot",
+  icons: {
+    icon: [{ url: "/brand/favicon-2026-v2.ico", sizes: "any" }],
+    apple: [{ url: "/brand/apple-touch-icon-2026-v2.png", sizes: "180x180" }],
+  },
   openGraph: {
     type: "website",
     siteName: "Support Your Local Patriot",
