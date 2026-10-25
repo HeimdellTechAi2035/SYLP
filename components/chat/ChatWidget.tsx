@@ -45,7 +45,7 @@ export default function ChatWidget() {
   }, [messages]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (open && window.matchMedia("(min-width: 640px)").matches) inputRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
@@ -97,30 +97,30 @@ export default function ChatWidget() {
     // z-[60]: above the cookie-consent bar (z-50), which is full-width and
     // otherwise sits directly on top of this corner until the visitor
     // responds to it.
-    <div className="fixed bottom-4 right-4 z-[60] flex flex-col items-end">
+    <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 sm:right-4 z-[60] flex flex-col items-end">
       {open && (
         <div
           ref={panelRef}
           role="dialog"
-          aria-modal="true"
+          aria-modal="false"
           aria-label="Support Your Local Patriot chat assistant"
-          className="mb-3 w-[calc(100vw-2rem)] max-w-sm h-[28rem] max-h-[70vh] bg-cream rounded-2xl shadow-xl flex flex-col overflow-hidden border border-ink/20"
+          className="mb-2 w-[min(20rem,calc(100vw-1.5rem))] h-[22rem] max-h-[min(55dvh,calc(100dvh-5rem))] sm:w-96 sm:h-[28rem] sm:max-h-[70dvh] bg-cream rounded-2xl shadow-xl flex flex-col overflow-hidden border border-ink/20"
         >
-          <div className="flex items-center justify-between px-4 py-3 bg-rose-dark text-ink">
-            <span className="font-display text-sm">Support Your Local Patriot Assistant</span>
+          <div className="flex items-center justify-between px-3 py-2 shrink-0 bg-rose-dark text-ink">
+            <span className="font-display text-sm">SYLP Assistant</span>
             <button
               type="button"
               onClick={() => {
                 setOpen(false);
               }}
               aria-label="Close chat"
-              className="text-ink/80 hover:text-ink"
+              className="min-h-11 min-w-11 flex items-center justify-center text-ink/80 hover:text-ink"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          <div ref={listRef} role="log" aria-live="polite" aria-label="Conversation" className="flex-1 overflow-y-auto p-4 space-y-3 text-sm">
+          <div ref={listRef} role="log" aria-live="polite" aria-label="Conversation" className="flex-1 min-h-0 overscroll-contain overflow-y-auto p-4 space-y-3 text-sm">
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
                 <p
@@ -151,7 +151,7 @@ export default function ChatWidget() {
                   value={orderNumberInput}
                   onChange={(e) => setOrderNumberInput(e.target.value)}
                   placeholder="Order number (e.g. HM-1001)"
-                  className="w-full rounded-lg border border-ink/20 px-2 py-1.5 text-xs text-ink placeholder:text-ink/50"
+                  className="w-full rounded-lg border border-ink/20 px-2 py-1.5 text-base text-ink placeholder:text-ink/50"
                 />
                 <label htmlFor="chat-order-email" className="sr-only">Email used at checkout</label>
                 <input
@@ -160,7 +160,7 @@ export default function ChatWidget() {
                   onChange={(e) => setEmailInput(e.target.value)}
                   type="email"
                   placeholder="Email used at checkout"
-                  className="w-full rounded-lg border border-ink/20 px-2 py-1.5 text-xs text-ink placeholder:text-ink/50"
+                  className="w-full rounded-lg border border-ink/20 px-2 py-1.5 text-base text-ink placeholder:text-ink/50"
                 />
                 <button type="submit" className="w-full rounded-lg bg-rose-dark text-ink text-xs py-1.5 font-medium">
                   Check order
@@ -184,7 +184,7 @@ export default function ChatWidget() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 border-t border-ink/10">
+          <form onSubmit={handleSubmit} className="flex shrink-0 items-center gap-2 p-2 border-t border-ink/10">
             <label htmlFor="chat-message-input" className="sr-only">Ask a question</label>
             <input
               id="chat-message-input"
@@ -193,14 +193,14 @@ export default function ChatWidget() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question..."
               maxLength={MAX_INPUT_LENGTH}
-              className="flex-1 rounded-full border border-ink/15 px-3 py-2 text-sm"
+              className="flex-1 min-w-0 rounded-full border border-ink/15 px-3 py-2 text-base"
               disabled={pending}
             />
             <button
               type="submit"
               disabled={pending || !input.trim()}
               aria-label="Send"
-              className="p-2 rounded-full bg-rose-dark text-ink disabled:opacity-50"
+              className="min-h-11 min-w-11 flex items-center justify-center p-2 rounded-full bg-rose-dark text-ink disabled:opacity-50"
             >
               <Send className="h-4 w-4" />
             </button>
@@ -216,7 +216,7 @@ export default function ChatWidget() {
         }}
         aria-label={open ? "Close chat assistant" : "Open chat assistant"}
         aria-expanded={open}
-        className="w-14 h-14 rounded-full bg-rose-dark text-ink border-2 border-ink/20 shadow-lg flex items-center justify-center hover:bg-rose transition-colors"
+        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-rose-dark text-ink border-2 border-ink/20 shadow-lg flex items-center justify-center hover:bg-rose transition-colors"
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
