@@ -41,6 +41,7 @@ export default async function PolicyPage({
       <h1 className="font-display text-3xl sm:text-4xl mb-2">{policy.title}</h1>
       {slug === "privacy" && <p className="my-4 rounded-xl border border-ink/20 p-4 text-sm">For registration, incident reports, private information and donation offers, also read our <Link href="/community/privacy" className="underline">community submission privacy notice</Link>.</p>}
       <p className="text-xs text-ink-soft mb-8">Last updated {policy.lastUpdated.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+      {["privacy", "cookies"].includes(slug) && <section className="mb-6 rounded-xl border border-ink/20 p-4 text-sm"><h2 className="font-semibold mb-2">Website visitor statistics</h2><p>With analytics consent, we record page views and estimate visits using a random identifier stored in this browser tab. A new visit starts after 30 minutes without a tracked page load. These statistics do not store your name, email address, IP address, query strings or form contents. Private community forms, account pages and checkout are excluded. Choose Necessary Only to browse without this analytics tracking.</p></section>}
       <div className="whitespace-pre-line text-ink-soft leading-relaxed">{policy.body}</div>
     </div>
   );

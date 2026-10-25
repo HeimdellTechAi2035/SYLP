@@ -1,3 +1,5 @@
+import DeleteRecordForm from "@/components/admin/DeleteRecordForm";
+import { deleteMessage } from "@/lib/actions/admin/cleanup";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCommunityOwner } from "@/lib/community/owner";
@@ -37,7 +39,7 @@ export default async function CommunityInbox({ kind, searchParams }: { kind?: Co
     <p className="text-sm text-ink-soft mb-4">{total} submissions · page {page} of {pages}</p>
     <div className="space-y-5">{messages.map(message => {
       const record = parseCommunityRecord(message.message);
-      if (!record) return null;
+      if (!record) return <article key={message.id} className="rounded-xl bg-blush border border-ink/15 p-5"><h2 className="font-semibold">Submission could not be displayed</h2><p className="text-sm text-ink-soft my-3">{message.createdAt.toLocaleString("en-GB")} · {message.status}</p><DeleteRecordForm action={deleteMessage.bind(null, message.id)} description="Permanently delete this unreadable submission? This cannot be undone." /></article>;
       const data = record.data;
       return <article key={message.id} className="rounded-2xl bg-blush border border-ink/15 p-5 min-w-0">
         <div className="flex flex-wrap justify-between gap-3 mb-4"><div><h2 className="font-display text-xl">{communityPages[data.kind]?.title ?? "Community submission"}</h2><p className="text-xs text-ink-soft mt-1 break-all">{record.reference} · {message.createdAt.toLocaleString("en-GB")} · {message.status}</p></div></div>
@@ -53,6 +55,7 @@ export default async function CommunityInbox({ kind, searchParams }: { kind?: Co
         <div className="flex flex-wrap gap-3 mt-5">
           {message.status === "NEW" && <form action={setCommunityStatus.bind(null,message.id,"READ")}><button className="min-h-11 px-4 py-2 rounded-lg border border-ink/25">Mark read</button></form>}
           {message.status !== "RESPONDED" && <form action={setCommunityStatus.bind(null,message.id,"RESPONDED")}><button className="min-h-11 px-4 py-2 rounded-lg border border-ink/25">Mark handled</button></form>}
+          <DeleteRecordForm action={deleteMessage.bind(null, message.id)} description="Permanently delete this submission and its uploaded evidence? This cannot be undone." />
           {data.email && <a href={`mailto:${data.email}`} className="inline-flex min-h-11 items-center px-4 py-2 rounded-lg bg-rose">Reply by email</a>}
         </div>
         {record.delivery === "UNCONFIRMED" && <form action={retryIncident.bind(null,message.id)} className="mt-4 border border-gold/50 rounded-lg p-4"><p className="text-sm mb-3">Delivery was not confirmed. Check the incident review queue for this reference before resending, to avoid duplicates.</p><button className="min-h-11 px-4 py-2 rounded-lg border border-ink/25">Retry incident delivery</button></form>}

@@ -1,3 +1,5 @@
+import DeleteRecordForm from "@/components/admin/DeleteRecordForm";
+import { deleteReview } from "@/lib/actions/admin/cleanup";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import StarRating from "@/components/ui/StarRating";
@@ -32,7 +34,8 @@ export default async function AdminReviewsPage() {
               <p className="text-sm text-ink-soft mb-3">{review.body}</p>
               {review.verifiedPurchase && <p className="text-xs text-sage mb-3">Verified purchase</p>}
 
-              <div className="flex gap-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-3">
+                <DeleteRecordForm action={deleteReview.bind(null, review.id)} description="Permanently delete this review? It will also be removed from the product page." />
                 {review.status !== "APPROVED" && (
                   <form action={approve}><button type="submit" className="text-xs px-3 py-1.5 rounded-full bg-sage text-ink">Approve</button></form>
                 )}

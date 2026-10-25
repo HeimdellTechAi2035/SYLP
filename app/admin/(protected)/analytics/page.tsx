@@ -1,3 +1,4 @@
+import VisitorSummary from "@/components/admin/VisitorSummary";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -86,6 +87,7 @@ export default async function AdminAnalyticsPage() {
   return (
     <div>
       <AdminPageHeader title="Analytics" />
+      <VisitorSummary detailed />
       <p className="text-sm text-ink-soft mb-6">
         Figures are calculated directly from your own order data — no third-party analytics required.
       </p>

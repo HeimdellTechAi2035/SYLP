@@ -3,6 +3,7 @@ import { Playfair_Display, Poppins } from "next/font/google";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CookieConsent from "@/components/marketing/CookieConsent";
+import VisitorTracker from "@/components/marketing/VisitorTracker";
 import Analytics from "@/components/marketing/Analytics";
 import ChatWidget from "@/components/chat/ChatWidget";
 import BackgroundMusic from "@/components/marketing/BackgroundMusic";
@@ -93,6 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Footer />
         <CookieConsent />
         <Analytics gaMeasurementId={settings.gaMeasurementId} metaPixelId={settings.metaPixelId} />
+        <VisitorTracker />
         <ChatWidget />
         <BackgroundMusic />
       </body>

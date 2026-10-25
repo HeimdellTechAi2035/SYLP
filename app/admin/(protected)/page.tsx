@@ -1,3 +1,4 @@
+import VisitorSummary from "@/components/admin/VisitorSummary";
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/auth";
 import FormInboxOverview from "@/components/admin/FormInboxOverview";
@@ -36,6 +37,7 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <AdminPageHeader title="Dashboard" />
+      <VisitorSummary />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
         <StatCard label="Total revenue" value={formatPence(revenue)} />

@@ -641,3 +641,21 @@ model NewsletterSubscriber {
   subscribedAt DateTime @default(now())
   source       String?
 }
+
+// Consent-based website statistics. Random visit IDs; no IPs or contact details.
+model TrafficVisit {
+  id        String @id
+  createdAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  pageViews TrafficPageView[]
+}
+
+model TrafficPageView {
+  id String @id
+  visitId String
+  visit TrafficVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  path String
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+  @@index([visitId, createdAt])
+}
