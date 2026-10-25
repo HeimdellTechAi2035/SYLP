@@ -26,6 +26,24 @@ class HmoDonationLinkTest(unittest.TestCase):
             maintenance.restore(changed)
             self.assertEqual((root / "public/index.html").read_bytes(), maintenance.OLD)
 
+    def test_only_exact_donation_setting_changes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / ".env"
+            original = b"PRIVATE_KEY=synthetic-secret\nCOFFEE_URL='" + maintenance.OLD + b"'\nCOMMENT=prefix-" + maintenance.OLD + b"\n"
+            path.write_bytes(original)
+            path.chmod(0o640)
+            changed = maintenance.replace_env_links([path], root / ".backup")
+            self.assertEqual(len(changed), 1)
+            self.assertIn(b"COFFEE_URL='" + maintenance.NEW + b"'", path.read_bytes())
+            self.assertIn(b"PRIVATE_KEY=synthetic-secret", path.read_bytes())
+            self.assertIn(b"COMMENT=prefix-" + maintenance.OLD, path.read_bytes())
+            self.assertEqual(maintenance.replace_env_links([path], root / ".backup"), [])
+            self.assertEqual(path.stat().st_mode & 0o777, 0o640)
+            maintenance.restore(changed)
+            self.assertEqual(path.read_bytes(), original)
+            self.assertEqual(path.stat().st_mode & 0o777, 0o640)
+
     def test_does_not_follow_external_symlinks(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
