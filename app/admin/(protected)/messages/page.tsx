@@ -3,7 +3,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { setMessageStatus } from "@/lib/actions/admin/messages";
 
 export default async function AdminMessagesPage() {
-  const messages = await prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" } });
+  const messages = await prisma.contactMessage.findMany({ where: { NOT: { category: { startsWith: "Community: " } } }, orderBy: { createdAt: "desc" } });
 
   return (
     <div>

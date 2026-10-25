@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export async function generateStaticParams() {
@@ -38,6 +39,7 @@ export default async function PolicyPage({
         </div>
       )}
       <h1 className="font-display text-3xl sm:text-4xl mb-2">{policy.title}</h1>
+      {slug === "privacy" && <p className="my-4 rounded-xl border border-ink/20 p-4 text-sm">For registration, incident reports, private information and donation offers, also read our <Link href="/community/privacy" className="underline">community submission privacy notice</Link>.</p>}
       <p className="text-xs text-ink-soft mb-8">Last updated {policy.lastUpdated.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
       <div className="whitespace-pre-line text-ink-soft leading-relaxed">{policy.body}</div>
     </div>

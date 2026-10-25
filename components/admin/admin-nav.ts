@@ -35,6 +35,7 @@ export const adminNav = [
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/returns", label: "Returns", icon: RotateCcw },
   { href: "/admin/messages", label: "Contact Messages", icon: Mail },
+  { href: "/admin/community", label: "Community Inbox", icon: Shield },
   { href: "/admin/policies", label: "Policies", icon: FileText },
   { href: "/admin/faqs", label: "FAQs & Chatbot", icon: MessageCircle },
   { href: "/admin/homepage", label: "Homepage", icon: Home },

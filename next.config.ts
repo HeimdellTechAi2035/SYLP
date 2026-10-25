@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: { serverActions: { bodySizeLimit: "8mb" } },
   images: {
     // Product photography will eventually be served from cloud storage —
     // add its hostname here once chosen (e.g. Vercel Blob, S3, Supabase Storage).

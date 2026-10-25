@@ -18,7 +18,7 @@ export default function ProductGallery({
     <div>
       <div className="relative aspect-square rounded-2xl overflow-hidden bg-blush">
         {hasImages ? (
-          <Image src={images[active]} alt={name} fill priority className="object-cover" />
+          <Image src={images[active]} alt={name} fill priority sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain" />
         ) : (
           <PlaceholderImage />
         )}

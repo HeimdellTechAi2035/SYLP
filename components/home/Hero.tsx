@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import PlaceholderImage from "@/components/ui/PlaceholderImage";
-import MemberCallout from "@/components/home/MemberCallout";
 
 export default function Hero({
   title,
@@ -11,7 +10,6 @@ export default function Hero({
   primaryHref,
   secondaryLabel,
   secondaryHref,
-  supportEmail,
 }: {
   title?: string | null;
   subtitle?: string | null;
@@ -50,7 +48,6 @@ export default function Hero({
             </Link>
           </div>
 
-          <MemberCallout supportEmail={supportEmail} />
         </div>
 
         <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-blush">

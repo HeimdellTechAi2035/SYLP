@@ -5,6 +5,7 @@ import {
   getShopProducts,
 } from "@/lib/queries/products";
 import Hero from "@/components/home/Hero";
+import CommunitySection from "@/components/home/CommunitySection";
 import DivisionGrid from "@/components/home/DivisionGrid";
 import ProductSection from "@/components/home/ProductSection";
 import StorySection from "@/components/home/StorySection";
@@ -41,6 +42,8 @@ export default async function HomePage() {
         supportEmail={settings.supportEmail}
       />
 
+      <CommunitySection />
+
       {/* Division boxes only show if any divisions are switched on in Admin. */}
       {divisions.length > 0 && (
         <DivisionGrid
@@ -54,7 +57,7 @@ export default async function HomePage() {
         />
       )}
 
-      {/* The whole range, straight under the hero (the shop is small for now). */}
+      {/* Keep the current merchandise range available below the community section. */}
       <ProductSection
         products={allProducts.slice(0, 8)}
         eyebrow="Shop"
