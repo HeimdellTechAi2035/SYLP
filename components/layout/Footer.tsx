@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/SocialIcons";
 import { getSiteSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
 import NewsletterForm from "@/components/marketing/NewsletterForm";
+import { communityPages } from "@/lib/community/config";
 
 export default async function Footer() {
   const [settings, divisions] = await Promise.all([
@@ -61,6 +61,7 @@ export default async function Footer() {
 
         {divisionLinks.length > 0 && <FooterColumn title="Divisions" links={divisionLinks} />}
         <FooterColumn title="Shop" links={shopLinks} />
+        <FooterColumn title="Community" links={Object.values(communityPages).map(p => ({ label: p.title, href: p.href }))} />
         <FooterColumn title="Help" links={helpLinks} />
         <FooterColumn title="Policies" links={legalLinks} />
       </div>
@@ -88,9 +89,9 @@ function FooterColumn({ title, links }: { title: string; links: { label: string;
       <ul className="space-y-1.5">
         {links.map((link) => (
           <li key={link.href}>
-            <Link href={link.href} className="text-sm text-ink/80 hover:text-ink underline-offset-2 hover:underline transition-colors">
+            <a href={link.href} className="inline-flex min-h-11 items-center text-sm text-ink/80 hover:text-ink underline-offset-2 hover:underline transition-colors">
               {link.label}
-            </Link>
+            </a>
           </li>
         ))}
       </ul>

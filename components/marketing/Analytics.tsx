@@ -2,6 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import Script from "next/script";
+import { usePathname } from "next/navigation";
+import { isCommunityPath } from "@/lib/community/config";
 import { getConsentSnapshot, getConsentServerSnapshot, subscribeToConsent } from "@/lib/consent";
 
 export default function Analytics({
@@ -12,6 +14,8 @@ export default function Analytics({
   metaPixelId: string | null;
 }) {
   const consent = useSyncExternalStore(subscribeToConsent, getConsentSnapshot, getConsentServerSnapshot);
+  const pathname = usePathname();
+  if (pathname && isCommunityPath(pathname)) return null;
 
   const analyticsAllowed = consent?.analytics === true;
   const marketingAllowed = consent?.marketing === true;

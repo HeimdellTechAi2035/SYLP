@@ -21,7 +21,7 @@ export default function ProductGrid({
       {products.map((product) => (
         <div
           key={product.slug}
-          className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)]"
+          className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]"
         >
           <ProductCard product={product} />
         </div>

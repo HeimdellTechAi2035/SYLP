@@ -61,6 +61,8 @@ trap rollback ERR
 g reset -q --hard "$LATEST"
 
 set -a; . "$ENV_FILE"; set +a
+# Community evidence is private, persistent data, outside the build output.
+install -d -m 700 -o sylp -g sylp "${MEDIA_DIR:-$APP_DIR/media-data}/community-private"
 # A live server may have NODE_ENV=production, which makes plain npm ci
 # omit build-time devDependencies such as @tailwindcss/postcss.  Also, an
 # existing node_modules directory is not evidence that these are installed.

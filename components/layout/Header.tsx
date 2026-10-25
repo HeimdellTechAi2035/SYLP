@@ -38,7 +38,11 @@ export default async function Header() {
   // consolidation the desktop nav does via ShopDropdown below.
   const navLinks = [
     { label: "Shop All", href: "/shop" },
-    { label: "New", href: "/collections/new" },
+    { label: "Community", href: "/#community" },
+    { label: "Register With Us", href: "/register-with-us" },
+    { label: "Report an Incident", href: "/report-an-incident" },
+    { label: "Whistleblower Information", href: "/whistleblower-information" },
+    { label: "Help the Homeless", href: "/help-the-homeless" },
     { label: "About", href: "/about" },
     { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/contact" },
@@ -74,8 +78,8 @@ export default async function Header() {
 
         <nav className="hidden lg:flex items-center gap-6 font-medium text-sm">
           <ShopDropdown categories={categoryLinks} divisions={divisionLinks} />
-          <Link href="/collections/new" className="text-ink-soft hover:text-rose-dark transition-colors">
-            New
+          <Link href="/#community" className="text-ink-soft hover:text-rose-dark transition-colors">
+            Community
           </Link>
           <Link href="/about" className="text-ink-soft hover:text-rose-dark transition-colors">
             About

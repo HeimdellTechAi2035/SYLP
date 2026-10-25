@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MessageCircle, X, Send } from "lucide-react";
 import { sendChatMessage } from "@/lib/actions/chat";
 import type { ChatLink } from "@/lib/knowledge/chat";
+import { isCommunityPath } from "@/lib/community/config";
 
 type Message = { role: "bot" | "user"; text: string; links?: ChatLink[] };
 
@@ -37,20 +38,8 @@ export default function ChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const userInteractedRef = useRef(false);
 
-  // Auto-opens once per browser tab, 30s after the widget first mounts —
-  // but never overrides a visitor who has already opened or dismissed it
-  // themselves, and never fires twice in the same session/navigation.
-  useEffect(() => {
-    if (sessionStorage.getItem("hbm_chat_auto_shown")) return;
-    const timer = setTimeout(() => {
-      sessionStorage.setItem("hbm_chat_auto_shown", "1");
-      if (!userInteractedRef.current) setOpen(true);
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, []);
-
+  // Open only when requested, so the panel never interrupts mobile browsing.
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages]);
@@ -73,7 +62,7 @@ export default function ChatWidget() {
 
   // Never covers Add to Cart / Checkout / payment controls — simplest reliable
   // rule is to not render at all on the payment handoff page.
-  if (pathname?.startsWith("/checkout")) return null;
+  if (pathname?.startsWith("/checkout") || (pathname && isCommunityPath(pathname))) return null;
 
   async function send(text: string, verification?: { orderNumber?: string; email?: string }) {
     if (!text.trim() || pending) return;
@@ -122,7 +111,6 @@ export default function ChatWidget() {
             <button
               type="button"
               onClick={() => {
-                userInteractedRef.current = true;
                 setOpen(false);
               }}
               aria-label="Close chat"
@@ -224,7 +212,6 @@ export default function ChatWidget() {
         ref={launcherRef}
         type="button"
         onClick={() => {
-          userInteractedRef.current = true;
           setOpen((o) => !o);
         }}
         aria-label={open ? "Close chat assistant" : "Open chat assistant"}
