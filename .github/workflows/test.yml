@@ -21,6 +21,7 @@ jobs:
       # points at a missing .prisma/client/default module (production 500).
       - run: node -e "require('@prisma/client')"
       - run: bash -n deploy/deploy-sylp.sh
+      - run: npm run check:css
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run test:launch

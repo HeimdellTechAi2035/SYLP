@@ -15,6 +15,9 @@
 
 # next.js
 /.next/
+/.next.prev/
+__pycache__/
+*.pyc
 /out/
 
 # production
