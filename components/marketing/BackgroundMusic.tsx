@@ -13,6 +13,7 @@ export default function BackgroundMusic() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    audio.loop = true;
     audio.volume = 0.25;
     audio.muted = false;
 
@@ -26,8 +27,20 @@ export default function BackgroundMusic() {
       setPlaying(true);
     };
     const onPause = () => setPlaying(false);
+    // Keep repeating even if a browser stops instead of honouring native loop.
+    const repeat = () => {
+      if (!enabledRef.current) return;
+      audio.currentTime = 0;
+      void audio.play().catch(() => setPlaying(false));
+    };
+    const checkEnd = () => {
+      if (!audio.paused && Number.isFinite(audio.duration) && audio.duration > 0 &&
+          audio.currentTime >= audio.duration - 0.08) repeat();
+    };
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
+    audio.addEventListener("ended", repeat);
+    audio.addEventListener("timeupdate", checkEnd);
     document.addEventListener("pointerup", start, true);
     document.addEventListener("touchend", start, true);
     document.addEventListener("click", start, true);
@@ -41,6 +54,8 @@ export default function BackgroundMusic() {
       document.removeEventListener("keydown", start);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("ended", repeat);
+      audio.removeEventListener("timeupdate", checkEnd);
       audio.pause();
     };
   }, []);
@@ -63,7 +78,7 @@ export default function BackgroundMusic() {
 
   return (
     <>
-      <audio ref={audioRef} src="/audio/sylp-background.mp3" loop preload="auto" />
+      <audio ref={audioRef} src="/audio/sylp-background.mp3" loop preload="auto" data-repeat="continuous" />
       <button
         ref={controlRef}
         type="button"
