@@ -1,3 +1,6 @@
+import { getBackgroundMusic } from "@/lib/music";
+import { setBackgroundMusic } from "@/lib/actions/admin/music";
+import { requireAdminSession } from "@/lib/auth";
 import { getHomepageContent, getHomepageFeatures } from "@/lib/settings";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { FormField, FormTextarea, SubmitButton } from "@/components/admin/FormField";
@@ -5,6 +8,8 @@ import ImageDropzone from "@/components/admin/ImageDropzone";
 import { updateHomepageContent, addHomepageFeature, removeHomepageFeature } from "@/lib/actions/admin/homepage";
 
 export default async function AdminHomepagePage() {
+  const session = await requireAdminSession();
+  const musicUrl = session.role === "OWNER" ? await getBackgroundMusic() : "";
   const [content, features] = await Promise.all([getHomepageContent(), getHomepageFeatures("WHY_SHOP")]);
 
   return (
@@ -49,6 +54,12 @@ export default async function AdminHomepagePage() {
         <SubmitButton>Save Homepage Content</SubmitButton>
       </form>
 
+      {session.role === "OWNER" && <form action={setBackgroundMusic} className="max-w-2xl border-t border-ink/10 pt-6 mb-8 space-y-4">
+        <h2 className="font-semibold text-lg">Background music</h2>
+        <p className="text-sm text-ink-soft">Add a hosted audio file first, then enter its local path. Playback loops quietly at 8% volume; visitors can turn it off. Browsers may require a tap to start. Leave blank to disable.</p>
+        <FormField label="Audio file path (for example /audio/background.mp3)" name="musicUrl" defaultValue={musicUrl} />
+        <SubmitButton>Save music setting</SubmitButton>
+      </form>}
       <div className="max-w-2xl border-t border-ink/10 pt-6">
         <h2 className="font-semibold text-lg mb-4">&ldquo;Why Shop&rdquo; Features</h2>
         <ul className="space-y-2 mb-4">

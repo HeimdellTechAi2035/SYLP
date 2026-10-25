@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { requireAdminSession } from "@/lib/auth";
+import FormInboxOverview from "@/components/admin/FormInboxOverview";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 export default async function AdminDashboardPage() {
+  const session = await requireAdminSession();
   const [recentOrders, lowStockProducts, pendingReviews, newMessages, totalRevenue, paidOrderItems] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.product.findMany({
@@ -41,6 +44,8 @@ export default async function AdminDashboardPage() {
         <StatCard label="Pending reviews" value={String(pendingReviews)} href="/admin/reviews" />
         <StatCard label="New messages" value={String(newMessages)} href="/admin/messages" />
       </div>
+
+      {session.role === "OWNER" && !session.mustChangePassword && <FormInboxOverview />}
 
       <div className="grid lg:grid-cols-2 gap-8">
         <div>

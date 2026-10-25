@@ -1,14 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, User, ShoppingBag, Coffee, ArrowUpRight } from "lucide-react";
+import { Search, ShoppingBag, Coffee, ArrowUpRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getHomepageContent } from "@/lib/settings";
 import { getCartToken, getCartWithItems } from "@/lib/cart";
 import MobileMenu from "@/components/layout/MobileMenu";
+import BackgroundMusic from "@/components/layout/BackgroundMusic";
+import { getBackgroundMusic } from "@/lib/music";
 import ShopDropdown from "@/components/layout/ShopDropdown";
 
 export default async function Header() {
-  const [categories, divisions, homepage, cartToken] = await Promise.all([
+  const [categories, divisions, homepage, cartToken, musicUrl] = await Promise.all([
     prisma.category.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: "asc" },
@@ -21,6 +23,7 @@ export default async function Header() {
     }),
     getHomepageContent(),
     getCartToken(),
+    getBackgroundMusic(),
   ]);
 
   const cart = await getCartWithItems(cartToken);
@@ -67,23 +70,23 @@ export default async function Header() {
         </div>
       )}
 
-      <div className="container-page flex items-center justify-between gap-4 py-3">
+      <div className="container-page flex items-center justify-between gap-2 sm:gap-4 py-2 sm:py-3">
         <div className="flex items-center gap-2 lg:hidden">
           <MobileMenu links={navLinks} categoryLinks={categoryLinks} divisionLinks={divisionLinks} />
         </div>
 
-        <Link href="/" className="flex items-center gap-2 min-w-0" aria-label="Support Your Local Patriot — home">
+        <Link href="/" className="flex flex-1 lg:flex-none items-center justify-center lg:justify-start gap-2 min-w-0" aria-label="Support Your Local Patriot — home">
           <Image
             src="/brand/sylp-logo-2026.webp"
             alt="Support Your Local Patriot"
             width={774}
             height={984}
-            className="h-14 w-11 sm:h-16 sm:w-13 object-contain shrink-0"
+            className="h-12 w-9 sm:h-16 sm:w-13 object-contain shrink-0"
             priority
           />
           {/* Shown on phones too: two short lines there, one line on wider screens. */}
-          <span className="font-display text-sm sm:text-lg text-ink leading-tight">
-            Support Your Local <span className="block sm:inline">Patriot</span>
+          <span className="font-display text-[13px] sm:text-lg text-ink leading-snug">
+            <span className="block sm:inline">Support Your</span>{" "}<span className="block sm:inline">Local Patriot</span>
           </span>
         </Link>
 
@@ -104,6 +107,7 @@ export default async function Header() {
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-3">
+          {musicUrl && <BackgroundMusic src={musicUrl} />}
           <form action="/shop" className="hidden md:flex items-center relative">
             <Search className="absolute left-3 h-4 w-4 text-ink-soft" aria-hidden />
             <input
@@ -115,16 +119,9 @@ export default async function Header() {
             />
           </form>
           <Link
-            href="/account"
-            aria-label="Your account"
-            className="p-2 rounded-full hover:bg-blush transition-colors"
-          >
-            <User className="h-5 w-5 text-ink" />
-          </Link>
-          <Link
             href="/cart"
             aria-label={`Basket, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
-            className="relative p-2 rounded-full hover:bg-blush transition-colors"
+            className="relative min-h-11 min-w-11 flex items-center justify-center p-2 rounded-full hover:bg-blush transition-colors"
           >
             <ShoppingBag className="h-5 w-5 text-ink" />
             {cartCount > 0 && (

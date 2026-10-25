@@ -10,7 +10,8 @@ export async function setCommunityStatus(id: string, status: string) {
   await requireCommunityOwner();
   if (!["READ", "RESPONDED"].includes(status)) throw new Error("Invalid status");
   await prisma.contactMessage.updateMany({ where: { id, category: { startsWith: COMMUNITY_PREFIX } }, data: { status } });
-  revalidatePath("/admin/community");
+  revalidatePath("/admin/community", "layout");
+  revalidatePath("/admin");
 }
 export async function retryIncident(id: string) {
   await requireCommunityOwner();
@@ -23,5 +24,6 @@ export async function retryIncident(id: string) {
   try { await forwardIncident(record.data, record.reference, record.files.length); record.delivery = "SENT"; }
   catch { record.delivery = "UNCONFIRMED"; }
   await prisma.contactMessage.update({ where: { id }, data: { message: JSON.stringify(record) } });
-  revalidatePath("/admin/community");
+  revalidatePath("/admin/community", "layout");
+  revalidatePath("/admin");
 }
