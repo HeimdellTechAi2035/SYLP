@@ -12,7 +12,7 @@ export default async function AdminDashboardPage() {
       select: { id: true, name: true, stockQuantity: true, lowStockThreshold: true },
     }).then((products) => products.filter((p) => p.stockQuantity <= p.lowStockThreshold)),
     prisma.review.count({ where: { status: "PENDING" } }),
-    prisma.contactMessage.count({ where: { status: "NEW" } }),
+    prisma.contactMessage.count({ where: { status: "NEW", NOT: { category: { startsWith: "Community: " } } } }),
     prisma.order.aggregate({ where: { paymentStatus: "PAID" }, _sum: { total: true } }),
     prisma.orderItem.findMany({
       where: { order: { paymentStatus: "PAID" } },

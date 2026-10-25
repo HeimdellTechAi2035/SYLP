@@ -8,7 +8,10 @@ const initial: CommunityState = { status: "idle" };
 const inputClass = "w-full min-h-12 rounded-xl border border-ink/25 bg-blush px-3 py-3 text-base text-ink focus-visible:outline-rose";
 
 export default function CommunityForm({ kind }: { kind: CommunityKind }) {
-  const [state, action, pending] = useActionState(submitCommunity, initial);
+  const [state, action, pending] = useActionState(async (previous: CommunityState, data: FormData): Promise<CommunityState> => {
+    try { return await submitCommunity(previous, data); }
+    catch { return { status: "error", message: "We couldn't confirm that your submission was saved. Please try again; if you attached files, try smaller files or send the text first." }; }
+  }, initial);
   const optionalContact = kind === "whistleblower" || kind === "incident";
   const [anonymous, setAnonymous] = useState(optionalContact);
   const [values, setValues] = useState<Record<string, string>>({});

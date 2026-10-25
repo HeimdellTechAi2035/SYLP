@@ -4,7 +4,7 @@ import path from "node:path";
 
 export const MAX_EVIDENCE_BYTES = 6 * 1024 * 1024;
 export type EvidenceFile = { key: string; type: string; size: number; extension: string };
-const directory = () => path.join(path.resolve(process.env.MEDIA_DIR || "media-data"), "community-private");
+const directory = () => path.join(path.resolve(/*turbopackIgnore: true*/ process.env.MEDIA_DIR || "media-data"), "community-private");
 const validKey = (key: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.bin$/.test(key);
 export function evidenceType(bytes: Buffer): { type: string; extension: string } | null {
   if (bytes.length < 12) return null;
