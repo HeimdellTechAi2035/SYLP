@@ -1,3 +1,4 @@
+import { answerCommunityQuestion } from "@/lib/knowledge/community";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import { getProductKnowledge, getProductKnowledgeBySlug, type PublicProductKnowledge } from "@/lib/knowledge/products";
@@ -239,7 +240,7 @@ async function answerOrderStatus(context: ChatContext): Promise<ChatResponse> {
   }
 
   return {
-    text: "To look up your order, please tell me your order number and the email address used at checkout, or log in to your account.",
+    text: "To look up your order, please tell me your order number and the email address used at checkout. You can also use Track My Order without signing in.",
     links: [{ label: "Track my order", href: "/track-order" }],
     resolved: true,
   };
@@ -302,12 +303,11 @@ async function answerPolicy(message: string, store: StoreKnowledge): Promise<Cha
 
 async function answerCategoryList(store: StoreKnowledge): Promise<ChatResponse> {
   const products = await getProductKnowledge();
-  const categories = [...new Set(products.map((p) => p.category).filter(Boolean))] as string[];
-  if (categories.length === 0) return unresolved("category list", store);
+  if (products.length === 0) return unresolved("current range", store);
 
   return {
-    text: `Our current range includes: ${categories.join(", ")}.`,
-    links: [{ label: "Shop all", href: "/shop" }],
+    text: `Our current published range: ${products.map(p => `${p.name} — ${formatPence(p.currentPrice)}${p.available ? "" : " (currently unavailable)"}`).join("; ")}. Postage is shown before payment; see delivery information for the current charges and free-delivery threshold.`,
+    links: [...products.slice(0, 5).map(productLink), { label: "Delivery information", href: "/legal/delivery" }],
     resolved: true,
   };
 }
@@ -335,15 +335,28 @@ async function answerCheapest(message: string, store: StoreKnowledge): Promise<C
 }
 
 function answerAboutProduct(message: string, product: PublicProductKnowledge, store: StoreKnowledge): ChatResponse | Promise<ChatResponse> {
-  if (/\bbigger size|larger size|other size|what size\b/.test(message)) {
-    const sizes = product.variants.filter((v) => v.size).map((v) => `${v.size} (${formatPence(v.price)})`);
+  if (/\b(bigger sizes?|larger sizes?|other sizes?|what sizes?|sizes?|sizing|size guide|fit)\b/.test(message)) {
+    const sizes = product.variants.filter((v) => v.size).map((v) => `${v.size} (${formatPence(v.price)}${v.available ? "" : ", unavailable"})`);
     const text =
       sizes.length === 0
-        ? `${product.name} is currently available in one size only.`
+        ? `Confirmed size options for ${product.name} are not listed in my product information. Please check its product page or contact the team before ordering.`
         : `${product.name} is available in: ${sizes.join(", ")}.`;
     return { text, links: [productLink(product)], resolved: true, subjectProductSlug: product.slug };
   }
 
+  if (/\b(colou?rs?|black|white)\b/.test(message)) {
+    const colours = [...new Set(product.variants.map(v => v.colour).filter(Boolean))];
+    return { text: colours.length ? `${product.name}: listed colours are ${colours.join(", ")}. Check the product page for size/colour availability.` : `${product.name}: confirmed colour options are not listed. Check the product page before ordering.`, links: [productLink(product)], resolved: true, subjectProductSlug: product.slug };
+  }
+  if (/\b(wash|washing|care|iron|tumble|dry clean|cleaning)\b/.test(message)) {
+    if (!product.careInstructions) return unresolved(message, store);
+    return { text: `${product.name}: ${product.careInstructions}`, links: [productLink(product), { label: "Product care", href: "/legal/product-care" }], resolved: true, subjectProductSlug: product.slug };
+  }
+  if (/\b(descri(?:be|ption)|tell me about|design|print|front|back|look like|details)\b/.test(message)) {
+    const detail = product.description || product.shortDescription;
+    if (!detail) return unresolved(message, store);
+    return { text: `${product.name} — ${formatPence(product.currentPrice)}. ${detail.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").slice(0, 850)}`, links: [productLink(product)], resolved: true, subjectProductSlug: product.slug };
+  }
   if (/\bmade to order\b/.test(message)) {
     const text = product.madeToOrder
       ? `Yes — ${product.name} is made to order${product.productionTimeDays ? `, please allow ${product.productionTimeDays} day${product.productionTimeDays === 1 ? "" : "s"} for production` : ""}.`
@@ -357,7 +370,7 @@ function answerAboutProduct(message: string, product: PublicProductKnowledge, st
     return { text: `${product.name}: ${info}`, links: [productLink(product)], resolved: true, subjectProductSlug: product.slug };
   }
 
-  if (/\b(available|in stock|do you have|can i order|can i get|still sell)\b/.test(message)) {
+  if (/\b(available|in stock|do you have|can i order|can i get|still sell|sizes?|sizing|colou?rs?|wash|washing|care|iron|tumble|descri(?:be|ption)|tell me about|design|print|front|back|look like|details)\b/.test(message)) {
     const text = product.available
       ? `Yes — ${product.name} is currently available for ${formatPence(product.currentPrice)}.`
       : `${product.name} is currently out of stock.`;
@@ -385,7 +398,7 @@ function answerAboutProduct(message: string, product: PublicProductKnowledge, st
 
 async function answerProductQuestion(message: string, context: ChatContext, store: StoreKnowledge): Promise<ChatResponse | null> {
   const isProductQuestion =
-    /\b(how much|price|cost|available|in stock|do you have|made to order|made (of|from)|what'?s? it made|whats it made|what material|bigger size|larger size|other size|what size|can i order|can i get|still sell)\b/.test(
+    /\b(how much|price|cost|available|in stock|do you have|made to order|made (of|from)|what'?s? it made|whats it made|what material|bigger size|larger size|other size|what size|can i order|can i get|still sell|sizes?|sizing|colou?rs?|wash|washing|care|iron|tumble|descri(?:be|ption)|tell me about|design|print|front|back|look like|details)\b/.test(
       message
     );
   if (!isProductQuestion) return null;
@@ -414,7 +427,7 @@ async function answerProductQuestion(message: string, context: ChatContext, stor
       if (product) return answerAboutProduct(message, product, store);
     }
     return {
-      text: "Which product would you like to know about? You can tell me its name, e.g. \"Preston Patriots Hoodie\".",
+      text: "Which product would you like to know about? You can tell me its name, e.g. \"SYLP Knight Hoodie\".",
       links: [{ label: "Shop all", href: "/shop" }],
       resolved: true,
     };
@@ -525,11 +538,22 @@ export async function askChatbot(rawMessage: string, context: ChatContext = {}):
     return unresolved(trimmedRaw, store);
   }
 
+  const communityAnswer = answerCommunityQuestion(message, store);
+  if (communityAnswer) return communityAnswer;
+
   if (/\b(track|tracking|where is my order|where'?s my parcel|dispatched|order status|what did i order)\b/.test(message)) {
     return answerOrderStatus(context);
   }
   if (/\b(deliver|delivery|shipping|postage|ship internationally|how quickly|when will it come|when is my order coming)\b/.test(message)) {
     return answerDelivery(message, store);
+  }
+  const policyTopic = /\b(cookie|privacy|data protection|terms|complaint|accessibility|product care guide)\b/.test(message);
+  if (policyTopic) {
+    const slug = /cookie/.test(message) ? "cookies" : /privacy|data protection/.test(message) ? "privacy" : /complaint/.test(message) ? "complaints" : /accessibility/.test(message) ? "accessibility" : /product care/.test(message) ? "product-care" : "terms";
+    const policies = await getPolicyKnowledge();
+    const policy = policies.find(p => p.slug === slug);
+    if (policy) return { text: policy.body.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 650), links: [{ label: policy.title, href: `/legal/${slug}` }], resolved: true };
+    return unresolved(trimmedRaw, store);
   }
   if (/\b(returns?|refund|cancel|send it back)\b/.test(message)) {
     return answerPolicy(message, store);
@@ -537,7 +561,7 @@ export async function askChatbot(rawMessage: string, context: ChatContext = {}):
   if (/\b(divisions?|branch(es)?|chapters?|which areas?|what areas?|which towns?|my area)\b/.test(message)) {
     return answerDivisions();
   }
-  if (/\bwhat (categories|ranges|collections) do you\b|\bwhat do you sell\b/.test(message)) {
+  if (/\bwhat (categories|ranges|collections) do you\b|\b(what do you sell|what (can i buy|merch(?:andise)? do you (sell|have))|your products|your merchandise|shop products)\b/.test(message)) {
     return answerCategoryList(store);
   }
   if (/\bcheapest\b|\blowest price\b/.test(message)) {

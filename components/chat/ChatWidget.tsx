@@ -13,16 +13,18 @@ type Message = { role: "bot" | "user"; text: string; links?: ChatLink[] };
 const MAX_INPUT_LENGTH = 500;
 
 const QUICK_ACTIONS = [
-  { label: "Shop products", message: "What products do you sell?" },
-  { label: "Delivery", message: "How much is delivery?" },
-  { label: "Returns", message: "What is your return policy?" },
-  { label: "Made to order", message: "What does made to order mean?" },
-  { label: "Track my order", message: "Where is my order?" },
+  { label: "Our cause", message: "What is SYLP and your cause?" },
+  { label: "Shop products", message: "What do you sell?" },
+  { label: "Get involved", message: "How can I volunteer?" },
+  { label: "Report an incident", message: "How do I report an incident?" },
+  { label: "Help the homeless", message: "How can I help the homeless?" },
+  { label: "Support our work", message: "How can I donate money?" },
+  { label: "Delivery & returns", message: "How much is delivery?" },
   { label: "Contact us", message: "How can I contact you?" },
 ];
 
 const GREETING =
-  "Hi 👋 I'm the Support Your Local Patriot assistant. I can help with products, delivery, orders, returns and general questions.";
+  "Hi 👋 I'm the SYLP assistant. Ask me about our cause, merchandise, volunteering, incident reporting, homeless donations or supporting our work. I can also help with delivery, returns and orders. Please use the dedicated forms for confidential information.";
 
 export default function ChatWidget() {
   const pathname = usePathname();

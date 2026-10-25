@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SUPPORT_URL } from "@/lib/knowledge/community";
 import Image from "next/image";
 import { Search, ShoppingBag, Coffee, ArrowUpRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -54,7 +55,7 @@ export default async function Header() {
   return (
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/80 border-b border-ink/10">
       <a
-        href="https://buymeacoffee.com/sylp"
+        href={SUPPORT_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Donate to Support Your Local Patriot on Buy Me a Coffee (opens in a new tab)"
