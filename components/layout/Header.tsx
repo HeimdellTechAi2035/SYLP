@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, User, ShoppingBag } from "lucide-react";
+import { Search, User, ShoppingBag, Coffee, ArrowUpRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getHomepageContent } from "@/lib/settings";
 import { getCartToken, getCartWithItems } from "@/lib/cart";
@@ -50,6 +50,17 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/80 border-b border-ink/10">
+      <a
+        href="https://buymeacoffee.com/sylp"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Donate to Support Your Local Patriot on Buy Me a Coffee (opens in a new tab)"
+        className="flex min-h-11 items-center justify-center gap-2 bg-[#ffdd00] px-4 py-2 text-center text-sm font-semibold text-[#121010] hover:bg-[#ffe747] focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black"
+      >
+        <Coffee className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span>Support our work · Buy us a coffee</span>
+        <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+      </a>
       {homepage.announcementBarText && (
         <div className="bg-rose-dark text-ink text-center text-xs sm:text-sm py-2 px-4 font-medium tracking-wide">
           {homepage.announcementBarText}
