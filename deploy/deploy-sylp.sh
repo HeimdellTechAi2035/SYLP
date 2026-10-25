@@ -89,6 +89,9 @@ for i in $(seq 1 20); do
   if curl -fsS -o /dev/null "$HEALTH_URL"; then
     trap - ERR
     rm -rf .next.prev
+    # One idempotent maintenance task explicitly requested for the co-hosted
+    # HMO site. Keep its failure separate from the healthy SYLP deployment.
+    python3 "$APP_DIR/deploy/update-hmo-donation-link.py" || echo "WARNING: HMO donation link update needs attention"
     echo "Deploy OK: $LATEST"
     exit 0
   fi
