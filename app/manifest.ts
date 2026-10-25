@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 // Minimal PWA manifest — exists so the admin dashboard is installable enough
 // for Web Push (a registered service worker + manifest) on the store owner's phone.
-// Icons are the SYLP logo, cut to a circle (public/brand/).
+// Icons preserve the full SYLP artwork on a dark square (public/brand/).
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Support Your Local Patriot Admin",
@@ -14,8 +14,8 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#fdf6f0",
     theme_color: "#b5495b",
     icons: [
-      { src: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
-      { src: "/brand/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/brand/icon-192-2026.png", sizes: "192x192", type: "image/png" },
+      { src: "/brand/icon-512-2026.png", sizes: "512x512", type: "image/png" },
     ],
   };
 }

@@ -31,7 +31,7 @@ export function organizationLd(opts: { email?: string | null; phone?: string | n
     name: SITE_NAME,
     legalName: LEGAL_NAME,
     url: siteUrl(),
-    logo: absUrl("/brand/icon-512.png"),
+    logo: absUrl("/brand/icon-512-2026.png"),
     email: opts.email || undefined,
     telephone: opts.phone || undefined,
     address: { "@type": "PostalAddress", addressLocality: "Preston", addressCountry: "GB" },

@@ -11,7 +11,7 @@ export function agentCard() {
     preferredTransport: "JSONRPC",
     version: "1.0.0",
     provider: { organization: `${SITE_NAME} (${LEGAL_NAME})`, url: siteUrl() },
-    iconUrl: absUrl("/brand/icon-192.png"),
+    iconUrl: absUrl("/brand/icon-192-2026.png"),
     documentationUrl: `${siteUrl()}/llms.txt`,
     capabilities: { streaming: false, pushNotifications: false, stateTransitionHistory: false },
     defaultInputModes: ["text/plain", "application/json"],
