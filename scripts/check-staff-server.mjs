@@ -22,8 +22,9 @@ async function cookie(user) {
  return `hbm_admin_session=${token}`;
 }
 const decode = value => value.replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
-async function submitForm(path, fields) {
- const page=await request(path);const html=await page.text();
+async function submitForm(path, fields, auth, containingField) {
+ const page=await request(path,auth);let html=await page.text();
+ if(containingField){html=(html.match(/<form\b[\s\S]*?<\/form>/g)||[]).find(form=>form.includes(`name="${containingField}"`))||"";}
  const form=new FormData();
  for(const tag of html.match(/<input\b[^>]*>/g)||[]) {
   const attrs=Object.fromEntries([...tag.matchAll(/([\w:$-]+)="([^"]*)"/g)].map(m=>[m[1],decode(m[2])]));
@@ -31,13 +32,15 @@ async function submitForm(path, fields) {
  }
  assert.ok([...form.keys()].some(name=>name.startsWith('$ACTION_')),'Native Server Action metadata must be present');
  for(const [name,value] of Object.entries(fields)) form.set(name,value);
- return fetch(`${origin}${path}`,{method:'POST',body:form,redirect:'manual',headers:{origin},signal:AbortSignal.timeout(15000)});
+ return fetch(`${origin}${path}`,{method:'POST',body:form,redirect:'manual',headers:{origin,...(auth?{cookie:auth}:{})},signal:AbortSignal.timeout(15000)});
 }
 async function request(path, auth) { return fetch(`${origin}${path}`,{redirect:'manual',headers:auth?{cookie:auth}:{},signal:AbortSignal.timeout(15000)}); }
 try {
  const owner = await db.adminUser.create({data:{id:'ci-server-owner',email:'server-owner@staff-test.invalid',name:'CI owner',passwordHash:'not-a-login-hash',role:'OWNER'}});
  const staff = await db.adminUser.create({data:{id:'ci-server-staff',email:'server-staff@staff-test.invalid',name:'CI staff',passwordHash:'not-a-login-hash',role:'STAFF',active:false,inviteHash:createHash('sha256').update('a'.repeat(64)).digest('hex'),inviteExpiresAt:new Date(Date.now()+60000)}});
  await db.contactMessage.create({data:{id:'ci-private-case',name:'Anonymous',email:'',category:'Community: whistleblower',message:JSON.stringify({version:1,reference:'CI-PRIVATE-CASE',data:{kind:'whistleblower',anonymous:true,message:'Synthetic confidential CI case',email:'',name:'',phone:''},files:[],delivery:'NOT_REQUIRED'})}});
+ const registrationRecord={version:1,reference:'CI-REGISTER-CASE',data:{kind:'register',anonymous:false,name:'Example helper',email:'helper@staff-test.invalid',area:'Preston',interest:'Community projects',message:'I can help with practical community work.'},files:[],delivery:'NOT_REQUIRED'};
+ await db.contactMessage.create({data:{id:'ci-register-case',name:'Example helper',email:'helper@staff-test.invalid',category:'Community: register',message:JSON.stringify(registrationRecord)}});
  server = spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3099'],{stdio:['ignore','ignore','pipe'],env:process.env});
  let errors='';server.stderr.on('data',chunk=>{errors+=chunk.toString().slice(-1000);});
  let ready=false;
@@ -60,11 +63,19 @@ try {
  for(const path of ['/admin','/admin/orders','/admin/messages','/admin/work','/admin/account','/admin/community/whistleblower']) {
   const response=await request(path,staffCookie); assert.equal(response.status,200,`Staff should access ${path}`);
   const html=await response.text();
-  if(path==='/admin'){assert.ok(html.includes('Customer service dashboard'));assert.ok(!html.includes('Total revenue'));assert.ok(!html.includes('Staff Access'));}
-  if(path==='/admin/community/whistleblower'){assert.ok(html.includes('Synthetic confidential CI case'));assert.ok(html.includes('No contact email supplied'));assert.ok(!html.includes('Permanently delete this submission'));}
+  if(path==='/admin'){assert.ok(html.includes('Customer service dashboard'));assert.ok(html.includes('Help for this page')); assert.ok(!html.includes('Total revenue'));assert.ok(!html.includes('Staff Access'));}
+  if(path==='/admin/community/whistleblower'){assert.ok(html.includes('Synthetic confidential CI case'));assert.ok(html.includes('No contact email supplied'));assert.ok(html.includes('Handle confidential information'));assert.ok(!html.includes('Ask area + how they can help')); assert.ok(!html.includes('Permanently delete this submission'));}
  }
  for(const path of ['/admin/settings','/admin/staff','/admin/products','/admin/analytics','/admin/customers']) assert.equal((await request(path,staffCookie)).status,404,`Staff must not access ${path}`);
  assert.equal((await request('/api/admin/buyers/export',staffCookie)).status,401);
+ const registrationPage=await request('/admin/community/register?record=ci-register-case',staffCookie);
+ const registrationHtml=await registrationPage.text();assert.equal(registrationPage.status,200);
+ for(const text of ['Quick reply to this message','Confirm details','Ask skills','How they would like to help','Area originally supplied'])assert.ok(registrationHtml.includes(text),`Missing registration guidance: ${text}`);
+ await submitForm('/admin/community/register?record=ci-register-case',{area:'Manchester / M1',helpInterest:'Design skills in the evenings',assignedTo:'',followUpAt:'2026-11-02',note:'Synthetic CI follow-up note'},staffCookie,'area');
+ const savedDetails=await db.supportTask.findUnique({where:{entityType_entityId:{entityType:'ContactMessage',entityId:'ci-register-case'}}});
+ assert.equal(savedDetails?.area,'Manchester / M1');assert.equal(savedDetails?.helpInterest,'Design skills in the evenings');
+ assert.equal((await db.contactMessage.findUnique({where:{id:'ci-register-case'}})).message,JSON.stringify(registrationRecord),'Original submission must not be rewritten');
+
  const staffPage=await request('/admin/staff',ownerCookie); assert.equal(staffPage.status,200); const staffHtml=await staffPage.text(); assert.ok(staffHtml.includes('Create and email invitation')); assert.ok(staffHtml.includes('Business email is not configured'));
  assert.equal((await request('/admin/settings',ownerCookie)).status,200);
  await db.adminUser.update({where:{id:staff.id},data:{active:false,sessionVersion:{increment:1}}});
@@ -81,7 +92,9 @@ try {
  console.log('Built server verified: staff dashboard and confidential inbox, owner-only pages/APIs, private rendering and immediate session revocation.');
 } finally {
  server?.kill('SIGTERM');
- await db.contactMessage.deleteMany({where:{id:'ci-private-case'}});
+ await db.supportTask.deleteMany({where:{entityId:'ci-register-case'}});
+ await db.supportEntry.deleteMany({where:{entityId:'ci-register-case'}});
+ await db.contactMessage.deleteMany({where:{id:{in:['ci-private-case','ci-register-case']}}});
  await db.auditLog.deleteMany({where:{adminUserId:{in:['ci-server-owner','ci-server-staff']}}});
  await db.adminUser.deleteMany({where:{id:{in:['ci-server-owner','ci-server-staff']}}});
  await db.$disconnect();

@@ -18,6 +18,7 @@ export default function PasswordChangeForm() {
         <label htmlFor="newPassword" className="block text-sm font-medium mb-1">New password</label>
         <input id="newPassword" name="newPassword" type="password" required minLength={12} maxLength={128} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm" />
       </div>
+      <p className="text-xs text-ink-soft">Use your current password and choose a private replacement between 12 and 128 characters. This changes your own account only.</p>
       {state.status !== "idle" && (
         <p className={`text-sm ${state.status === "success" ? "text-sage" : "text-rose-dark"}`}>{state.message}</p>
       )}

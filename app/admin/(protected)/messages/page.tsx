@@ -34,6 +34,7 @@ export default async function AdminMessagesPage({ searchParams }: { searchParams
 
         {session.role === "OWNER" && <DeleteRecordForm action={deleteMessage.bind(null, msg.id)} description="Permanently delete this contact message? This cannot be undone." />}
       </div>
+      <p className="text-xs text-ink-soft mt-3">Status buttons do not send an email. Use Customer service below for quick replies, area details and follow-up dates.</p>
       <SupportPanel entityType="ContactMessage" entityId={msg.id} />
     </article>)}</div>
     {messages.length === 0 && <p className="text-ink-soft">No messages with this status.</p>}

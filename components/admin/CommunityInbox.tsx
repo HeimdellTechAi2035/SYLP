@@ -47,8 +47,8 @@ export default async function CommunityInbox({ kind, searchParams }: { kind?: Co
         <div className="flex flex-wrap justify-between gap-3 mb-4"><div><h2 className="font-display text-xl">{communityPages[data.kind]?.title ?? "Community submission"}</h2><p className="text-xs text-ink-soft mt-1 break-all">{record.reference} · {message.createdAt.toLocaleString("en-GB")} · {message.status}</p></div></div>
         <dl className="grid sm:grid-cols-2 gap-3 text-sm mb-4">
           <div><dt className="font-semibold">Contact</dt><dd className="break-words">{data.anonymous ? "No contact details supplied" : `${data.name} ${data.email} ${data.phone}`}</dd></div>
-          {data.area && <div><dt className="font-semibold">Area</dt><dd>{data.area}</dd></div>}
-          {data.interest && <div><dt className="font-semibold">Interest</dt><dd>{data.interest}</dd></div>}
+          {data.area && <div><dt className="font-semibold">Area originally supplied</dt><dd>{data.area}</dd></div>}
+          {data.interest && <div><dt className="font-semibold">Interest originally supplied</dt><dd>{data.interest}</dd></div>}
           {data.fulfilment && <div><dt className="font-semibold">Donation arrangements requested</dt><dd>{data.fulfilment}</dd></div>}
           {data.kind === "incident" && <><div><dt className="font-semibold">Incident location</dt><dd>{data.address}, {data.town}, {data.postcode}</dd></div><div><dt className="font-semibold">Incident delivery</dt><dd>{record.delivery} · {data.incidentCategory}{data.occurredOn && ` · ${data.occurredOn}`}</dd></div></>}
         </dl>
@@ -60,6 +60,7 @@ export default async function CommunityInbox({ kind, searchParams }: { kind?: Co
           {session.role === "OWNER" && <DeleteRecordForm action={deleteMessage.bind(null, message.id)} description="Permanently delete this submission and its uploaded evidence? This cannot be undone." />}
 
         </div>
+        <p className="text-xs text-ink-soft mt-2">Mark read records that you reviewed it. Mark handled changes the inbox status only; use Send email below to contact the person. Set a follow-up date if more work is needed.</p>
         <SupportPanel entityType="ContactMessage" entityId={message.id} />
         {record.delivery === "UNCONFIRMED" && <form action={retryIncident.bind(null,message.id)} className="mt-4 border border-gold/50 rounded-lg p-4"><p className="text-sm mb-3">Delivery was not confirmed. Check the incident review queue for this reference before resending, to avoid duplicates.</p><button className="min-h-11 px-4 py-2 rounded-lg border border-ink/25">Retry incident delivery</button></form>}
       </article>;

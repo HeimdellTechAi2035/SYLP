@@ -1,3 +1,4 @@
+import { adminFieldHelp } from "@/lib/admin-guidance";
 export function FormField({
   label,
   name,
@@ -8,6 +9,7 @@ export function FormField({
   step,
   min,
   placeholder,
+  help,
 }: {
   label: string;
   name: string;
@@ -22,13 +24,16 @@ export function FormField({
   step?: string;
   min?: string | number;
   placeholder?: string;
+  help?: string;
 }) {
   const fieldId = id ?? name;
+  const tip = help ?? adminFieldHelp[name];
   return (
     <div>
       <label htmlFor={fieldId} className="block text-sm font-medium mb-1">{label}</label>
       <input
         id={fieldId}
+        aria-describedby={tip ? `${fieldId}-help` : undefined}
         name={name}
         type={type}
         defaultValue={defaultValue}
@@ -36,8 +41,9 @@ export function FormField({
         step={step}
         min={min}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-ink/15 px-3 py-2 text-base sm:text-sm"
       />
+      {tip && <p id={`${fieldId}-help`} className="text-xs text-ink-soft mt-1 leading-relaxed">{tip}</p>}
     </div>
   );
 }
@@ -48,18 +54,22 @@ export function FormTextarea({
   id,
   defaultValue,
   rows = 3,
+  help,
 }: {
   label: string;
   name: string;
   id?: string;
   defaultValue?: string;
   rows?: number;
+  help?: string;
 }) {
   const fieldId = id ?? name;
+  const tip = help ?? adminFieldHelp[name];
   return (
     <div>
       <label htmlFor={fieldId} className="block text-sm font-medium mb-1">{label}</label>
-      <textarea id={fieldId} name={name} defaultValue={defaultValue} rows={rows} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm" />
+      <textarea aria-describedby={tip ? `${fieldId}-help` : undefined} id={fieldId} name={name} defaultValue={defaultValue} rows={rows} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-base sm:text-sm" />
+      {tip && <p id={`${fieldId}-help`} className="text-xs text-ink-soft mt-1 leading-relaxed">{tip}</p>}
     </div>
   );
 }
@@ -70,31 +80,36 @@ export function FormSelect({
   id,
   defaultValue,
   options,
+  help,
 }: {
   label: string;
   name: string;
   id?: string;
   defaultValue?: string;
   options: { value: string; label: string }[];
+  help?: string;
 }) {
   const fieldId = id ?? name;
+  const tip = help ?? adminFieldHelp[name];
   return (
     <div>
       <label htmlFor={fieldId} className="block text-sm font-medium mb-1">{label}</label>
-      <select id={fieldId} name={name} defaultValue={defaultValue} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm bg-blush">
+      <select aria-describedby={tip ? `${fieldId}-help` : undefined} id={fieldId} name={name} defaultValue={defaultValue} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-base sm:text-sm bg-blush">
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}
       </select>
+      {tip && <p id={`${fieldId}-help`} className="text-xs text-ink-soft mt-1 leading-relaxed">{tip}</p>}
     </div>
   );
 }
 
-export function FormCheckbox({ label, name, defaultChecked }: { label: string; name: string; defaultChecked?: boolean }) {
+export function FormCheckbox({ label, name, defaultChecked, help }: { label: string; name: string; defaultChecked?: boolean; help?: string }) {
+  const tip = help ?? adminFieldHelp[name];
   return (
     <label className="flex items-center gap-2 text-sm">
       <input type="checkbox" name={name} defaultChecked={defaultChecked} className="rounded border-ink/30" />
-      {label}
+      <span>{label}{tip && <span className="block text-xs text-ink-soft mt-1">{tip}</span>}</span>
     </label>
   );
 }

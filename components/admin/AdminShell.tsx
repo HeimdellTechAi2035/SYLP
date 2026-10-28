@@ -1,3 +1,4 @@
+import AdminGuide from "@/components/admin/AdminGuide";
 import { canAccessAdminPage } from "@/lib/admin-permissions";
 import Link from "next/link";
 import LogoutButton from "@/components/admin/LogoutButton";
@@ -45,7 +46,7 @@ export default function AdminShell({
           <span className="font-display text-lg">Support Your Local Patriot — Admin</span>
           <LogoutButton />
         </header>
-        <main className="p-4 pb-28 sm:p-8 lg:pb-8 max-w-6xl mx-auto">{children}</main>
+        <main className="p-4 pb-28 sm:p-8 lg:pb-8 max-w-6xl mx-auto"><AdminGuide />{children}</main>
       </div>
       <AdminMobileNav role={session.role} />
     </div>

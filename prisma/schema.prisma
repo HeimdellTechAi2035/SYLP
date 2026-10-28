@@ -667,6 +667,8 @@ model TrafficPageView {
 }
 
 model SupportTask {
+ area String?
+ helpInterest String?
  id String @id @default(cuid())
  entityType String
  entityId String

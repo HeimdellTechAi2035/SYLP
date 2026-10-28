@@ -1,0 +1,18 @@
+import { describe,it,expect } from "vitest";
+import { quickReplies,type ReplyContext } from "@/lib/admin-replies";
+import { adminGuides,adminGuideFor,adminFieldHelp } from "@/lib/admin-guidance";
+import { adminNav } from "@/components/admin/admin-nav";
+const context:ReplyContext={kind:"register",name:"Example volunteer",reference:"SYLP-EXAMPLE",area:"",interest:"",anonymous:false,originalMessage:"I would like to get involved."};
+describe("contextual quick replies",()=>{
+ it("asks volunteers for area, interests and availability without requesting a full address",()=>{const reply=quickReplies(context).find(reply=>reply.id==="area-and-help")!;expect(reply.body).toContain("town or postcode area");expect(reply.body.toLowerCase()).toContain("what would you like to help with");expect(reply.body).toContain("availability");expect(reply.body).toContain("do not need your full home address");});
+ it.each(["register","contact","incident","whistleblower","donation","order"] as const)("keeps every %s draft linked to the reference and editable as text",kind=>{const replies=quickReplies({...context,kind});expect(new Set(replies.map(reply=>reply.id)).size).toBe(replies.length);for(const reply of replies){expect(reply.body).toContain("Reference: SYLP-EXAMPLE");expect(reply.body).toContain("Hi Example volunteer,");expect(reply.tip.length).toBeGreaterThan(20);}});
+ it("uses known details rather than asking a volunteer to repeat them",()=>{const reply=quickReplies({...context,area:"Preston",interest:"Practical help"}).find(reply=>reply.id==="area-and-help")!;expect(reply.body).toContain("area recorded as Preston");expect(reply.body).toContain("You mentioned Practical help");expect(reply.body).not.toContain("Which town or postcode area");expect(reply.label).toBe("Confirm details + availability");});
+ it("keeps order replies factual and separate from volunteering questions",()=>{const replies=quickReplies({...context,kind:"order"});expect(replies.some(reply=>reply.id==="area-and-help")).toBe(false);for(const reply of replies)expect(reply.body).not.toMatch(/has been dispatched|refund has been issued|will arrive on/i);});
+ it("uses confidential clarification rather than volunteer or home-area questions",()=>{const replies=quickReplies({...context,kind:"whistleblower"});expect(replies.some(reply=>reply.id==="area-and-help")).toBe(false);const acknowledgement=replies.find(reply=>reply.id==="private-received")!;expect(acknowledgement.body).toContain("authorised team");expect(acknowledgement.body).not.toMatch(/guarantee|completely anonymous|end-to-end encrypted/i);});
+ it("does not confuse donation availability with a booked collection",()=>{const reply=quickReplies({...context,kind:"donation"}).find(reply=>reply.id==="donation-arrangements")!;expect(reply.body).toContain("before anything is booked");expect(reply.tip).toContain("Do not say a collection is booked");});
+});
+describe("guidance throughout admin",()=>{
+ it("covers every navigation section",()=>{for(const item of adminNav){expect(adminGuides[item.href],item.href).toBeDefined();expect(adminGuides[item.href].steps.length).toBeGreaterThanOrEqual(3);}});
+ it("selects the specific inbox guide and handles detail pages",()=>{expect(adminGuideFor("/admin/community/whistleblower").title).toBe("Handle confidential information");expect(adminGuideFor("/admin/orders/example").title).toBe("Handle an order");expect(adminGuideFor("/admin/products/new").title).toBe("Check before publishing a product");});
+ it("explains status and tracking fields at the point of use",()=>{expect(adminFieldHelp.fulfilmentStatus).toContain("posted");expect(adminFieldHelp.trackingNumber).toContain("Do not invent");expect(adminFieldHelp.internalNotes).toContain("not sent");});
+});
