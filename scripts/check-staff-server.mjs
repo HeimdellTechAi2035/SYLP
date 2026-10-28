@@ -35,7 +35,7 @@ try {
  }
  for(const path of ['/admin/settings','/admin/staff','/admin/products','/admin/analytics','/admin/customers']) assert.equal((await request(path,staffCookie)).status,404,`Staff must not access ${path}`);
  assert.equal((await request('/api/admin/buyers/export',staffCookie)).status,401);
- assert.equal((await request('/admin/staff',ownerCookie)).status,200);
+ const staffPage=await request('/admin/staff',ownerCookie); assert.equal(staffPage.status,200); const staffHtml=await staffPage.text(); assert.ok(staffHtml.includes('Create and email invitation')); assert.ok(staffHtml.includes('Business email is not configured'));
  assert.equal((await request('/admin/settings',ownerCookie)).status,200);
  await db.adminUser.update({where:{id:staff.id},data:{active:false,sessionVersion:{increment:1}}});
  assert.equal((await request('/admin/orders',staffCookie)).status,307,'Disabled staff token must stop working');
