@@ -1,6 +1,8 @@
 // Exercises the built server with synthetic records in the disposable CI DB.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import bcrypt from 'bcryptjs';
+import { createHash } from 'node:crypto';
 import { SignJWT } from 'jose';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -15,17 +17,41 @@ async function cookie(user) {
  const token = await new SignJWT({sub:user.id,role:user.role,sessionVersion:user.sessionVersion,mustChangePassword:false}).setProtectedHeader({alg:'HS256'}).setAudience('sylp-admin').setExpirationTime('5m').sign(new TextEncoder().encode(process.env.SESSION_SECRET));
  return `hbm_admin_session=${token}`;
 }
+const decode = value => value.replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+async function submitForm(path, fields) {
+ const page=await request(path);const html=await page.text();
+ const form=new FormData();
+ for(const tag of html.match(/<input\b[^>]*>/g)||[]) {
+  const attrs=Object.fromEntries([...tag.matchAll(/([\w:$-]+)="([^"]*)"/g)].map(m=>[m[1],decode(m[2])]));
+  if(attrs.type==='hidden' && attrs.name) form.append(attrs.name,attrs.value||'');
+ }
+ assert.ok([...form.keys()].some(name=>name.startsWith('$ACTION_')),'Native Server Action metadata must be present');
+ for(const [name,value] of Object.entries(fields)) form.set(name,value);
+ return fetch(`${origin}${path}`,{method:'POST',body:form,redirect:'manual',headers:{origin},signal:AbortSignal.timeout(15000)});
+}
 async function request(path, auth) { return fetch(`${origin}${path}`,{redirect:'manual',headers:auth?{cookie:auth}:{},signal:AbortSignal.timeout(15000)}); }
 try {
  const owner = await db.adminUser.create({data:{id:'ci-server-owner',email:'server-owner@staff-test.invalid',name:'CI owner',passwordHash:'not-a-login-hash',role:'OWNER'}});
- const staff = await db.adminUser.create({data:{id:'ci-server-staff',email:'server-staff@staff-test.invalid',name:'CI staff',passwordHash:'not-a-login-hash',role:'STAFF'}});
+ const staff = await db.adminUser.create({data:{id:'ci-server-staff',email:'server-staff@staff-test.invalid',name:'CI staff',passwordHash:'not-a-login-hash',role:'STAFF',active:false,inviteHash:createHash('sha256').update('a'.repeat(64)).digest('hex'),inviteExpiresAt:new Date(Date.now()+60000)}});
  await db.contactMessage.create({data:{id:'ci-private-case',name:'Anonymous',email:'',category:'Community: whistleblower',message:JSON.stringify({version:1,reference:'CI-PRIVATE-CASE',data:{kind:'whistleblower',anonymous:true,message:'Synthetic confidential CI case',email:'',name:'',phone:''},files:[],delivery:'NOT_REQUIRED'})}});
  server = spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3099'],{stdio:['ignore','ignore','pipe'],env:process.env});
  let errors='';server.stderr.on('data',chunk=>{errors+=chunk.toString().slice(-1000);});
  let ready=false;
  for(let attempt=0;attempt<40;attempt++) { try { if((await request('/admin/login')).status===200){ready=true;break;} }catch{} await new Promise(resolve=>setTimeout(resolve,500)); }
  assert.ok(ready,`Server did not start: ${errors.slice(-1500)}`);
- const staffCookie=await cookie(staff); const ownerCookie=await cookie(owner);
+ const testPassword='Isolated-test-password-123!';
+ const activated=await submitForm(`/admin/accept-invite?token=${'a'.repeat(64)}`,{token:'a'.repeat(64),password:testPassword});
+ assert.ok([200,303].includes(activated.status),`Activation returned ${activated.status}`);
+ const activeStaff=await db.adminUser.findUnique({where:{id:staff.id}});
+ assert.equal(activeStaff.active,true,'Activation must enable staff');
+ assert.ok(await bcrypt.compare(testPassword,activeStaff.passwordHash),'Chosen password must be saved');
+ const login=await submitForm('/admin/login',{email:staff.email,password:testPassword});
+ assert.equal(login.status,303,`Real staff login must redirect to dashboard, got ${login.status}: ${(await login.text()).slice(-1000)}`);
+ assert.equal(login.headers.get('location'),'/admin');
+ const sessionCookie=login.headers.getSetCookie().find(value=>value.startsWith('hbm_admin_session='));
+ assert.ok(sessionCookie,'Login must set admin session cookie');
+ const staffCookie=sessionCookie.split(';')[0]; const ownerCookie=await cookie(owner);
+ assert.equal((await request('/admin',staffCookie)).status,200,'Real sign-in cookie must open dashboard');
  assert.equal((await request('/admin/orders')).status,307);
  for(const path of ['/admin','/admin/orders','/admin/messages','/admin/work','/admin/account','/admin/community/whistleblower']) {
   const response=await request(path,staffCookie); assert.equal(response.status,200,`Staff should access ${path}`);
