@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
 import { SignJWT } from 'jose';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -16,6 +17,7 @@ assert.ok(['localhost','127.0.0.1'].includes(url.hostname));
 assert.equal(process.env.SESSION_SECRET,'isolated-ci-build-session-secret-never-production');
 const db = new PrismaClient({adapter:new PrismaPg({connectionString:url.toString()})});
 const origin = 'http://127.0.0.1:3099';
+const {encodeReply}=createRequire(import.meta.url)('next/dist/compiled/react-server-dom-turbopack/client.node');
 let server;
 let errors="";
 let stage="starting";
@@ -48,6 +50,20 @@ async function submitForm(path, fields, auth, containingField) {
  assert.ok([...form.keys()].some(name=>name.startsWith('$ACTION_')),'Native Server Action metadata must be present');
  for(const [name,value] of Object.entries(fields)) form.set(name,value);
  stage=`submit ${path.split("?")[0]}`;
+ if(containingField){
+  // Match the hydrated browser's Server Action request. Native action metadata
+  // is used only to obtain the built function reference and its bound args.
+  const reference=[...form.keys()].find(key=>key.startsWith('$ACTION_REF_'));
+  assert.ok(reference,'Bound save action must be present');
+  const prefix=`$ACTION_${reference.slice('$ACTION_REF_'.length)}:`;
+  const metadata=JSON.parse(String(form.get(`${prefix}0`)));
+  const boundIndex=/^\$@(\d+)$/.exec(metadata.bound)?.[1];assert.ok(boundIndex,'Expected bound action arguments');
+  const bound=JSON.parse(String(form.get(`${prefix}${boundIndex}`)));assert.ok(Array.isArray(bound));
+  const submitted=new FormData();for(const [name,value] of Object.entries(fields))submitted.set(name,value);
+  const payload=await encodeReply([...bound,submitted]);
+  const response=await fetch(`${origin}${path}`,{method:'POST',body:payload,redirect:'manual',headers:{origin,cookie:auth,'Next-Action':metadata.id},signal:AbortSignal.timeout(30000)});
+  assert.equal(response.status,200,'Save action should complete');await response.text();return response;
+ }
  return fetch(`${origin}${path}`,{method:'POST',body:form,redirect:'manual',headers:{origin,...(auth?{cookie:auth}:{})},signal:AbortSignal.timeout(30000)});
 }
 async function request(path, auth) { stage=`get ${path.split("?")[0]}`; return fetch(`${origin}${path}`,{redirect:'manual',headers:auth?{cookie:auth}:{},signal:AbortSignal.timeout(30000)}); }
