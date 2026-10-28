@@ -1,6 +1,10 @@
 // Exercises the built server with synthetic records in the disposable CI DB.
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import { createHash } from 'node:crypto';
 import { SignJWT } from 'jose';
@@ -67,6 +71,13 @@ try {
  assert.equal((await request('/admin/orders',staffCookie)).status,307,'Disabled staff token must stop working');
  await db.adminUser.update({where:{id:staff.id},data:{active:true}});
  assert.equal((await request('/admin/orders',staffCookie)).status,307,'Re-enabling must not resurrect an old token');
+ const diagnosticDirectory=await mkdtemp(path.join(tmpdir(),'sylp-staff-check-'));
+ try {
+  await promisify(execFile)(process.execPath,['deploy/check-live-staff-signin.mjs'],{env:{...process.env,SYLP_LIVE_STAFF_CHECK:'1',SYLP_CHECK_TEST_ORIGIN:origin,MEDIA_DIR:diagnosticDirectory},timeout:60000});
+  const diagnostic=JSON.parse(await readFile(path.join(diagnosticDirectory,'diagnostics/staff-signin.json'),'utf8'));
+  assert.equal(diagnostic.status,'passed',`Diagnostic failed at ${diagnostic.stage}`);assert.equal(diagnostic.cleanedUp,true);
+  assert.equal(await db.adminUser.count({where:{email:{endsWith:'@staff-check.invalid'}}}),0,'Diagnostic account must be removed');
+ } finally { await rm(diagnosticDirectory,{recursive:true,force:true}); }
  console.log('Built server verified: staff dashboard and confidential inbox, owner-only pages/APIs, private rendering and immediate session revocation.');
 } finally {
  server?.kill('SIGTERM');
