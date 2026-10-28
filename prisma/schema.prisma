@@ -41,6 +41,10 @@ model AdminUser {
   // other admin page is usable, so a shared/known initial password can never
   // stay live past first login.
   mustChangePassword Boolean  @default(false)
+  active             Boolean @default(true)
+  sessionVersion     Int @default(0)
+  inviteHash         String? @unique
+  inviteExpiresAt    DateTime?
   createdAt          DateTime @default(now())
   auditLogs          AuditLog[]
   pushSubscriptions  AdminPushSubscription[]
@@ -658,4 +662,28 @@ model TrafficPageView {
   createdAt DateTime @default(now())
   @@index([createdAt])
   @@index([visitId, createdAt])
+}
+
+model SupportTask {
+ id String @id @default(cuid())
+ entityType String
+ entityId String
+ assignedTo String?
+ followUpAt DateTime?
+ updatedAt DateTime @updatedAt
+ @@unique([entityType, entityId])
+}
+model SupportEntry {
+ id String @id @default(cuid())
+ entityType String
+ entityId String
+ adminUserId String
+ authorName String
+ kind String
+ body String
+ subject String?
+ recipient String?
+ status String @default("SAVED")
+ createdAt DateTime @default(now())
+ @@index([entityType, entityId, createdAt])
 }

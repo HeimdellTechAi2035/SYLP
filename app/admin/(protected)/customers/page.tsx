@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import Link from "next/link";
 import { Phone, Mail, Download, Search, ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -13,6 +14,7 @@ export default async function AdminCustomersPage({
 }: {
   searchParams: Promise<{ q?: string; division?: string; view?: string }>;
 }) {
+  await requireOwnerSession();
   const { q, division, view } = await searchParams;
   const divisions = await prisma.division.findMany({ orderBy: { sortOrder: "asc" }, select: { slug: true, name: true } });
 

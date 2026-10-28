@@ -3,10 +3,10 @@
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession, createAdminSession } from "@/lib/auth";
+import { requireAdminSession, requireOwnerSession, createAdminSession } from "@/lib/auth";
 
 export async function updateSiteSettings(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const str = (key: string) => String(formData.get(key) || "") || null;
 
   const data = {
@@ -33,12 +33,12 @@ export async function updateSiteSettings(formData: FormData) {
 export type PasswordState = { status: "idle" | "success" | "error"; message?: string };
 
 export async function changeAdminPassword(_prev: PasswordState, formData: FormData): Promise<PasswordState> {
-  const session = await requireAdminSession();
+  const session = await requireAdminSession(true);
   const currentPassword = String(formData.get("currentPassword") || "");
   const newPassword = String(formData.get("newPassword") || "");
 
-  if (newPassword.length < 8) {
-    return { status: "error", message: "New password must be at least 8 characters." };
+  if (newPassword.length < 12 || newPassword.length > 128) {
+    return { status: "error", message: "New password must be between 12 and 128 characters." };
   }
 
   const admin = await prisma.adminUser.findUnique({ where: { id: session.sub } });
@@ -47,13 +47,13 @@ export async function changeAdminPassword(_prev: PasswordState, formData: FormDa
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
-  await prisma.adminUser.update({ where: { id: admin.id }, data: { passwordHash, mustChangePassword: false } });
+  await prisma.adminUser.update({ where: { id: admin.id }, data: { passwordHash, mustChangePassword: false, sessionVersion: { increment: 1 } } });
 
   // Re-issue the session with mustChangePassword cleared — the JWT is
   // stateless, so without this the middleware would keep redirecting back to
   // this same page until the next login, even though the password is
   // already changed.
-  await createAdminSession({ sub: admin.id, email: admin.email, name: admin.name, role: admin.role, mustChangePassword: false });
+  await createAdminSession({ sub: admin.id, email: admin.email, name: admin.name, role: admin.role, mustChangePassword: false, sessionVersion: admin.sessionVersion + 1 });
 
   return { status: "success", message: "Password updated." };
 }

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 import { setupDivisionRange, refreshDivisionApparelPhotos, type RangeResult } from "@/lib/division-setup";
 import { archiveProductInStripe, syncProductToStripe } from "@/lib/stripe-sync";
 
@@ -39,7 +39,7 @@ const summary = (r: RangeResult) => ({
 });
 
 export async function createDivision(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const data = readForm(formData);
   if (!data.name || !data.slug) done({ error: "Give the division a name." });
   if (await prisma.division.findUnique({ where: { slug: data.slug } }))
@@ -56,7 +56,7 @@ export async function createDivision(formData: FormData) {
 }
 
 export async function addMissingProducts(divisionId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const templateId = String(formData.get("copyFrom") || "");
   if (!templateId) done({ error: "Pick a division to copy products from." });
   const division = await prisma.division.findUnique({ where: { id: divisionId }, select: { slug: true } });
@@ -66,7 +66,7 @@ export async function addMissingProducts(divisionId: string, formData: FormData)
 }
 
 export async function updateDivision(divisionId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const data = readForm(formData);
   if (!data.name || !data.slug) done({ error: "A division needs a name." });
   const before = await prisma.division.findUnique({ where: { id: divisionId } });
@@ -104,7 +104,7 @@ export async function updateDivision(divisionId: string, formData: FormData) {
 }
 
 export async function deleteDivision(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const divisionId = String(formData.get("divisionId") || "");
   const division = await prisma.division.findUnique({ where: { id: divisionId } });
   if (!division) done({ error: "Division not found." });

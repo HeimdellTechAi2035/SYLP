@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 import { productFormSchema } from "@/lib/validation";
 import {
   syncProductToStripe,
@@ -75,7 +75,7 @@ function extraFields(formData: FormData) {
 }
 
 export async function createProduct(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const data = readProductForm(formData);
 
   const product = await prisma.product.create({
@@ -98,7 +98,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(productId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const data = readProductForm(formData);
 
   const before = await prisma.product.findUnique({
@@ -150,7 +150,7 @@ export async function updateProduct(productId: string, formData: FormData) {
 }
 
 export async function archiveProduct(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const productId = String(formData.get("productId") || "");
   await prisma.product.update({ where: { id: productId }, data: { status: "ARCHIVED" } });
   await archiveProductInStripe(productId);
@@ -158,7 +158,7 @@ export async function archiveProduct(formData: FormData) {
 }
 
 export async function addProductImage(productId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const url = String(formData.get("url") || "");
   const altText = String(formData.get("altText") || "");
   if (!url) return;
@@ -167,7 +167,7 @@ export async function addProductImage(productId: string, formData: FormData) {
 }
 
 export async function removeProductImage(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const imageId = String(formData.get("imageId") || "");
   const productId = String(formData.get("productId") || "");
   await prisma.productImage.delete({ where: { id: imageId } }).catch(() => {});
@@ -175,7 +175,7 @@ export async function removeProductImage(formData: FormData) {
 }
 
 export async function addVariant(productId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const name = String(formData.get("variantName") || "");
   const sku = String(formData.get("variantSku") || "");
   if (!name || !sku) return;
@@ -201,7 +201,7 @@ export async function addVariant(productId: string, formData: FormData) {
 }
 
 export async function removeVariant(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const variantId = String(formData.get("variantId") || "");
   const productId = String(formData.get("productId") || "");
   await deactivateVariantInStripe(variantId);
@@ -210,7 +210,7 @@ export async function removeVariant(formData: FormData) {
 }
 
 export async function retryStripeSync(productId: string) {
-  await requireAdminSession();
+  await requireOwnerSession();
   // Force a full reconciliation (product + all price-overriding variants),
   // exactly what "Retry Stripe Sync" should mean — idempotent either way.
   await syncProductToStripe(productId, { priceChanged: true, detailsChanged: true });

@@ -1,9 +1,11 @@
+import { requireOwnerSession } from "@/lib/auth";
 import VisitorSummary from "@/components/admin/VisitorSummary";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 export default async function AdminAnalyticsPage() {
+  await requireOwnerSession();
   const [totalRevenue, paidOrderCount, topProducts, statusCounts, paidOrders] = await Promise.all([
     prisma.order.aggregate({ where: { paymentStatus: "PAID" }, _sum: { total: true } }),
     prisma.order.count({ where: { paymentStatus: "PAID" } }),

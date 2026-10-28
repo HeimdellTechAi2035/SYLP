@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { advanceOrderStatus } from "@/lib/actions/admin/orders";
@@ -15,6 +16,7 @@ const nextLabel: Record<string, string> = {
 };
 
 export default async function AdminProductionPage() {
+  await requireOwnerSession();
   const orders = await prisma.order.findMany({
     where: { fulfilmentStatus: { in: queueStatuses } },
     orderBy: { createdAt: "asc" },

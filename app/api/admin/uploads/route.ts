@@ -9,7 +9,7 @@ import { saveMedia, ALLOWED_IMAGE_TYPES, MAX_UPLOAD_BYTES } from "@/lib/storage/
 // app/api/admin/push-subscriptions/route.ts).
 export async function POST(request: NextRequest) {
   const session = await getAdminSession();
-  if (!session) {
+  if (!session || session.role !== "OWNER" || session.mustChangePassword) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 

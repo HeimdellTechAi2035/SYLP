@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { getSiteSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -9,6 +10,7 @@ import PushNotificationToggle from "@/components/admin/PushNotificationToggle";
 import { requireAdminSession } from "@/lib/auth";
 
 export default async function AdminSettingsPage() {
+  await requireOwnerSession();
   const [session, settings, pushSubscriptions] = await Promise.all([
     requireAdminSession(),
     getSiteSettings(),

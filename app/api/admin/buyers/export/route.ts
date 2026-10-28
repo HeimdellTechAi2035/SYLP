@@ -7,7 +7,7 @@ import { getBuyers } from "@/lib/queries/buyers";
 // requireAdminSession() because that redirects; an API should 401 instead.
 export async function GET(request: NextRequest) {
   const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
+  if (!session || session.role !== "OWNER" || session.mustChangePassword) return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
 
   const q = request.nextUrl.searchParams.get("q") ?? undefined;
   const division = request.nextUrl.searchParams.get("division") ?? undefined;

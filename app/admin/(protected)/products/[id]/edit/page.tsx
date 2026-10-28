@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -21,6 +22,7 @@ export default async function EditProductPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireOwnerSession();
   const { id } = await params;
   const [product, categories, otherProducts, allOtherProducts, packagingProfiles, divisions] = await Promise.all([
     prisma.product.findUnique({

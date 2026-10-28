@@ -22,6 +22,9 @@ import {
 
 /** Every admin page, used by the desktop sidebar and the phone menu. */
 export const adminNav = [
+  { href: "/admin/work", label: "Follow-ups", icon: ClipboardList },
+  { href: "/admin/account", label: "My Account", icon: Users },
+  { href: "/admin/staff", label: "Staff Access", icon: Users },
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/divisions", label: "Divisions", icon: Shield },

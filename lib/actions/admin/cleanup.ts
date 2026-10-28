@@ -1,14 +1,14 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 import { requireCommunityOwner } from "@/lib/community/owner";
 import { COMMUNITY_PREFIX } from "@/lib/community/config";
 import { parseCommunityRecord } from "@/lib/community/records";
 import { removeEvidence } from "@/lib/community/evidence";
 
 async function admin() {
-  const session = await requireAdminSession();
+  const session = await requireOwnerSession();
   if (session.mustChangePassword) throw new Error("Change your password first");
   return session;
 }
@@ -27,6 +27,7 @@ export async function deleteMessage(id: string) {
   if (record?.delivery === "PENDING") throw new Error("Wait for incident delivery to finish");
   const removed = await prisma.$transaction(async tx => {
     const result = await tx.contactMessage.deleteMany({ where: { id, message: message.message, category: message.category } });
+    if (result.count) { await tx.supportEntry.deleteMany({ where: { entityType: "ContactMessage", entityId: id } }); await tx.supportTask.deleteMany({ where: { entityType: "ContactMessage", entityId: id } }); }
     if (result.count) await tx.auditLog.create({ data: { adminUserId: session.sub, action: "message.delete", entityType: "ContactMessage", entityId: id } });
     return result.count;
   });
@@ -36,7 +37,10 @@ export async function deleteMessage(id: string) {
 export async function clearHandledMessages() {
   const session = await admin();
   await prisma.$transaction(async tx => {
-    const result = await tx.contactMessage.deleteMany({ where: { status: "RESPONDED", NOT: { category: { startsWith: COMMUNITY_PREFIX } } } });
+    const handled = await tx.contactMessage.findMany({ where: { status: "RESPONDED", NOT: { category: { startsWith: COMMUNITY_PREFIX } } }, select: { id: true } });
+    await tx.supportEntry.deleteMany({ where: { entityType: "ContactMessage", entityId: { in: handled.map(m => m.id) } } });
+    await tx.supportTask.deleteMany({ where: { entityType: "ContactMessage", entityId: { in: handled.map(m => m.id) } } });
+    const result = await tx.contactMessage.deleteMany({ where: { id: { in: handled.map(m => m.id) }, status: "RESPONDED", NOT: { category: { startsWith: COMMUNITY_PREFIX } } } });
     await tx.auditLog.create({ data: { adminUserId: session.sub, action: "message.clearHandled", entityType: "ContactMessage", detail: `${result.count} handled contact messages deleted` } });
   });
   refreshInboxes();

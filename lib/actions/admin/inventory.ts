@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 
 export async function updateProductStock(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const productId = String(formData.get("productId") || "");
   const stockQuantity = Number(formData.get("stockQuantity") || 0);
   await prisma.product.update({ where: { id: productId }, data: { stockQuantity } });
@@ -14,7 +14,7 @@ export async function updateProductStock(formData: FormData) {
 }
 
 export async function updateVariantStock(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const variantId = String(formData.get("variantId") || "");
   const stockQuantity = Number(formData.get("stockQuantity") || 0);
   await prisma.productVariant.update({ where: { id: variantId }, data: { stockQuantity } });

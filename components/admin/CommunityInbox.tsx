@@ -1,22 +1,24 @@
+import SupportPanel from "@/components/admin/SupportPanel";
 import DeleteRecordForm from "@/components/admin/DeleteRecordForm";
 import { deleteMessage } from "@/lib/actions/admin/cleanup";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireCommunityOwner } from "@/lib/community/owner";
+import { requireCommunityAccess } from "@/lib/community/access";
 import { communityPages, COMMUNITY_PREFIX } from "@/lib/community/config";
 import { parseCommunityRecord } from "@/lib/community/records";
 import { retryIncident, setCommunityStatus } from "@/lib/actions/admin/community";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { communityInboxes, type CommunityInboxKind } from "@/lib/community/inboxes";
 
-export default async function CommunityInbox({ kind, searchParams }: { kind?: CommunityInboxKind; searchParams: Promise<{ status?: string; page?: string }> }) {
-  await requireCommunityOwner();
+export default async function CommunityInbox({ kind, searchParams }: { kind?: CommunityInboxKind; searchParams: Promise<{ status?: string; page?: string; record?: string }> }) {
+  const session = await requireCommunityAccess();
+  await prisma.auditLog.create({ data: { adminUserId: session.sub, action: "community.view", entityType: "ContactMessage", detail: kind ?? "all" } });
   const query = await searchParams;
   const status = ["NEW", "READ", "RESPONDED"].includes(query.status ?? "") ? query.status : undefined;
   const requestedPage = Number(query.page);
   const pageSize = 50;
   const category = kind ? { equals: `${COMMUNITY_PREFIX}${kind}` } : { startsWith: COMMUNITY_PREFIX };
-  const where = { category, ...(status ? { status } : {}) };
+  const where = { ...(query.record ? { id: query.record } : {}), category, ...(status ? { status } : {}) };
   const [total, groups] = await Promise.all([
     prisma.contactMessage.count({ where }),
     prisma.contactMessage.groupBy({ by: ["category", "status"], where: { category: { startsWith: COMMUNITY_PREFIX } }, _count: { _all: true } }),
@@ -26,7 +28,7 @@ export default async function CommunityInbox({ kind, searchParams }: { kind?: Co
   const messages = await prisma.contactMessage.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (page - 1) * pageSize, take: pageSize });
   const base = kind ? `/admin/community/${kind}` : "/admin/community";
   const pageLink = (next: number) => `${base}?page=${next}${status ? `&status=${status}` : ""}`;
-  return <div><AdminPageHeader title={kind ? communityInboxes[kind] : "All community submissions"} /><p className="text-sm text-ink-soft mb-6">Owner access only. Reports and evidence stay private. Select a section to review its submissions.</p>
+  return <div><AdminPageHeader title={kind ? communityInboxes[kind] : "All community submissions"} /><p className="text-sm text-ink-soft mb-6">Authorised staff and owner access only. Reports and evidence stay private. Select a section to review its submissions.</p>
     <nav aria-label="Form inbox sections" className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
       {Object.entries(communityInboxes).map(([key, label]) => {
         const rows = groups.filter(row => row.category === `${COMMUNITY_PREFIX}${key}`);
@@ -39,7 +41,7 @@ export default async function CommunityInbox({ kind, searchParams }: { kind?: Co
     <p className="text-sm text-ink-soft mb-4">{total} submissions · page {page} of {pages}</p>
     <div className="space-y-5">{messages.map(message => {
       const record = parseCommunityRecord(message.message);
-      if (!record) return <article key={message.id} className="rounded-xl bg-blush border border-ink/15 p-5"><h2 className="font-semibold">Submission could not be displayed</h2><p className="text-sm text-ink-soft my-3">{message.createdAt.toLocaleString("en-GB")} · {message.status}</p><DeleteRecordForm action={deleteMessage.bind(null, message.id)} description="Permanently delete this unreadable submission? This cannot be undone." /></article>;
+      if (!record) return <article key={message.id} className="rounded-xl bg-blush border border-ink/15 p-5"><h2 className="font-semibold">Submission could not be displayed</h2><p className="text-sm text-ink-soft my-3">{message.createdAt.toLocaleString("en-GB")} · {message.status}</p>{session.role === "OWNER" && <DeleteRecordForm action={deleteMessage.bind(null, message.id)} description="Permanently delete this unreadable submission? This cannot be undone." />}</article>;
       const data = record.data;
       return <article key={message.id} className="rounded-2xl bg-blush border border-ink/15 p-5 min-w-0">
         <div className="flex flex-wrap justify-between gap-3 mb-4"><div><h2 className="font-display text-xl">{communityPages[data.kind]?.title ?? "Community submission"}</h2><p className="text-xs text-ink-soft mt-1 break-all">{record.reference} · {message.createdAt.toLocaleString("en-GB")} · {message.status}</p></div></div>
@@ -55,9 +57,10 @@ export default async function CommunityInbox({ kind, searchParams }: { kind?: Co
         <div className="flex flex-wrap gap-3 mt-5">
           {message.status === "NEW" && <form action={setCommunityStatus.bind(null,message.id,"READ")}><button className="min-h-11 px-4 py-2 rounded-lg border border-ink/25">Mark read</button></form>}
           {message.status !== "RESPONDED" && <form action={setCommunityStatus.bind(null,message.id,"RESPONDED")}><button className="min-h-11 px-4 py-2 rounded-lg border border-ink/25">Mark handled</button></form>}
-          <DeleteRecordForm action={deleteMessage.bind(null, message.id)} description="Permanently delete this submission and its uploaded evidence? This cannot be undone." />
-          {data.email && <a href={`mailto:${data.email}`} className="inline-flex min-h-11 items-center px-4 py-2 rounded-lg bg-rose">Reply by email</a>}
+          {session.role === "OWNER" && <DeleteRecordForm action={deleteMessage.bind(null, message.id)} description="Permanently delete this submission and its uploaded evidence? This cannot be undone." />}
+
         </div>
+        <SupportPanel entityType="ContactMessage" entityId={message.id} />
         {record.delivery === "UNCONFIRMED" && <form action={retryIncident.bind(null,message.id)} className="mt-4 border border-gold/50 rounded-lg p-4"><p className="text-sm mb-3">Delivery was not confirmed. Check the incident review queue for this reference before resending, to avoid duplicates.</p><button className="min-h-11 px-4 py-2 rounded-lg border border-ink/25">Retry incident delivery</button></form>}
       </article>;
     })}</div>{messages.length === 0 && <p className="text-ink-soft">No submissions in this section with the selected status.</p>}

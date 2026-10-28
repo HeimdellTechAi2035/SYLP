@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import DeleteRecordForm from "@/components/admin/DeleteRecordForm";
 import { deleteReview } from "@/lib/actions/admin/cleanup";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +7,7 @@ import StarRating from "@/components/ui/StarRating";
 import { setReviewStatus, respondToReview } from "@/lib/actions/admin/reviews";
 
 export default async function AdminReviewsPage() {
+  await requireOwnerSession();
   const reviews = await prisma.review.findMany({
     orderBy: { createdAt: "desc" },
     include: { product: { select: { name: true } } },

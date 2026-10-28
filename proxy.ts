@@ -10,7 +10,7 @@ import { ADMIN_SESSION_COOKIE } from "@/lib/auth";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/admin/login") {
+  if ((pathname === "/admin/login" || pathname === "/admin/accept-invite")) {
     return NextResponse.next();
   }
 
@@ -26,8 +26,8 @@ export async function proxy(request: NextRequest) {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), { audience: "sylp-admin", algorithms: ["HS256"] });
     // A freshly-seeded/reset admin account must change its password before
     // reaching anywhere else — /admin/settings is where that form lives.
-    if (payload.mustChangePassword && pathname !== "/admin/settings") {
-      return NextResponse.redirect(new URL("/admin/settings", request.url));
+    if (payload.mustChangePassword && pathname !== "/admin/account") {
+      return NextResponse.redirect(new URL("/admin/account", request.url));
     }
     return NextResponse.next();
   } catch {

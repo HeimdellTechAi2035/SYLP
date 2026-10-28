@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import ProductForm from "@/components/admin/ProductForm";
@@ -8,6 +9,7 @@ export default async function NewProductPage({
 }: {
   searchParams: Promise<{ division?: string }>;
 }) {
+  await requireOwnerSession();
   const { division } = await searchParams;
   const [categories, packagingProfiles, divisions] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),

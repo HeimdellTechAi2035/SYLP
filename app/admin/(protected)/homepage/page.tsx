@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { getBackgroundMusic } from "@/lib/music";
 import { setBackgroundMusic } from "@/lib/actions/admin/music";
 import { requireAdminSession } from "@/lib/auth";
@@ -8,6 +9,7 @@ import ImageDropzone from "@/components/admin/ImageDropzone";
 import { updateHomepageContent, addHomepageFeature, removeHomepageFeature } from "@/lib/actions/admin/homepage";
 
 export default async function AdminHomepagePage() {
+  await requireOwnerSession();
   const session = await requireAdminSession();
   const musicUrl = session.role === "OWNER" ? await getBackgroundMusic() : "";
   const [content, features] = await Promise.all([getHomepageContent(), getHomepageFeatures("WHY_SHOP")]);

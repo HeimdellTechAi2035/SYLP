@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { FormField, FormTextarea, FormSelect, FormCheckbox, SubmitButton } from "@/components/admin/FormField";
@@ -23,6 +24,7 @@ const CATEGORIES = [
 ];
 
 export default async function AdminFaqsPage() {
+  await requireOwnerSession();
   const [faqs, unansweredQuestions] = await Promise.all([
     prisma.faqItem.findMany({ orderBy: [{ category: "asc" }, { sortOrder: "asc" }] }),
     prisma.unansweredQuestion.findMany({
