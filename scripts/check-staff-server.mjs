@@ -17,6 +17,7 @@ assert.equal(process.env.SESSION_SECRET,'isolated-ci-build-session-secret-never-
 const db = new PrismaClient({adapter:new PrismaPg({connectionString:url.toString()})});
 const origin = 'http://127.0.0.1:3099';
 let server;
+let errors="";
 let stage="starting";
 async function cookie(user) {
  const token = await new SignJWT({sub:user.id,role:user.role,sessionVersion:user.sessionVersion,mustChangePassword:false}).setProtectedHeader({alg:'HS256'}).setAudience('sylp-admin').setExpirationTime('5m').sign(new TextEncoder().encode(process.env.SESSION_SECRET));
@@ -25,12 +26,24 @@ async function cookie(user) {
 const decode = value => value.replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 async function submitForm(path, fields, auth, containingField) {
  stage=`load form ${path.split("?")[0]}`;
- const page=await request(path,auth);let html=await page.text();
+ const page=await request(path,auth);const fullHtml=await page.text();let html=fullHtml;
  if(containingField){html=(html.match(/<form\b[\s\S]*?<\/form>/g)||[]).find(form=>form.includes(`name="${containingField}"`))||"";}
  const form=new FormData();
  for(const tag of html.match(/<input\b[^>]*>/g)||[]) {
   const attrs=Object.fromEntries([...tag.matchAll(/([\w:$-]+)="([^"]*)"/g)].map(m=>[m[1],decode(m[2])]));
   if(attrs.type==='hidden' && attrs.name) form.append(attrs.name,attrs.value||'');
+ }
+
+ if(containingField){
+  const reference=[...form.keys()].find(key=>key.startsWith('$ACTION_REF_'));
+  if(reference){
+   const prefix=`$ACTION_${reference.slice('$ACTION_REF_'.length)}:`;
+   for(const tag of fullHtml.match(/<input\b[^>]*>/g)||[]){
+    const attrs=Object.fromEntries([...tag.matchAll(/([\w:$-]+)="([^"]*)"/g)].map(m=>[m[1],decode(m[2])]));
+    if(attrs.name?.startsWith(prefix)&&!form.has(attrs.name))form.append(attrs.name,attrs.value||'');
+   }
+  }
+  console.log('Selected native form metadata:',[...form.keys()].filter(key=>key.startsWith('$ACTION_')).join(', '));
  }
  assert.ok([...form.keys()].some(name=>name.startsWith('$ACTION_')),'Native Server Action metadata must be present');
  for(const [name,value] of Object.entries(fields)) form.set(name,value);
@@ -45,7 +58,7 @@ try {
  const registrationRecord={version:1,reference:'CI-REGISTER-CASE',data:{kind:'register',anonymous:false,name:'Example helper',email:'helper@staff-test.invalid',area:'Preston',interest:'Community projects',message:'I can help with practical community work.'},files:[],delivery:'NOT_REQUIRED'};
  await db.contactMessage.create({data:{id:'ci-register-case',name:'Example helper',email:'helper@staff-test.invalid',category:'Community: register',message:JSON.stringify(registrationRecord)}});
  server = spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3099'],{stdio:['ignore','ignore','pipe'],env:process.env});
- let errors='';server.stderr.on('data',chunk=>{errors+=chunk.toString().slice(-1000);});
+ server.stderr.on('data',chunk=>{errors+=chunk.toString().slice(-1000);});
  let ready=false;
  for(let attempt=0;attempt<40;attempt++) { try { if((await request('/admin/login')).status===200){ready=true;break;} }catch{} await new Promise(resolve=>setTimeout(resolve,500)); }
  assert.ok(ready,`Server did not start: ${errors.slice(-1500)}`);
@@ -93,7 +106,7 @@ try {
   assert.equal(await db.adminUser.count({where:{email:{endsWith:'@staff-check.invalid'}}}),0,'Diagnostic account must be removed');
  } finally { await rm(diagnosticDirectory,{recursive:true,force:true}); }
  console.log('Built server verified: staff dashboard and confidential inbox, owner-only pages/APIs, private rendering and immediate session revocation.');
-} catch(error) { console.error(`Staff server check failed during: ${stage}`); throw error; } finally {
+} catch(error) { console.error(`Staff server check failed during: ${stage}`);console.error(errors.slice(-1800)); throw error; } finally {
  server?.kill('SIGTERM');
  await db.supportTask.deleteMany({where:{entityId:'ci-register-case'}});
  await db.supportEntry.deleteMany({where:{entityId:'ci-register-case'}});
