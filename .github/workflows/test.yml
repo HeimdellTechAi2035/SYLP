@@ -40,8 +40,11 @@ jobs:
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run test:launch
+      - run: node scripts/prepare-staff-test-database.mjs
+      - run: npx prisma migrate resolve --applied 20260903010000_init_postgres
       - run: npx prisma migrate deploy
       - run: node scripts/check-staff-database.mjs
       - run: npm run build
+      - run: node scripts/check-staff-server.mjs
 # The legacy integration/E2E harness targets SQLite and requires conversion
 # to an isolated Postgres service before it can run against this schema.
