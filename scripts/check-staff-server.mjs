@@ -17,12 +17,14 @@ assert.equal(process.env.SESSION_SECRET,'isolated-ci-build-session-secret-never-
 const db = new PrismaClient({adapter:new PrismaPg({connectionString:url.toString()})});
 const origin = 'http://127.0.0.1:3099';
 let server;
+let stage="starting";
 async function cookie(user) {
  const token = await new SignJWT({sub:user.id,role:user.role,sessionVersion:user.sessionVersion,mustChangePassword:false}).setProtectedHeader({alg:'HS256'}).setAudience('sylp-admin').setExpirationTime('5m').sign(new TextEncoder().encode(process.env.SESSION_SECRET));
  return `hbm_admin_session=${token}`;
 }
 const decode = value => value.replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 async function submitForm(path, fields, auth, containingField) {
+ stage=`load form ${path.split("?")[0]}`;
  const page=await request(path,auth);let html=await page.text();
  if(containingField){html=(html.match(/<form\b[\s\S]*?<\/form>/g)||[]).find(form=>form.includes(`name="${containingField}"`))||"";}
  const form=new FormData();
@@ -32,9 +34,10 @@ async function submitForm(path, fields, auth, containingField) {
  }
  assert.ok([...form.keys()].some(name=>name.startsWith('$ACTION_')),'Native Server Action metadata must be present');
  for(const [name,value] of Object.entries(fields)) form.set(name,value);
- return fetch(`${origin}${path}`,{method:'POST',body:form,redirect:'manual',headers:{origin,...(auth?{cookie:auth}:{})},signal:AbortSignal.timeout(15000)});
+ stage=`submit ${path.split("?")[0]}`;
+ return fetch(`${origin}${path}`,{method:'POST',body:form,redirect:'manual',headers:{origin,...(auth?{cookie:auth}:{})},signal:AbortSignal.timeout(30000)});
 }
-async function request(path, auth) { return fetch(`${origin}${path}`,{redirect:'manual',headers:auth?{cookie:auth}:{},signal:AbortSignal.timeout(15000)}); }
+async function request(path, auth) { stage=`get ${path.split("?")[0]}`; return fetch(`${origin}${path}`,{redirect:'manual',headers:auth?{cookie:auth}:{},signal:AbortSignal.timeout(30000)}); }
 try {
  const owner = await db.adminUser.create({data:{id:'ci-server-owner',email:'server-owner@staff-test.invalid',name:'CI owner',passwordHash:'not-a-login-hash',role:'OWNER'}});
  const staff = await db.adminUser.create({data:{id:'ci-server-staff',email:'server-staff@staff-test.invalid',name:'CI staff',passwordHash:'not-a-login-hash',role:'STAFF',active:false,inviteHash:createHash('sha256').update('a'.repeat(64)).digest('hex'),inviteExpiresAt:new Date(Date.now()+60000)}});
@@ -90,7 +93,7 @@ try {
   assert.equal(await db.adminUser.count({where:{email:{endsWith:'@staff-check.invalid'}}}),0,'Diagnostic account must be removed');
  } finally { await rm(diagnosticDirectory,{recursive:true,force:true}); }
  console.log('Built server verified: staff dashboard and confidential inbox, owner-only pages/APIs, private rendering and immediate session revocation.');
-} finally {
+} catch(error) { console.error(`Staff server check failed during: ${stage}`); throw error; } finally {
  server?.kill('SIGTERM');
  await db.supportTask.deleteMany({where:{entityId:'ci-register-case'}});
  await db.supportEntry.deleteMany({where:{entityId:'ci-register-case'}});

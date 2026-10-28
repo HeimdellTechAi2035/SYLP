@@ -58,5 +58,5 @@ export async function sendSupportReply(type: string, id: string, _previous: Supp
   if (type === "ContactMessage") await tx.contactMessage.update({ where: { id }, data: { status: "RESPONDED" } });
   await tx.auditLog.create({ data: { adminUserId: session.sub, action: "support.email", entityType: type, entityId: id } });
  });
- refresh(); return { message: "Email sent and saved in the history.", success: true };
+ refresh(); return { message: "Email accepted by the email service and saved in the history.", success: true };
 }
