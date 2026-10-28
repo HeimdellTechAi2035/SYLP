@@ -13,7 +13,8 @@ try {
   const staff = await tx.adminUser.create({ data: { email:'staff@staff-test.invalid', name:'Test staff', passwordHash:'not-a-login-hash', role:'STAFF', active:false, inviteHash:'isolated-test-hash', inviteExpiresAt:new Date(Date.now()+60000) } });
   const accept = () => tx.adminUser.updateMany({ where:{role:'STAFF',inviteHash:'isolated-test-hash',inviteExpiresAt:{gt:new Date()}},data:{active:true,inviteHash:null,inviteExpiresAt:null,sessionVersion:{increment:1}} });
   assert.equal((await accept()).count,1); assert.equal((await accept()).count,0);
-  const task = await tx.supportTask.create({ data:{entityType:'ContactMessage',entityId:'isolated-test-case',assignedTo:staff.id,followUpAt:new Date()} });
+  const task = await tx.supportTask.create({ data:{entityType:'ContactMessage',entityId:'isolated-test-case',assignedTo:staff.id,followUpAt:new Date(),area:'Preston',helpInterest:'Practical support'} });
+  assert.equal(task.area,'Preston'); assert.equal(task.helpInterest,'Practical support');
   await tx.supportEntry.create({ data:{entityType:'ContactMessage',entityId:'isolated-test-case',adminUserId:staff.id,authorName:staff.name,kind:'NOTE',body:'Isolated CI note'} });
   await tx.adminUser.updateMany({ where:{id:staff.id,role:'STAFF'},data:{active:false,sessionVersion:{increment:1}} });
   const disabled = await tx.adminUser.findUnique({ where:{id:staff.id} }); assert.equal(disabled.active,false); assert.equal(disabled.sessionVersion,2);
