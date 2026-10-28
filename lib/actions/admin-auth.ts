@@ -25,7 +25,7 @@ export async function loginAdmin(_prev: AdminLoginState, formData: FormData): Pr
   }
 
   const admin = await prisma.adminUser.findUnique({ where: { email } });
-  if (!admin || !(await bcrypt.compare(password, admin.passwordHash))) {
+  if (!admin || !admin.active || !["OWNER", "STAFF"].includes(admin.role) || !(await bcrypt.compare(password, admin.passwordHash))) {
     recordFailedAttempt(rateLimitKey, RATE_LIMIT_WINDOW_MS);
     return { status: "error", message: "Incorrect email or password." };
   }
@@ -36,6 +36,7 @@ export async function loginAdmin(_prev: AdminLoginState, formData: FormData): Pr
     name: admin.name,
     role: admin.role,
     mustChangePassword: admin.mustChangePassword,
+    sessionVersion: admin.sessionVersion,
   });
   redirect("/admin");
 }

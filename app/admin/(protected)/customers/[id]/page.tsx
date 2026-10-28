@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +10,7 @@ export default async function AdminCustomerDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireOwnerSession();
   const { id } = await params;
   const customer = await prisma.customer.findUnique({
     where: { id },

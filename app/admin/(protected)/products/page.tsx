@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, Package } from "lucide-react";
@@ -21,6 +22,7 @@ export default async function AdminProductsPage({
 }: {
   searchParams: Promise<{ division?: string; q?: string; status?: string }>;
 }) {
+  await requireOwnerSession();
   const { division, q, status } = await searchParams;
 
   const where: Record<string, unknown> = {};

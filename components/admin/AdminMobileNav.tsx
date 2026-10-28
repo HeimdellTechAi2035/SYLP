@@ -1,5 +1,6 @@
 "use client";
 
+import { canAccessAdminPage } from "@/lib/admin-permissions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -13,12 +14,13 @@ const isActive = (pathname: string, href: string) =>
  * Phone admin navigation: a bottom bar with the everyday pages and a "More"
  * button that opens every admin page. Hidden on laptops (sidebar instead).
  */
-export default function AdminMobileNav() {
+export default function AdminMobileNav({ role }: { role: string }) {
   const pathname = usePathname();
   // Remember which page the menu was opened on, so it closes itself on navigation.
   const [openOn, setOpenOn] = useState<string | null>(null);
   const open = openOn === pathname;
-  const quick = adminQuickNav.map((href) => adminNav.find((n) => n.href === href)!);
+  const visibleNav = adminNav.filter(item => canAccessAdminPage(role, item.href));
+  const quick = (role === "OWNER" ? adminQuickNav : ["/admin", "/admin/orders", "/admin/messages", "/admin/work"]).map((href) => adminNav.find((n) => n.href === href)!);
   const moreActive = !quick.some((n) => isActive(pathname, n.href));
 
   return (
@@ -33,7 +35,7 @@ export default function AdminMobileNav() {
           className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-50 max-h-[70vh] overflow-y-auto rounded-t-2xl bg-blush border-t border-ink/15 p-3"
         >
           <ul className="grid grid-cols-2 gap-2">
-            {adminNav.map((item) => (
+            {visibleNav.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}

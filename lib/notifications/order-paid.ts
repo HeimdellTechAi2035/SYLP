@@ -163,7 +163,7 @@ export async function notifyAdminOfPaidOrder(orderId: string): Promise<void> {
       await sendAdminOrderEmail(order, settings.orderNotificationEmail);
     }
 
-    const subscriptions = await prisma.adminPushSubscription.findMany({ where: { active: true } });
+    const subscriptions = await prisma.adminPushSubscription.findMany({ where: { active: true, adminUser: { active: true } } });
     for (const subscription of subscriptions) {
       await sendAdminOrderPush(order, subscription);
     }

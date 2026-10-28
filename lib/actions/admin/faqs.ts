@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 
 function faqData(formData: FormData) {
   return {
@@ -15,21 +15,21 @@ function faqData(formData: FormData) {
 }
 
 export async function createFaq(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   await prisma.faqItem.create({ data: faqData(formData) });
   revalidatePath("/admin/faqs");
   revalidatePath("/faq");
 }
 
 export async function updateFaq(faqId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   await prisma.faqItem.update({ where: { id: faqId }, data: faqData(formData) });
   revalidatePath("/admin/faqs");
   revalidatePath("/faq");
 }
 
 export async function deleteFaq(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const faqId = String(formData.get("faqId") || "");
   await prisma.faqItem.delete({ where: { id: faqId } }).catch(() => {});
   revalidatePath("/admin/faqs");
@@ -38,7 +38,7 @@ export async function deleteFaq(formData: FormData) {
 
 /** Pre-fills a new FAQ from an unanswered question, and marks that question resolved once saved. */
 export async function createFaqFromUnansweredQuestion(unansweredQuestionId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const faq = await prisma.faqItem.create({ data: faqData(formData) });
   await prisma.unansweredQuestion.update({ where: { id: unansweredQuestionId }, data: { resolvedFaqId: faq.id } });
   revalidatePath("/admin/faqs");
@@ -46,7 +46,7 @@ export async function createFaqFromUnansweredQuestion(unansweredQuestionId: stri
 }
 
 export async function dismissUnansweredQuestion(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const id = String(formData.get("id") || "");
   await prisma.unansweredQuestion.delete({ where: { id } }).catch(() => {});
   revalidatePath("/admin/faqs");

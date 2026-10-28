@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ session: null as null | { sub: string; role: string; mustChangePassword: boolean }, find: vi.fn(), remove: vi.fn(), deleteMany: vi.fn(), audit: vi.fn(), subscriber: vi.fn(), reviewFind: vi.fn(), reviewDelete: vi.fn(), transaction: vi.fn() }));
-vi.mock("@/lib/auth", () => ({ requireAdminSession: async () => { if (!mocks.session) throw new Error("unauthorised"); return mocks.session; } }));
+vi.mock("@/lib/auth", () => ({ requireOwnerSession: async () => { if (!mocks.session || mocks.session.role !== "OWNER") throw new Error("not found"); return mocks.session; }, requireAdminSession: async () => { if (!mocks.session) throw new Error("unauthorised"); return mocks.session; } }));
 vi.mock("next/navigation", () => ({ notFound: () => { throw new Error("not found"); } }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/community/evidence", () => ({ removeEvidence: mocks.remove }));
@@ -11,7 +11,7 @@ beforeEach(() => {
   vi.clearAllMocks(); mocks.session = { sub: "owner", role: "OWNER", mustChangePassword: false };
   mocks.find.mockResolvedValue({ id: "message", category: "Product question", message: "Hello" });
   mocks.deleteMany.mockResolvedValue({ count: 1 });
-  mocks.transaction.mockImplementation(fn => fn({ contactMessage: { deleteMany: mocks.deleteMany }, auditLog: { create: mocks.audit }, newsletterSubscriber: { deleteMany: mocks.subscriber }, review: { deleteMany: mocks.reviewDelete } }));
+  mocks.transaction.mockImplementation(fn => fn({ supportEntry: { deleteMany: vi.fn() }, supportTask: { deleteMany: vi.fn() }, contactMessage: { findMany: async () => [{ id: "handled" }], deleteMany: mocks.deleteMany }, auditLog: { create: mocks.audit }, newsletterSubscriber: { deleteMany: mocks.subscriber }, review: { deleteMany: mocks.reviewDelete } }));
 });
 describe("dashboard deletion permissions", () => {
   it("blocks unauthenticated users and password-change sessions before deletion", async () => {
@@ -33,7 +33,7 @@ describe("dashboard deletion permissions", () => {
     await expect(deleteMessage("message")).rejects.toThrow(); expect(mocks.transaction).not.toHaveBeenCalled();
   });
   it("bulk cleanup only removes responded contact messages, not unread or community records", async () => {
-    await clearHandledMessages(); expect(mocks.deleteMany).toHaveBeenCalledWith({ where: { status: "RESPONDED", NOT: { category: { startsWith: "Community: " } } } });
+    await clearHandledMessages(); expect(mocks.deleteMany).toHaveBeenCalledWith({ where: { id: { in: ["handled"] }, status: "RESPONDED", NOT: { category: { startsWith: "Community: " } } } });
   });
   it("supports individual contact, newsletter and review deletion with audit records", async () => {
     await deleteMessage("message"); await deleteSubscriber("subscriber");

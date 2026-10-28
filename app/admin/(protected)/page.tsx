@@ -1,3 +1,4 @@
+import StaffDashboard from "@/components/admin/StaffDashboard";
 import VisitorSummary from "@/components/admin/VisitorSummary";
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/auth";
@@ -8,6 +9,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 export default async function AdminDashboardPage() {
   const session = await requireAdminSession();
+  if (session.role === "STAFF") return <StaffDashboard />;
   const [recentOrders, lowStockProducts, pendingReviews, newMessages, totalRevenue, paidOrderItems] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.product.findMany({

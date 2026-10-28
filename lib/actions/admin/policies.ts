@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 
 export async function updatePolicy(policyId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const policy = await prisma.policy.update({
     where: { id: policyId },
     data: {

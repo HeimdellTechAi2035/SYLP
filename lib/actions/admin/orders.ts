@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { canFulfilOrder } from "@/lib/admin-permissions";
+import { requireAdminSession, requireOwnerSession } from "@/lib/auth";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 
 export async function updateOrderFulfilment(orderId: string, formData: FormData) {
@@ -13,8 +14,11 @@ export async function updateOrderFulfilment(orderId: string, formData: FormData)
   const trackingUrl = String(formData.get("trackingUrl") || "") || null;
   const internalNotes = String(formData.get("internalNotes") || "") || null;
 
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order || !canFulfilOrder(session.role, order.paymentStatus, fulfilmentStatus)) throw new Error("Only paid orders can be processed by staff. Choose a valid fulfilment status.");
+  if (trackingUrl && !/^https?:\/\//i.test(trackingUrl)) throw new Error("Tracking URL must use http or https.");
   await prisma.order.update({
-    where: { id: orderId },
+    where: { id: orderId, paymentStatus: order.paymentStatus },
     data: { fulfilmentStatus, trackingCarrier, trackingNumber, trackingUrl, internalNotes },
   });
 
@@ -36,7 +40,9 @@ export async function updateOrderFulfilment(orderId: string, formData: FormData)
 /** Used by the Production queue, where only the status itself changes — never touches tracking/notes fields. */
 export async function advanceOrderStatus(orderId: string, status: string) {
   const session = await requireAdminSession();
-  await prisma.order.update({ where: { id: orderId }, data: { fulfilmentStatus: status } });
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order || !canFulfilOrder(session.role, order.paymentStatus, status)) throw new Error("Invalid order transition");
+  await prisma.order.update({ where: { id: orderId, paymentStatus: order.paymentStatus }, data: { fulfilmentStatus: status } });
   await prisma.auditLog.create({
     data: {
       adminUserId: session.sub,
@@ -53,6 +59,7 @@ export async function advanceOrderStatus(orderId: string, status: string) {
 
 export async function refundOrder(orderId: string, formData: FormData) {
   const session = await requireAdminSession();
+  if (session.role !== "OWNER") await requireOwnerSession();
   const full = formData.get("refundType") === "full";
 
   const order = await prisma.order.findUnique({ where: { id: orderId } });

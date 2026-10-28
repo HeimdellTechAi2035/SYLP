@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 import { notifyAdminOfPaidOrder } from "@/lib/notifications/order-paid";
 
 export async function updateOrderNotificationSettings(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
 
   const enabled = formData.get("orderNotificationEmailEnabled") === "on";
   const email = String(formData.get("orderNotificationEmail") || "").trim() || null;
@@ -21,7 +21,7 @@ export async function updateOrderNotificationSettings(formData: FormData) {
 }
 
 export async function setPushSubscriptionActive(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const id = String(formData.get("subscriptionId") || "");
   const active = formData.get("active") === "true";
   if (!id) return;
@@ -36,7 +36,7 @@ export async function setPushSubscriptionActive(formData: FormData) {
  * already SENT, only re-tries what's missing or FAILED).
  */
 export async function retryOrderNotifications(orderId: string) {
-  await requireAdminSession();
+  await requireOwnerSession();
   await notifyAdminOfPaidOrder(orderId);
   revalidatePath(`/admin/orders/${orderId}`);
 }

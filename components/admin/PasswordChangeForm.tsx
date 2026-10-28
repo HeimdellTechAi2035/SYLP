@@ -16,7 +16,7 @@ export default function PasswordChangeForm() {
       </div>
       <div>
         <label htmlFor="newPassword" className="block text-sm font-medium mb-1">New password</label>
-        <input id="newPassword" name="newPassword" type="password" required minLength={8} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm" />
+        <input id="newPassword" name="newPassword" type="password" required minLength={12} maxLength={128} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm" />
       </div>
       {state.status !== "idle" && (
         <p className={`text-sm ${state.status === "success" ? "text-sage" : "text-rose-dark"}`}>{state.message}</p>

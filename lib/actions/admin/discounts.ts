@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 
 function readForm(formData: FormData) {
   const startDate = formData.get("startDate") ? new Date(String(formData.get("startDate"))) : null;
@@ -24,19 +24,19 @@ function readForm(formData: FormData) {
 }
 
 export async function createDiscount(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   await prisma.discount.create({ data: readForm(formData) });
   revalidatePath("/admin/discounts");
 }
 
 export async function updateDiscount(discountId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   await prisma.discount.update({ where: { id: discountId }, data: readForm(formData) });
   revalidatePath("/admin/discounts");
 }
 
 export async function deleteDiscount(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const discountId = String(formData.get("discountId") || "");
   await prisma.discount.delete({ where: { id: discountId } }).catch(() => {});
   revalidatePath("/admin/discounts");

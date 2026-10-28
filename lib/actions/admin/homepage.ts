@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 
 export async function updateHomepageContent(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const str = (key: string) => String(formData.get(key) || "") || null;
 
   await prisma.homepageContent.upsert({
@@ -51,7 +51,7 @@ export async function updateHomepageContent(formData: FormData) {
 }
 
 export async function addHomepageFeature(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   await prisma.homepageFeature.create({
     data: {
       section: "WHY_SHOP",
@@ -65,7 +65,7 @@ export async function addHomepageFeature(formData: FormData) {
 }
 
 export async function removeHomepageFeature(formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const id = String(formData.get("id") || "");
   await prisma.homepageFeature.delete({ where: { id } }).catch(() => {});
   revalidatePath("/admin/homepage");

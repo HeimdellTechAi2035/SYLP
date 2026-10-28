@@ -1,3 +1,4 @@
+import { canAccessAdminPage } from "@/lib/admin-permissions";
 import Link from "next/link";
 import LogoutButton from "@/components/admin/LogoutButton";
 import ServiceWorkerRegister from "@/components/admin/ServiceWorkerRegister";
@@ -22,7 +23,7 @@ export default function AdminShell({
           <p className="text-xs text-ink/70 mt-0.5">Support Your Local Patriot — Admin Dashboard</p>
         </div>
         <nav className="flex-1 overflow-y-auto py-3">
-          {nav.map((item) => (
+          {nav.filter(item => canAccessAdminPage(session.role, item.href)).map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -46,7 +47,7 @@ export default function AdminShell({
         </header>
         <main className="p-4 pb-28 sm:p-8 lg:pb-8 max-w-6xl mx-auto">{children}</main>
       </div>
-      <AdminMobileNav />
+      <AdminMobileNav role={session.role} />
     </div>
   );
 }

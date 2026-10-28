@@ -1,3 +1,4 @@
+import { requireAdminSession } from "@/lib/auth";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
@@ -8,6 +9,7 @@ export default async function AdminOrdersPage({
 }: {
   searchParams: Promise<{ status?: string; division?: string }>;
 }) {
+  await requireAdminSession();
   const { status, division } = await searchParams;
   const [orders, divisions] = await Promise.all([
     prisma.order.findMany({

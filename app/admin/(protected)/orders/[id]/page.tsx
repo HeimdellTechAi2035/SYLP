@@ -1,3 +1,5 @@
+import SupportPanel from "@/components/admin/SupportPanel";
+import { requireAdminSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
@@ -14,6 +16,7 @@ export default async function AdminOrderDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await requireAdminSession();
   const { id } = await params;
   const order = await prisma.order.findUnique({
     where: { id },
@@ -65,7 +68,7 @@ export default async function AdminOrderDetailPage({
                 label="Fulfilment status"
                 name="fulfilmentStatus"
                 defaultValue={order.fulfilmentStatus}
-                options={statuses.map((s) => ({ value: s, label: s }))}
+                options={statuses.filter(s => session.role === "OWNER" || !["NEW", "PAID", "CANCELLED"].includes(s)).map((s) => ({ value: s, label: s }))}
               />
               <div className="grid sm:grid-cols-2 gap-4">
                 <FormField label="Tracking carrier" name="trackingCarrier" defaultValue={order.trackingCarrier ?? ""} />
@@ -77,7 +80,7 @@ export default async function AdminOrderDetailPage({
             </form>
           </div>
 
-          <div className="bg-blush rounded-xl p-6">
+          {session.role === "OWNER" && <><div className="bg-blush rounded-xl p-6">
             <h2 className="font-semibold mb-3">Refund</h2>
             <p className="text-xs text-ink-soft mb-3">Payment status: {order.paymentStatus}</p>
             <form action={boundRefund} className="flex flex-wrap items-end gap-3">
@@ -115,7 +118,9 @@ export default async function AdminOrderDetailPage({
             </div>
           </div>
 
-          {order.paymentStatus === "PAID" && (
+          </>}
+          <SupportPanel entityType="Order" entityId={order.id} />
+          {session.role === "OWNER" && order.paymentStatus === "PAID" && (
             <div className="bg-blush rounded-xl p-6">
               <h2 className="font-semibold mb-3">Notifications</h2>
               <div className="space-y-3 text-sm">

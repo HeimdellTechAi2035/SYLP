@@ -1,9 +1,11 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { FormField, FormTextarea, FormCheckbox, SubmitButton } from "@/components/admin/FormField";
 import { updatePolicy } from "@/lib/actions/admin/policies";
 
 export default async function AdminPoliciesPage() {
+  await requireOwnerSession();
   const policies = await prisma.policy.findMany({ orderBy: { title: "asc" } });
 
   return (

@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 
 export async function setReviewStatus(reviewId: string, status: string) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const review = await prisma.review.update({ where: { id: reviewId }, data: { status }, include: { product: true } });
   revalidatePath("/admin/reviews");
   revalidatePath(`/products/${review.product.slug}`);
@@ -13,7 +13,7 @@ export async function setReviewStatus(reviewId: string, status: string) {
 }
 
 export async function respondToReview(reviewId: string, formData: FormData) {
-  await requireAdminSession();
+  await requireOwnerSession();
   const merchantResponse = String(formData.get("merchantResponse") || "");
   const review = await prisma.review.update({
     where: { id: reviewId },

@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -15,6 +16,7 @@ import {
 } from "@/lib/actions/admin/delivery";
 
 export default async function AdminDeliveryPage() {
+  await requireOwnerSession();
   const [zones, packagingProfiles, postageRates] = await Promise.all([
     prisma.deliveryZone.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.packagingProfile.findMany({ orderBy: { sortOrder: "asc" } }),

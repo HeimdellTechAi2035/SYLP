@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
@@ -9,6 +10,7 @@ function formatValue(type: string, value: number) {
 }
 
 export default async function AdminDiscountsPage() {
+  await requireOwnerSession();
   const discounts = await prisma.discount.findMany({ orderBy: { createdAt: "desc" } });
 
   return (

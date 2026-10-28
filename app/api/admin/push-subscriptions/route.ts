@@ -12,7 +12,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   const session = await getAdminSession();
-  if (!session) {
+  if (!session || session.mustChangePassword) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const session = await getAdminSession();
-  if (!session) {
+  if (!session || session.mustChangePassword) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -49,7 +49,7 @@ export async function DELETE(request: NextRequest) {
 
   // Deactivate rather than delete — keeps its OrderNotification history intact.
   await prisma.adminPushSubscription.updateMany({
-    where: { endpoint },
+    where: { endpoint, adminUserId: session.sub },
     data: { active: false },
   });
 

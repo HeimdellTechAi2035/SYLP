@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { FormField, FormTextarea, FormCheckbox, SubmitButton } from "@/components/admin/FormField";
@@ -5,6 +6,7 @@ import ImageDropzone from "@/components/admin/ImageDropzone";
 import { createCategory, updateCategory, deleteCategory } from "@/lib/actions/admin/categories";
 
 export default async function AdminCategoriesPage() {
+  await requireOwnerSession();
   const categories = await prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
 
   return (

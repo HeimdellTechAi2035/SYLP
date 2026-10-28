@@ -9,6 +9,8 @@ export type EmailMessage = {
   subject: string;
   text: string;
   html?: string;
+  replyTo?: string;
+  idempotencyKey?: string;
 };
 
 export type EmailSendResult = { providerMessageId: string | null };
@@ -36,6 +38,7 @@ export async function sendEmail(message: EmailMessage): Promise<EmailSendResult>
     headers: {
       Authorization: `Bearer ${process.env.EMAIL_API_KEY}`,
       "Content-Type": "application/json",
+      ...(message.idempotencyKey ? { "Idempotency-Key": message.idempotencyKey } : {}),
     },
     body: JSON.stringify({
       from: `${fromName} <${fromAddress}>`,
@@ -43,6 +46,7 @@ export async function sendEmail(message: EmailMessage): Promise<EmailSendResult>
       subject: message.subject,
       text: message.text,
       html: message.html,
+      reply_to: message.replyTo,
     }),
   });
 

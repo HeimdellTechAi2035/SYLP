@@ -1,0 +1,28 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SignJWT } from "jose";
+const m = vi.hoisted(() => ({ token: "", admin: { id: "staff-1", email: "staff@example.test", name: "Staff", role: "STAFF", active: true, sessionVersion: 0, mustChangePassword: false }, orderFind: vi.fn(), orderUpdate: vi.fn(), audit: vi.fn(), write: vi.fn(), find: vi.fn() }));
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => ({ value: m.token }) }) }));
+vi.mock("next/navigation", () => ({ redirect: (path: string) => { throw new Error(`redirect:${path}`); }, notFound: () => { throw new Error("forbidden"); } }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/prisma", () => ({ prisma: { adminUser: { findUnique: async () => m.admin }, order: { findUnique: m.orderFind, update: m.orderUpdate }, auditLog: { create: m.audit }, contactMessage: { findUnique: m.find, update: m.write }, $transaction: m.write } }));
+vi.mock("@/lib/stripe", () => ({ stripe: { refunds: { create: m.write } }, stripeConfigured: () => true }));
+import { getAdminSession, requireAdminSession, requireOwnerSession } from "@/lib/auth";
+import { refundOrder, updateOrderFulfilment, advanceOrderStatus } from "@/lib/actions/admin/orders";
+import { updateSiteSettings } from "@/lib/actions/admin/settings";
+import { deleteMessage, clearHandledMessages, deleteReview } from "@/lib/actions/admin/cleanup";
+import { disableStaff, inviteStaff } from "@/lib/actions/admin/staff";
+import { POST as upload } from "@/app/api/admin/uploads/route";
+import { GET as exportBuyers } from "@/app/api/admin/buyers/export/route";
+import { canAccessAdminPage, canFulfilOrder } from "@/lib/admin-permissions";
+beforeEach(async () => { vi.clearAllMocks(); process.env.SESSION_SECRET = "isolated-staff-security-test-secret"; m.admin.role="STAFF";m.admin.active=true;m.admin.mustChangePassword=false;m.admin.sessionVersion=0; m.token=await new SignJWT({sub:"staff-1",role:"OWNER",sessionVersion:0}).setProtectedHeader({alg:"HS256"}).setAudience("sylp-admin").setExpirationTime("1h").sign(new TextEncoder().encode(process.env.SESSION_SECRET)); m.orderFind.mockResolvedValue({ paymentStatus: "PAID" }); });
+describe("staff server permissions",()=>{
+ it("uses current DB role even when the token claims owner",async()=>{expect((await getAdminSession())?.role).toBe("STAFF");await expect(requireOwnerSession()).rejects.toThrow("forbidden");});
+ it("rejects disabled and revoked sessions immediately",async()=>{m.admin.active=false;expect(await getAdminSession()).toBeNull();m.admin.active=true;m.admin.sessionVersion=1;expect(await getAdminSession()).toBeNull();});
+ it("forces password changes on server actions, even without proxy",async()=>{m.admin.mustChangePassword=true;await expect(requireAdminSession()).rejects.toThrow("/admin/account");await expect(updateOrderFulfilment("order",new FormData())).rejects.toThrow("/admin/account");expect(m.orderFind).not.toHaveBeenCalled();});
+ it("blocks refunds, settings, deletes and account management before touching data",async()=>{for (const operation of [()=>refundOrder("order",new FormData()),()=>updateSiteSettings(new FormData()),()=>deleteMessage("message"),()=>clearHandledMessages(),()=>deleteReview("review"),()=>disableStaff("owner"),()=>inviteStaff({message:""},new FormData())]) await expect(operation()).rejects.toThrow("forbidden");expect(m.write).not.toHaveBeenCalled();expect(m.orderFind).not.toHaveBeenCalled();expect(m.find).not.toHaveBeenCalled();});
+ it("blocks direct media-upload and bulk export requests",async()=>{expect((await upload(new Request("https://example.test") as never)).status).toBe(401);expect((await exportBuyers(new Request("https://example.test") as never)).status).toBe(401);});
+ it.each(["PENDING","FAILED","REFUNDED","PART_REFUNDED"])("cannot process %s orders",async paymentStatus=>{m.orderFind.mockResolvedValue({paymentStatus});const data=new FormData();data.set("fulfilmentStatus","DISPATCHED");await expect(updateOrderFulfilment("order",data)).rejects.toThrow();await expect(advanceOrderStatus("order","DISPATCHED")).rejects.toThrow();expect(m.orderUpdate).not.toHaveBeenCalled();});
+ it("can dispatch a paid order without changing payment status",async()=>{const data=new FormData();data.set("fulfilmentStatus","DISPATCHED");data.set("trackingUrl","https://tracking.example.test/123");await updateOrderFulfilment("order",data);expect(m.orderUpdate).toHaveBeenCalledWith(expect.objectContaining({where:{id:"order",paymentStatus:"PAID"},data:expect.objectContaining({fulfilmentStatus:"DISPATCHED"})}));expect(m.orderUpdate.mock.calls[0][0].data).not.toHaveProperty("paymentStatus");expect(m.audit).toHaveBeenCalled();});
+ it("rejects arbitrary statuses and executable tracking URLs",async()=>{const data=new FormData();data.set("fulfilmentStatus","HACKED");await expect(updateOrderFulfilment("order",data)).rejects.toThrow();data.set("fulfilmentStatus","DISPATCHED");data.set("trackingUrl","javascript:alert(1)");await expect(updateOrderFulfilment("order",data)).rejects.toThrow();expect(m.orderUpdate).not.toHaveBeenCalled();});
+ it("keeps the staff navigation limited and denies lookalike paths",()=>{expect(canAccessAdminPage("STAFF","/admin/community/whistleblower")).toBe(true);expect(canAccessAdminPage("STAFF","/admin/orders/123")).toBe(true);for(const path of ["/admin/settings","/admin/products","/admin/orders-export","/admin/staff","/admin/analytics"])expect(canAccessAdminPage("STAFF",path)).toBe(false);expect(canAccessAdminPage("UNKNOWN","/admin")).toBe(false);expect(canFulfilOrder("STAFF","PAID","CANCELLED")).toBe(false);});
+});

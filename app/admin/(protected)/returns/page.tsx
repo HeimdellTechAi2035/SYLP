@@ -1,9 +1,11 @@
+import { requireOwnerSession } from "@/lib/auth";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPence } from "@/lib/money";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 export default async function AdminReturnsPage() {
+  await requireOwnerSession();
   const orders = await prisma.order.findMany({
     where: { paymentStatus: { in: ["REFUNDED", "PART_REFUNDED"] } },
     orderBy: { updatedAt: "desc" },

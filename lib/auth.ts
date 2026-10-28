@@ -1,6 +1,7 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export const ADMIN_SESSION_COOKIE = "hbm_admin_session";
@@ -20,6 +21,7 @@ export type AdminSessionPayload = {
   name: string;
   role: string;
   mustChangePassword: boolean;
+  sessionVersion?: number;
 };
 
 export async function createAdminSession(payload: AdminSessionPayload) {
@@ -45,7 +47,7 @@ export async function destroyAdminSession() {
   cookieStore.delete(ADMIN_SESSION_COOKIE);
 }
 
-export async function getAdminSession(): Promise<AdminSessionPayload | null> {
+export const getAdminSession = cache(async (): Promise<AdminSessionPayload | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -54,18 +56,25 @@ export async function getAdminSession(): Promise<AdminSessionPayload | null> {
     const { payload } = await jwtVerify(token, getSecretKey(), { audience: "sylp-admin", algorithms: ["HS256"] });
     if (typeof payload.sub !== "string") return null;
     const admin = await prisma.adminUser.findUnique({ where: { id: payload.sub } });
-    if (!admin) return null;
-    return { sub: admin.id, email: admin.email, name: admin.name, role: admin.role, mustChangePassword: admin.mustChangePassword };
+    if (!admin || !admin.active || !["OWNER", "STAFF"].includes(admin.role) || (payload.sessionVersion ?? 0) !== admin.sessionVersion) return null;
+    return { sub: admin.id, email: admin.email, name: admin.name, role: admin.role, mustChangePassword: admin.mustChangePassword, sessionVersion: admin.sessionVersion };
   } catch {
     return null;
   }
-}
+});
 
 /** Call at the top of protected admin server components/actions. Redirects if not logged in. */
-export async function requireAdminSession(): Promise<AdminSessionPayload> {
+export async function requireAdminSession(allowPasswordChange = false): Promise<AdminSessionPayload> {
   const session = await getAdminSession();
   if (!session) {
     redirect("/admin/login");
   }
+  if (session.mustChangePassword && !allowPasswordChange) redirect("/admin/account");
   return session;
+}
+
+export async function requireOwnerSession() {
+ const session = await requireAdminSession();
+ if (session.role !== "OWNER") notFound();
+ return session;
 }

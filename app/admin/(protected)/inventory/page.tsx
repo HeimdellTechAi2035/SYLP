@@ -1,9 +1,11 @@
+import { requireOwnerSession } from "@/lib/auth";
 import { Fragment } from "react";
 import { prisma } from "@/lib/prisma";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { updateProductStock, updateVariantStock } from "@/lib/actions/admin/inventory";
 
 export default async function AdminInventoryPage() {
+  await requireOwnerSession();
   const products = await prisma.product.findMany({
     // Only stock-tracked items: made-to-order products have nothing to count.
     where: { status: { not: "ARCHIVED" }, madeToOrder: false },

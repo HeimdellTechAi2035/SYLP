@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
 import { Shield } from "lucide-react";
@@ -24,6 +25,7 @@ export default async function AdminDivisionsPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  await requireOwnerSession();
   const sp = await searchParams;
   const period = (PERIODS.some((p) => p.key === sp.period) ? sp.period : "30d") as SalesPeriod;
 

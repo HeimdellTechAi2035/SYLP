@@ -1,3 +1,4 @@
+import { requireOwnerSession } from "@/lib/auth";
 import DeleteRecordForm from "@/components/admin/DeleteRecordForm";
 import { deleteSubscriber } from "@/lib/actions/admin/cleanup";
 import Link from "next/link";
@@ -6,6 +7,7 @@ import { requireCommunityOwner } from "@/lib/community/owner";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  await requireOwnerSession();
   await requireCommunityOwner();
   const query = await searchParams;
   const total = await prisma.newsletterSubscriber.count();

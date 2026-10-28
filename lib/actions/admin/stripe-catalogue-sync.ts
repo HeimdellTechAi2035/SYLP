@@ -8,7 +8,7 @@
  */
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdminSession } from "@/lib/auth";
+import { requireOwnerSession } from "@/lib/auth";
 import { syncProductToStripe } from "@/lib/stripe-sync";
 import { checkStripeCatalogue, fixStripeProduct } from "@/lib/stripe-reconcile";
 
@@ -20,7 +20,7 @@ export type StripeCatalogueSummary = {
 
 /** Read-only preview — "how many products need syncing" — never mutates anything. */
 export async function getStripeCatalogueSummary(): Promise<StripeCatalogueSummary> {
-  await requireAdminSession();
+  await requireOwnerSession();
 
   const [totalSellable, synced] = await Promise.all([
     prisma.product.count({ where: { status: "ACTIVE" } }),
@@ -40,7 +40,7 @@ export type BulkSyncResult = { attempted: number; synced: number; failed: number
  * an already-created Stripe Product/Price.
  */
 export async function bulkSyncCatalogueToStripe(): Promise<BulkSyncResult> {
-  await requireAdminSession();
+  await requireOwnerSession();
 
   const pending = await prisma.product.findMany({
     where: { status: "ACTIVE", stripeSyncStatus: { not: "SYNCED" } },
@@ -66,7 +66,7 @@ export async function bulkSyncCatalogueToStripe(): Promise<BulkSyncResult> {
 
 /** Compare every product in the shop with what Stripe holds. Read-only. */
 export async function checkStripeCatalogueAction() {
-  await requireAdminSession();
+  await requireOwnerSession();
   return checkStripeCatalogue();
 }
 
@@ -78,7 +78,7 @@ export async function checkStripeCatalogueAction() {
 export async function fixStripeCatalogueBatch(
   items: { productId: string; priceProblem: boolean }[]
 ): Promise<{ fixed: string[]; failed: { productId: string; error: string }[] }> {
-  await requireAdminSession();
+  await requireOwnerSession();
   const fixed: string[] = [];
   const failed: { productId: string; error: string }[] = [];
   for (const item of items.slice(0, 5)) {
