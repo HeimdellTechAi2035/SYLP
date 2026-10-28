@@ -29,6 +29,7 @@ const decode = value => value.replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'"
 async function submitForm(path, fields, auth, containingField) {
  stage=`load form ${path.split("?")[0]}`;
  const page=await request(path,auth);const fullHtml=await page.text();let html=fullHtml;
+ if(path==='/admin/login')assert.ok(fullHtml.includes('Use your owner email'),'Sign-in guidance should be visible');
  if(containingField){html=(html.match(/<form\b[\s\S]*?<\/form>/g)||[]).find(form=>form.includes(`name="${containingField}"`))||"";}
  const form=new FormData();
  for(const tag of html.match(/<input\b[^>]*>/g)||[]) {
