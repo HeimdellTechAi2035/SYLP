@@ -92,10 +92,6 @@ for i in $(seq 1 20); do
     # One idempotent maintenance task explicitly requested for the co-hosted
     # HMO site. Keep its failure separate from the healthy SYLP deployment.
     python3 "$APP_DIR/deploy/update-hmo-donation-link.py" || echo "WARNING: HMO donation link update needs attention"
-    # One-off live sign-in test explicitly requested by the owner. The script
-    # always removes its synthetic account and publishes boolean results only.
-    install -d -m 700 -o sylp -g sylp "${MEDIA_DIR:-$APP_DIR/media-data}/diagnostics"
-    SYLP_LIVE_STAFF_CHECK=1 runuser -u sylp --preserve-environment -- node "$APP_DIR/deploy/check-live-staff-signin.mjs" || echo "WARNING: Staff sign-in check needs attention"
     echo "Deploy OK: $LATEST"
     exit 0
   fi
