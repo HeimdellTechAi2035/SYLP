@@ -45,6 +45,8 @@ model AdminUser {
   sessionVersion     Int @default(0)
   inviteHash         String? @unique
   inviteExpiresAt    DateTime?
+  inviteEmailStatus  String @default("NOT_SENT")
+  inviteEmailSentAt  DateTime?
   createdAt          DateTime @default(now())
   auditLogs          AuditLog[]
   pushSubscriptions  AdminPushSubscription[]

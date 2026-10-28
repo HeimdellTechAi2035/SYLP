@@ -1,0 +1,1 @@
+ALTER TABLE "AdminUser" ADD COLUMN "inviteEmailStatus" TEXT NOT NULL DEFAULT 'NOT_SENT', ADD COLUMN "inviteEmailSentAt" TIMESTAMP(3);
