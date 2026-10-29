@@ -1,5 +1,7 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
+
 import { useActionState } from "react";
 import { loginAdmin, type AdminLoginState } from "@/lib/actions/admin-auth";
 
@@ -17,7 +19,7 @@ export default function LoginForm() {
       </div>
       <div>
         <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
-        <input id="password" name="password" type="password" autoComplete="current-password" aria-describedby="admin-password-help" required className="w-full rounded-lg border border-ink/15 px-3 py-2.5" />
+        <PasswordInput id="password" name="password" autoComplete="current-password" aria-describedby="admin-password-help" required className="w-full rounded-lg border border-ink/15 px-3 py-2.5" />
       </div>
       <p id="admin-password-help" className="text-xs text-ink-soft">Use your own password. Staff must activate their latest invitation first, then use the password they chose.</p>
       {state.status === "error" && <p className="text-rose-dark text-sm">{state.message}</p>}

@@ -1,5 +1,7 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
+
 import { useActionState } from "react";
 import { updateAccountSettings, type SettingsState } from "@/lib/actions/account-settings";
 
@@ -34,7 +36,7 @@ export default function SettingsForm({
       </div>
       <div>
         <label htmlFor="newPassword" className="block text-sm font-medium mb-1">New password (optional)</label>
-        <input id="newPassword" name="newPassword" type="password" minLength={8} className="w-full rounded-lg border border-ink/15 px-3 py-2.5" />
+        <PasswordInput id="newPassword" name="newPassword" autoComplete="new-password" minLength={8} className="w-full rounded-lg border border-ink/15 px-3 py-2.5" />
       </div>
       {state.status !== "idle" && (
         <p className={`text-sm ${state.status === "success" ? "text-sage" : "text-rose-dark"}`}>{state.message}</p>

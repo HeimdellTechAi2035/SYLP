@@ -1,5 +1,7 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
+
 import { useActionState, useState } from "react";
 import { loginCustomer, registerCustomer, type AuthFormState } from "@/lib/actions/customer-auth";
 
@@ -64,7 +66,11 @@ function Field({ label, name, type = "text", required, minLength }: { label: str
   return (
     <div>
       <label htmlFor={name} className="block text-sm font-medium mb-1">{label}</label>
-      <input id={name} name={name} type={type} required={required} minLength={minLength} className="w-full rounded-lg border border-ink/15 px-3 py-2.5" />
+      {type === "password" ? (
+        <PasswordInput id={name} name={name} required={required} minLength={minLength} autoComplete={minLength ? "new-password" : "current-password"} className="w-full rounded-lg border border-ink/15 px-3 py-2.5" />
+      ) : (
+        <input id={name} name={name} type={type} required={required} minLength={minLength} className="w-full rounded-lg border border-ink/15 px-3 py-2.5" />
+      )}
     </div>
   );
 }
