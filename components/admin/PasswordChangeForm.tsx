@@ -1,5 +1,7 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
+
 import { useActionState } from "react";
 import { changeAdminPassword, type PasswordState } from "@/lib/actions/admin/settings";
 
@@ -12,11 +14,11 @@ export default function PasswordChangeForm() {
     <form action={formAction} className="space-y-4 max-w-md">
       <div>
         <label htmlFor="currentPassword" className="block text-sm font-medium mb-1">Current password</label>
-        <input id="currentPassword" name="currentPassword" type="password" required className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm" />
+        <PasswordInput id="currentPassword" name="currentPassword" autoComplete="current-password" required className="w-full rounded-lg border border-ink/15 px-3 py-2 text-base" />
       </div>
       <div>
         <label htmlFor="newPassword" className="block text-sm font-medium mb-1">New password</label>
-        <input id="newPassword" name="newPassword" type="password" required minLength={12} maxLength={128} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm" />
+        <PasswordInput id="newPassword" name="newPassword" autoComplete="new-password" required minLength={12} maxLength={128} className="w-full rounded-lg border border-ink/15 px-3 py-2 text-base" />
       </div>
       <p className="text-xs text-ink-soft">Use your current password and choose a private replacement between 12 and 128 characters. This changes your own account only.</p>
       {state.status !== "idle" && (
